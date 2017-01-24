@@ -1,4 +1,4 @@
-package com.app.miti.iot_reduce_daily_stress_app;
+package app.miti.com.iot_reduce_daily_stress_app;
 
 import org.junit.Test;
 

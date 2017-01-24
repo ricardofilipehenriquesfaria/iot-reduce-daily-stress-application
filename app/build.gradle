@@ -2,9 +2,9 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "24.0.1"
+    buildToolsVersion "25.0.1"
     defaultConfig {
-        applicationId "com.app.miti.iot_reduce_daily_stress_app"
+        applicationId "app.miti.com.iot_reduce_daily_stress_app"
         minSdkVersion 10
         targetSdkVersion 25
         versionCode 1
@@ -17,6 +17,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
 }
 
@@ -34,4 +38,5 @@ dependencies {
     compile 'com.awareframework:aware-core:3.9.8@aar'
     compile 'com.android.support:cardview-v7:25.0.1'
     compile 'com.google.android.gms:play-services:10.0.1'
+    compile project(':library-0.0.1')
 }
