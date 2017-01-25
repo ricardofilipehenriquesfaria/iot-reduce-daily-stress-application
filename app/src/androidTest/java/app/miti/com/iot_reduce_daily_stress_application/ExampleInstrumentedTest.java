@@ -1,4 +1,4 @@
-package app.miti.com.iot_reduce_daily_stress_app;
+package app.miti.com.iot_reduce_daily_stress_application;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("app.miti.com.iot_reduce_daily_stress_app", appContext.getPackageName());
+        assertEquals("app.miti.com.iot_reduce_daily_stress_application", appContext.getPackageName());
     }
 }
