@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 /**
@@ -80,14 +81,14 @@ public class Google_AR_Provider extends ContentProvider {
 
     private static UriMatcher sUriMatcher = null;
     private static HashMap<String, String> gARMap = null;
-    private static DatabaseHelper databaseHelper = null;
+    private DatabaseHelper databaseHelper = null;
     private static SQLiteDatabase database = null;
 
     private boolean initializeDB() {
         if (databaseHelper == null) {
             databaseHelper = new DatabaseHelper( getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS );
         }
-        if( databaseHelper != null && ( database == null || ! database.isOpen() )) {
+        if(database == null || ! database.isOpen()) {
             database = databaseHelper.getWritableDatabase();
         }
         return( database != null && databaseHelper != null);
@@ -97,7 +98,7 @@ public class Google_AR_Provider extends ContentProvider {
      * Delete entry from the database
      */
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
     	if( ! initializeDB() ) {
             Log.w(AUTHORITY,"Database unavailable...");
             return 0;
@@ -119,7 +120,7 @@ public class Google_AR_Provider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case GOOGLE_AR:
                 return Google_Activity_Recognition_Data.CONTENT_TYPE;
@@ -134,7 +135,7 @@ public class Google_AR_Provider extends ContentProvider {
      * Insert entry to the database
      */
     @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
     	if( ! initializeDB() ) {
             Log.w(AUTHORITY,"Database unavailable...");
             return null;
@@ -231,7 +232,7 @@ public class Google_AR_Provider extends ContentProvider {
      * Update application on the database
      */
     @Override
-    public int update(Uri uri, ContentValues values, String selection,
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
             String[] selectionArgs) {
         
     	if( ! initializeDB() ) {
