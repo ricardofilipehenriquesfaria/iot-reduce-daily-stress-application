@@ -23,9 +23,22 @@ public class MainActivity extends AppCompatActivity {
         //Set sampling frequency
         Aware.setSetting(this, Aware_Preferences.FREQUENCY_ACCELEROMETER, 200000);
         //Apply settings
-        Aware.startAccelerometer(this);
+        Aware.startPlugin(this, "com.aware.plugin.activity_recognition");
 
-        TextView textView = (TextView)findViewById(R.id.textView);
-        textView.setText(DbHelper.retrieveAccelerometerData(MainActivity.this));
+        Aware.setSetting(this, Aware_Preferences.STATUS_LOCATION_GPS, true);
+
+        Aware.setSetting(this, Aware_Preferences.STATUS_LOCATION_NETWORK, true);
+
+        Aware.setSetting(this, Aware_Preferences.FREQUENCY_LOCATION_GPS, 0);
+
+        Aware.setSetting(this, Aware_Preferences.FREQUENCY_LOCATION_NETWORK, 0);
+
+        Aware.startLocations(this);
+
+        TextView textAccelerometer = (TextView)findViewById(R.id.textAccelerometer);
+        textAccelerometer.setText(DbHelper.retrieveActivityRecognitionData(MainActivity.this));
+
+        TextView textLocations = (TextView)findViewById(R.id.textLocations);
+        textLocations.setText(DbHelper.retrieveLocationsData(MainActivity.this));
     }
 }
