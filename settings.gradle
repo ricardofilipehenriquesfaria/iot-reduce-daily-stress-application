@@ -1,1 +1,1 @@
-include ':app', ':activity_recognition'
+include ':app', ':activity_recognition', ':location'
