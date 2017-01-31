@@ -40,5 +40,8 @@ public class MainActivity extends AppCompatActivity {
 
         TextView textLocations = (TextView)findViewById(R.id.textLocations);
         textLocations.setText(DbHelper.retrieveLocationsData(MainActivity.this));
+
+        Intent nextScreen = new Intent(this, MapScreen.class);
+        startActivity(nextScreen);
     }
 }

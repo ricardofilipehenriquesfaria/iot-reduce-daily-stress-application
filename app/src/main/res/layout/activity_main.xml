@@ -28,4 +28,17 @@
         android:layout_below="@+id/textAccelerometer"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        tools:context="app.miti.com.google_maps_integration.MainActivity"
+        android:layout_below="@+id/textLocations"
+        android:layout_marginTop="26dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

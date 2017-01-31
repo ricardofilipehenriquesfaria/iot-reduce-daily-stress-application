@@ -18,6 +18,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".MapScreen"></activity>
+
         <provider
             android:name="com.aware.providers.Scheduler_Provider"
             android:authorities="${applicationId}.provider.scheduler"
