@@ -11,10 +11,10 @@
     tools:context="app.miti.com.iot_reduce_daily_stress_application.MainActivity">
 
     <TextView
-    android:id="@+id/textAccelerometer"
+    android:id="@+id/textActivityRecognition"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Hello World!"
+    android:text="@string/textActivityRecognition"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -23,9 +23,9 @@
         android:id="@+id/textLocations"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ABC!"
+        android:text="@string/textLocations"
         android:layout_marginTop="29dp"
-        android:layout_below="@+id/textAccelerometer"
+        android:layout_below="@+id/textActivityRecognition"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 

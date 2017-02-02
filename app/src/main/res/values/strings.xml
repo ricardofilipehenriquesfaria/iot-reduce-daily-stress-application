@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">iot-reduce-daily-stress-application</string>
+    <string name="textLocations"> </string>
+    <string name="textActivityRecognition"> </string>
 </resources>

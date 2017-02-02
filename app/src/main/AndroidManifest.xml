@@ -10,6 +10,7 @@
         android:theme="@style/AppTheme"
         tools:replace="android:icon, android:theme"
         android:name="android.support.multidex.MultiDexApplication">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,8 +18,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".MapScreen"></activity>
 
         <provider
             android:name="com.aware.providers.Scheduler_Provider"
