@@ -1,7 +1,9 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -116,6 +118,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if (resultCode == RESULT_OK) {
 
                 Toast.makeText(getApplicationContext(), "GPS ligado", Toast.LENGTH_LONG).show();
+                WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                wifi.setWifiEnabled(true);
 
             } else {
 
