@@ -55,6 +55,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         addMapFragment();
+
+        Intent service = new Intent(MainActivity.this, NotificationService.class);
+        startService(service);
     }
 
     private void addMapFragment() {
