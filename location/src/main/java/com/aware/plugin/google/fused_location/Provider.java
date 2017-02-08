@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -108,7 +109,7 @@ public class Provider extends ContentProvider {
         if (databaseHelper == null) {
             databaseHelper = new DatabaseHelper(getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS);
         }
-        if (databaseHelper != null && (database == null || !database.isOpen())) {
+        if (database == null || !database.isOpen()) {
             database = databaseHelper.getWritableDatabase();
         }
         return (database != null && databaseHelper != null);
@@ -149,7 +150,7 @@ public class Provider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         if (!initializeDB()) {
             Log.w("", "Database unavailable...");
             return null;
@@ -182,7 +183,7 @@ public class Provider extends ContentProvider {
 
     @Nullable
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case GEO_DIR:
                 return Geofences.CONTENT_TYPE;
@@ -199,7 +200,7 @@ public class Provider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues new_values) {
+    public Uri insert(@NonNull Uri uri, ContentValues new_values) {
         if (!initializeDB()) {
             Log.w("", "Database unavailable...");
             return null;
@@ -230,7 +231,7 @@ public class Provider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         if (!initializeDB()) {
             Log.w("", "Database unavailable...");
             return 0;
@@ -252,7 +253,7 @@ public class Provider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         if (!initializeDB()) {
             Log.w("", "Database unavailable...");
             return 0;

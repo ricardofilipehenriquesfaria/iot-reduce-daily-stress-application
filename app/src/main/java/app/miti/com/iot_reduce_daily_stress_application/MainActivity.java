@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                     status.startResolutionForResult(MainActivity.this, 0);
 
-                } catch (IntentSender.SendIntentException e) {
+                } catch (IntentSender.SendIntentException ignored) {
 
                 }
                 break;
@@ -116,19 +116,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 0) {
+        if (requestCode == 0) if (resultCode == RESULT_OK) {
 
-            if (resultCode == RESULT_OK) {
+            Toast.makeText(getApplicationContext(), "GPS ligado", Toast.LENGTH_LONG).show();
+            WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            wifi.setWifiEnabled(true);
 
-                Toast.makeText(getApplicationContext(), "GPS ligado", Toast.LENGTH_LONG).show();
-                WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-                wifi.setWifiEnabled(true);
+        } else {
 
-            } else {
+            Toast.makeText(getApplicationContext(), "GPS desligado", Toast.LENGTH_LONG).show();
 
-                Toast.makeText(getApplicationContext(), "GPS desligado", Toast.LENGTH_LONG).show();
-
-            }
         }
     }
 }

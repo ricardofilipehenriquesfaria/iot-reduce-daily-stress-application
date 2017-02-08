@@ -4,11 +4,7 @@
 
 package com.aware.plugin.google.activity_recognition;
 
-import java.util.HashMap;
-
-import com.aware.*;
-import com.aware.utils.DatabaseHelper;
-
+import android.annotation.SuppressLint;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -18,10 +14,14 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
+import com.aware.Aware;
+import com.aware.utils.DatabaseHelper;
+
+import java.util.HashMap;
 
 /**
  * Google's Activity Recognition Context Provider. Stored in SDcard in
@@ -97,6 +97,7 @@ public class Google_AR_Provider extends ContentProvider {
     /**
      * Delete entry from the database
      */
+    @SuppressLint("LongLogTag")
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
     	if( ! initializeDB() ) {
@@ -134,6 +135,7 @@ public class Google_AR_Provider extends ContentProvider {
     /**
      * Insert entry to the database
      */
+    @SuppressLint("LongLogTag")
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
     	if( ! initializeDB() ) {
@@ -197,9 +199,10 @@ public class Google_AR_Provider extends ContentProvider {
     /**
      * Query entries from the database
      */
+    @SuppressLint("LongLogTag")
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
         
     	if( ! initializeDB() ) {
             Log.w(AUTHORITY,"Database unavailable...");
@@ -231,6 +234,7 @@ public class Google_AR_Provider extends ContentProvider {
     /**
      * Update application on the database
      */
+    @SuppressLint("LongLogTag")
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection,
             String[] selectionArgs) {
@@ -240,7 +244,7 @@ public class Google_AR_Provider extends ContentProvider {
             return 0;
         }
     	
-        int count = 0;
+        int count;
         switch (sUriMatcher.match(uri)) {
             case GOOGLE_AR:
                 count = database.update(DATABASE_TABLES[0], values, selection,

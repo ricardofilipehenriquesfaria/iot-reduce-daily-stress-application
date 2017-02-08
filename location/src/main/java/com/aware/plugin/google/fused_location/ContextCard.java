@@ -1,5 +1,6 @@
 package com.aware.plugin.google.fused_location;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -39,7 +40,7 @@ public class ContextCard implements IContextCard {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View card = inflater.inflate(R.layout.card, null);
+        @SuppressLint("InflateParams") View card = inflater.inflate(R.layout.card, null);
         TextView address = (TextView) card.findViewById(R.id.address);
         TextView last_update = (TextView) card.findViewById(R.id.last_updated);
         Button geofencer = (Button) card.findViewById(R.id.geofencer);

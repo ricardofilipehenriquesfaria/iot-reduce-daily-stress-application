@@ -12,7 +12,7 @@ import android.util.Log;
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.providers.Locations_Provider.Locations_Data;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.FusedLocationProviderApi;
 
 public class Algorithm extends IntentService {
 
@@ -25,9 +25,9 @@ public class Algorithm extends IntentService {
         
         boolean DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
         
-        if( intent != null && intent.hasExtra(LocationServices.FusedLocationApi.KEY_LOCATION_CHANGED ) ) {
+        if( intent != null && intent.hasExtra(FusedLocationProviderApi.KEY_LOCATION_CHANGED) ) {
         
-            Location bestLocation = (Location) intent.getExtras().get(LocationServices.FusedLocationApi.KEY_LOCATION_CHANGED);
+            Location bestLocation = (Location) intent.getExtras().get(FusedLocationProviderApi.KEY_LOCATION_CHANGED);
 
             if( bestLocation == null ) return;
 

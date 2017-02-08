@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -267,7 +268,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connection_result) {
+    public void onConnectionFailed(@NonNull ConnectionResult connection_result) {
         if (DEBUG)
             Log.w(TAG, "Error connecting to Google Fused Location services, will try again in 5 minutes");
     }
