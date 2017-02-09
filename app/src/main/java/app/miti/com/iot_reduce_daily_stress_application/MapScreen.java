@@ -54,6 +54,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         googleMap = arg0;
         googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
+        if( DbHelper.retrieveLocationsData(getContext()) == null ) return;
         String[] separated = DbHelper.retrieveLocationsData(getContext()).split(",");
 
         LatLng latLng = new LatLng(Double.parseDouble(separated[0]), Double.parseDouble(separated[1]));

@@ -38,9 +38,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Intent aware = new Intent(this, Aware.class);
         startService(aware);
 
-        Aware.startPlugin(this, "com.aware.plugin.activity_recognition");
+        Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
 
-        Aware.startPlugin(this, "com.aware.plugin.locations");
+        Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
 
         TextView textActivityRecognition = (TextView)findViewById(R.id.textActivityRecognition);
         textActivityRecognition.setText(DbHelper.retrieveActivityRecognitionData(MainActivity.this));

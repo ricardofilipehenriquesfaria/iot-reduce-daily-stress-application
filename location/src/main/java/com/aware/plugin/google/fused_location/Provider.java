@@ -25,7 +25,7 @@ import java.util.HashMap;
  */
 public class Provider extends ContentProvider {
 
-    public static String AUTHORITY = "com.aware.plugin.google.fused_location.provider.geofences";
+    public static String AUTHORITY = "app.miti.com.iot_reduce_daily_stress_application.provider.geofences";
     public static final int DATABASE_VERSION = 2;
 
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);

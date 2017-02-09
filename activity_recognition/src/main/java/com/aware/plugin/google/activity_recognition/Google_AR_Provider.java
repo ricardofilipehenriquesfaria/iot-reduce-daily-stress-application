@@ -36,7 +36,7 @@ public class Google_AR_Provider extends ContentProvider {
     /**
      * Provider authority: com.aware.provider.plugin.google.activity_recognition
      */
-    public static String AUTHORITY = "com.miti.app.provider.gar";
+    public static String AUTHORITY = "app.miti.com.iot_reduce_daily_stress_application.provider.gar";
 
     private static final int GOOGLE_AR = 1;
     private static final int GOOGLE_AR_ID = 2;
