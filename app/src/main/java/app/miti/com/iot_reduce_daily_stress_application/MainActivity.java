@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         Intent service = new Intent(MainActivity.this, NotificationService.class);
         startService(service);
+
+        TextSpeech textSpeech = new TextSpeech(this, "Olá");
     }
 
     private void addMapFragment() {
