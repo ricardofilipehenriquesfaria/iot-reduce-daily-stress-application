@@ -14,17 +14,23 @@ import static java.lang.String.valueOf;
 
 class DbHelper {
 
+    public DbHelper(){};
+
     static String retrieveActivityRecognitionData(Context context)
     {
         String row = null;
         Cursor cursor = context.getContentResolver().query(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI, null, null, null, null);
 
         assert cursor != null;
-        if(cursor.moveToLast())
-        {
+        if(cursor.moveToLast()) {
             row = valueOf(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_NAME)));
             cursor.close();
         }
+
+        if(row == null) {
+            row = "still";
+        }
+
         return row;
     }
 
@@ -34,12 +40,16 @@ class DbHelper {
         Cursor cursor = context.getContentResolver().query(Locations_Provider.Locations_Data.CONTENT_URI, null, null, null, null);
 
         assert cursor != null;
-        if(cursor.moveToLast())
-        {
+        if(cursor.moveToLast()) {
             row = valueOf(cursor.getDouble(cursor.getColumnIndex(Locations_Provider.Locations_Data.LATITUDE)) +
                     ", " + valueOf(cursor.getDouble(cursor.getColumnIndex(Locations_Provider.Locations_Data.LONGITUDE))));
             cursor.close();
         }
+
+        if(row == null) {
+            row = "32.761063, -16.960402";
+        }
+
         return row;
     }
 }

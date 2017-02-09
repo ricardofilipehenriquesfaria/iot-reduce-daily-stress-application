@@ -11,7 +11,9 @@ import com.aware.utils.Aware_TTS;
 
 class TextSpeech {
 
-    TextSpeech(Context context, String string) {
+    public TextSpeech(){}
+
+    static void TextToSpeech(Context context, String string){
         Intent speak = new Intent(Aware_TTS.ACTION_AWARE_TTS_SPEAK);
         speak.putExtra(Aware_TTS.EXTRA_TTS_TEXT, string);
         speak.putExtra(Aware_TTS.EXTRA_TTS_REQUESTER, "app.miti.com.iot_reduce_daily_stress_application");

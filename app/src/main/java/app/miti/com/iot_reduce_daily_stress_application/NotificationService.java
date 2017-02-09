@@ -30,19 +30,19 @@ public class NotificationService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
-        showNotification();
+        showNotification(intent.getExtras().getString("TEXT"));
         return flags;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private void showNotification()
+    private void showNotification(String text)
     {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         Notification notification = new Notification.Builder(this)
                 .setContentTitle("New notification")
-                .setContentText("New notification")
+                .setContentText(text)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)

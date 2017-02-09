@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     protected GoogleApiClient googleApiClient = null;
     protected LocationRequest locationRequest = null;
+    protected String activity = null;
+    protected String location = null;
+    protected String message = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,11 +45,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
 
+        activity = DbHelper.retrieveActivityRecognitionData(MainActivity.this);
         TextView textActivityRecognition = (TextView)findViewById(R.id.textActivityRecognition);
-        textActivityRecognition.setText(DbHelper.retrieveActivityRecognitionData(MainActivity.this));
+        textActivityRecognition.setText(activity);
 
+        location = DbHelper.retrieveLocationsData(MainActivity.this);
         TextView textLocations = (TextView)findViewById(R.id.textLocations);
-        textLocations.setText(DbHelper.retrieveLocationsData(MainActivity.this));
+        textLocations.setText(location);
 
         googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
         googleApiClient.connect();
@@ -56,10 +61,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         addMapFragment();
 
-        Intent service = new Intent(MainActivity.this, NotificationService.class);
-        startService(service);
+        message = "Rua 31 de Janeiro em obras";
 
-        TextSpeech textSpeech = new TextSpeech(this, "Olá");
+        if(location.equals("in vehicle")) {
+            TextSpeech.TextToSpeech(this, message);
+        }
+        else {
+            Intent service = new Intent(MainActivity.this, NotificationService.class);
+            service.putExtra("TEXT", message);
+            startService(service);
+        }
     }
 
     private void addMapFragment() {
