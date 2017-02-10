@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 
 /**
  * Created by Ricardo on 06-02-2017.
@@ -40,13 +41,14 @@ public class NotificationService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        Notification notification = new Notification.Builder(this)
+        Notification notification = new NotificationCompat.Builder(this)
                 .setContentTitle("New notification")
                 .setContentText(text)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
-                .addAction(R.mipmap.ic_launcher, "Open", pendingIntent)
+                .setVibrate(new long []{300,100,300,100})
+                .addAction(R.mipmap.ic_launcher, "Abrir", pendingIntent)
                 .build();
 
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);

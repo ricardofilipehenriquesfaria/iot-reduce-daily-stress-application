@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         message = "Rua 31 de Janeiro em obras";
 
-        if(location.equals("in vehicle")) {
+        if(activity.equals("in_vehicle")) {
             TextSpeech.TextToSpeech(this, message);
         }
         else {
@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             service.putExtra("TEXT", message);
             startService(service);
         }
+
+        new ParseURL().execute();
     }
 
     private void addMapFragment() {
@@ -110,12 +112,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
 
                 try {
-
                     status.startResolutionForResult(MainActivity.this, 0);
+                } catch (IntentSender.SendIntentException ignored) {}
 
-                } catch (IntentSender.SendIntentException ignored) {
-
-                }
                 break;
 
             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
