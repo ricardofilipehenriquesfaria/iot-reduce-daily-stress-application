@@ -12,11 +12,16 @@ import java.io.IOException;
  * Created by Ricardo on 10-02-2017.
  */
 
-class ParseURL extends AsyncTask<Void, Void, Void> {
+class ParseURL extends AsyncTask<Void, Void, String[]> {
 
     private String[] string = new String[100];
 
-    ParseURL(){}
+        void process(String[] output);
+    }
+
+
+        this.delegate = delegate;
+    }
 
     @Override
     protected void onPreExecute() {
@@ -24,7 +29,7 @@ class ParseURL extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected String[] doInBackground(Void... voids) {
         try{
 
             String URL = "https://www.procivmadeira.pt/index.php?option=com_content&view=article&id=360%3Aestradas-encerradas&catid=20%3Aestradas-encerradas&Itemid=213&lang=pt";
@@ -40,6 +45,11 @@ class ParseURL extends AsyncTask<Void, Void, Void> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return string;
+    }
+
+    @Override
+    protected void onPostExecute(String[] strings) {
+        delegate.process(strings);
     }
 }
