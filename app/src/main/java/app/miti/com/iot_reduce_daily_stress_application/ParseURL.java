@@ -16,10 +16,13 @@ class ParseURL extends AsyncTask<Void, Void, String[]> {
 
     private String[] string = new String[100];
 
+    interface AsyncTaskCallback{
         void process(String[] output);
     }
 
+    private AsyncTaskCallback delegate = null;
 
+    ParseURL(AsyncTaskCallback delegate){
         this.delegate = delegate;
     }
 

@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected LocationRequest locationRequest = null;
     protected String activity = null;
     protected String location = null;
-    protected String message = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,18 +60,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         addMapFragment();
 
-        message = "Rua 31 de Janeiro em obras";
-
-        if(activity.equals("in_vehicle")) {
-            TextSpeech.TextToSpeech(this, message);
-        }
-        else {
-            Intent service = new Intent(MainActivity.this, NotificationService.class);
-            service.putExtra("TEXT", message);
-            startService(service);
-        }
-
-        new ParseURL().execute();
+        new ParseURL(new ParseURL.AsyncTaskCallback() {
+            @Override
+            public void process(String[] output) {
+                if(activity.equals("in_vehicle")) {
+                    TextSpeech.TextToSpeech(MainActivity.this, output[0]);
+                }
+                else {
+                    Intent service = new Intent(MainActivity.this, NotificationService.class);
+                    service.putExtra("TEXT", output[0]);
+                    startService(service);
+                }
+            }
+        }).execute();
     }
 
     private void addMapFragment() {
