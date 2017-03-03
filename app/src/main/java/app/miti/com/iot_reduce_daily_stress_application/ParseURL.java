@@ -1,58 +1,62 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
-import android.os.AsyncTask;
+import android.content.Context;
+import android.content.Intent;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.IOException;
-
 /**
  * Created by Ricardo on 10-02-2017.
  */
 
-class ParseURL extends AsyncTask<Void, Void, String[]> {
+class ParseURL {
+
+    String URL = "https://www.procivmadeira.pt/index.php?option=com_content&view=article&id=360%3Aestradas-encerradas&catid=20%3Aestradas-encerradas&Itemid=213&lang=pt";
 
     private String[] string = new String[100];
 
-    interface AsyncTaskCallback{
-        void process(String[] output);
-    }
+    ParseURL(final Context context){
 
-    private AsyncTaskCallback delegate = null;
+        final String activity = DbHelper.retrieveActivityRecognitionData(context);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, URL, new Response.Listener<String>() {
 
-    ParseURL(AsyncTaskCallback delegate){
-        this.delegate = delegate;
-    }
+            @Override
+            public void onResponse(String response) {
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
+                Document document = Jsoup.parse(response);
 
-    @Override
-    protected String[] doInBackground(Void... voids) {
-        try{
+                int i = 0;
 
-            String URL = "https://www.procivmadeira.pt/index.php?option=com_content&view=article&id=360%3Aestradas-encerradas&catid=20%3Aestradas-encerradas&Itemid=213&lang=pt";
-            Document document = Jsoup.connect(URL).get();
-
-            int i = 0;
-
-            for( Element element : document.select("a[href$=.pdf]")
-                    .select("span[style*=\"color: #000000; text-decoration: underline;\"]") ) {
-                string[i] = element.text();
-                i++;
+                for( Element element : document.select("a[href$=.pdf]")
+                        .select("span[style*=\"color: #000000; text-decoration: underline;\"]") ) {
+                    string[i] = element.text();
+                    i++;
+                }
+                if(activity.equals("in_vehicle")) {
+                    TextSpeech.TextToSpeech(context, string[0]);
+                }
+                else {
+                    Intent service = new Intent(context, NotificationService.class);
+                    service.putExtra("TEXT", string[0]);
+                    context.startService(service);
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return string;
-    }
+        }, new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error) {
 
-    @Override
-    protected void onPostExecute(String[] strings) {
-        delegate.process(strings);
+            }
+        });
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+        requestQueue.add(stringRequest);
     }
 }

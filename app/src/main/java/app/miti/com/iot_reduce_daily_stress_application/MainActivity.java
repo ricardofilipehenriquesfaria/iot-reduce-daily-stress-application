@@ -60,19 +60,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         addMapFragment();
 
-        new ParseURL(new ParseURL.AsyncTaskCallback() {
-            @Override
-            public void process(String[] output) {
-                if(activity.equals("in_vehicle")) {
-                    TextSpeech.TextToSpeech(MainActivity.this, output[0]);
-                }
-                else {
-                    Intent service = new Intent(MainActivity.this, NotificationService.class);
-                    service.putExtra("TEXT", output[0]);
-                    startService(service);
-                }
-            }
-        }).execute();
+        new ParseURL(this);
     }
 
     private void addMapFragment() {
