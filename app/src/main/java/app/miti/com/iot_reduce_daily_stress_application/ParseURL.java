@@ -7,6 +7,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -20,7 +21,7 @@ import org.jsoup.nodes.Element;
 
 class ParseURL {
 
-    String URL = "https://www.procivmadeira.pt/index.php?option=com_content&view=article&id=360%3Aestradas-encerradas&catid=20%3Aestradas-encerradas&Itemid=213&lang=pt";
+    private String URL = "http://toxic.pt/prociv/pt/informacao-a-populacao/32-noticias/estradas/38-estradas-encerradas-17-06-2016.html";
 
     private String[] string = new String[100];
 
@@ -36,8 +37,8 @@ class ParseURL {
 
                 int i = 0;
 
-                for( Element element : document.select("a[href$=.pdf]")
-                        .select("span[style*=\"color: #000000; text-decoration: underline;\"]") ) {
+                for( Element element : document.select("div[itemprop*=\"articleBody\"]").select("p:has(a[href$=.pdf])" )) {
+                    element.select("a[href$=.pdf]").remove();
                     string[i] = element.text();
                     i++;
                 }
@@ -47,13 +48,14 @@ class ParseURL {
                 else {
                     Intent service = new Intent(context, NotificationService.class);
                     service.putExtra("TEXT", string[0]);
+                    service.putExtra("TITLE", "Estrada Encerrada");
                     context.startService(service);
                 }
             }
         }, new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                VolleyLog.e("Error: ", error.getMessage());
             }
         });
         RequestQueue requestQueue = Volley.newRequestQueue(context);
