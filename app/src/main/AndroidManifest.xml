@@ -13,7 +13,11 @@
         tools:replace="android:icon, android:theme"
         android:name="android.support.multidex.MultiDexApplication">
 
-        <service android:name=".NotificationService" />
+        <service android:name=".NotificationService"
+            android:exported="false"/>
+
+        <service android:name=".AddressService"
+            android:exported="false"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
