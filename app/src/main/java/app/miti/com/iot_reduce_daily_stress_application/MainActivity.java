@@ -60,7 +60,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         addMapFragment();
 
-        new ParseURL(this);
+        Intent intentService = new Intent(this, JsonParsingService.class);
+        startService(intentService);
 
         Intent intent = new Intent(this, AddressService.class);
         startService(intent);

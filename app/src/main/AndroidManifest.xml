@@ -19,6 +19,9 @@
         <service android:name=".AddressService"
             android:exported="false"/>
 
+        <service android:name=".JsonParsingService"
+            android:exported="false" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
