@@ -22,8 +22,10 @@ import java.net.URL;
 
 public class JsonParsingService extends IntentService {
 
+    public static final String RESPONSE_STRING = "response";
+
     public JsonParsingService() {
-        super("JsonParsingService");
+        super(JsonParsingService.class.getName());
     }
 
     @Override
@@ -55,28 +57,10 @@ public class JsonParsingService extends IntentService {
             httpURLConnection.disconnect();
         }
 
-        try {
-            JSONArray jArray = new JSONArray(stringBuilder.toString());
-
-            for (int i = 0; i < jArray.length(); i++) {
-
-                JSONObject json_data = jArray.getJSONObject(i);
-
-                Log.i("Output", "id: " + json_data.getInt("id") +
-                        ", estrada: " + json_data.getString("estrada") +
-                        ", rua: " + json_data.getString("rua") +
-                        ", data_inicio: " + json_data.getString("data_inicio") +
-                        ", data_fim: " + json_data.getString("data_fim") +
-                        ", hora_inicio: " + json_data.getString("hora_inicio") +
-                        ", hora_fim: " + json_data.getString("hora_fim") +
-                        ", latitude_inicio: " + json_data.getDouble("latitude_inicio") +
-                        ", longitude_inicio: " + json_data.getDouble("longitude_inicio") +
-                        ", latitude_fim: " + json_data.getDouble("latitude_fim") +
-                        ", longitude_inicio: " + json_data.getDouble("longitude_fim")
-                );
-            }
-        } catch (JSONException e) {
-            Log.e("Error parsing data: ", e.toString());
-        }
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(MainActivity.JsonBroadcastReceiver.PROCESS_RESPONSE);
+        broadcastIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        broadcastIntent.putExtra(RESPONSE_STRING, stringBuilder.toString());
+        sendBroadcast(broadcastIntent);
     }
 }

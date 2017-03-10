@@ -17,7 +17,7 @@ import java.util.Locale;
 public class AddressService  extends IntentService {
 
     public AddressService() {
-        super("AddressService");
+        super(AddressService.class.getName());
     }
 
     @Override

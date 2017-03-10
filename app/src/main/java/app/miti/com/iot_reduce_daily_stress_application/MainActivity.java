@@ -1,7 +1,9 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -58,20 +60,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        addMapFragment();
+        IntentFilter intentFilter = new IntentFilter(JsonBroadcastReceiver.PROCESS_RESPONSE);
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+        JsonBroadcastReceiver broadcastReceiver = new JsonBroadcastReceiver();
+        registerReceiver(broadcastReceiver, intentFilter);
 
         Intent intentService = new Intent(this, JsonParsingService.class);
         startService(intentService);
 
         Intent intent = new Intent(this, AddressService.class);
         startService(intent);
-    }
-
-    private void addMapFragment() {
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(R.id.map, new MapScreen());
-        transaction.commit();
     }
 
     @Override
@@ -130,6 +129,29 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             Toast.makeText(getApplicationContext(), "GPS desligado", Toast.LENGTH_LONG).show();
 
+        }
+    }
+
+    public class JsonBroadcastReceiver extends BroadcastReceiver {
+
+        public static final String PROCESS_RESPONSE = "app.miti.com.iot_reduce_daily_stress_application.PROCESS_RESPONSE";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Bundle data = new Bundle();
+            MapScreen mapScreen = new MapScreen();
+
+            String stringExtra = intent.getStringExtra(JsonParsingService.RESPONSE_STRING);
+
+            data.putString("data", stringExtra);
+            mapScreen.setArguments(data);
+
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+
+            transaction.add(R.id.map, mapScreen);
+            transaction.commit();
         }
     }
 }

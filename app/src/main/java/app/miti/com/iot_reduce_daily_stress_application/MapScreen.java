@@ -16,6 +16,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -80,16 +82,30 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         googleMap.addMarker(new MarkerOptions().position(latLng).title("Localização Atual"));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
 
-        LatLng origin = new LatLng(32.82108, -16.975873);
-        LatLng destination = new LatLng(32.817483, -16.975349);
+        Bundle extras = getArguments();
+        String data = extras.getString("data");
 
-        String stringOrigin = "origin=" + origin.latitude + "," + origin.longitude;
-        String stringDestination = "destination=" + destination.latitude + "," + destination.longitude;
+        try {
+            JSONArray jsonArray = new JSONArray(data);
 
-        String parameters = stringOrigin + "&" + stringDestination + "&sensor=false&mode=driving";
+            for (int i = 0; i < jsonArray.length(); i++) {
 
-        DownloadTask downloadTask = new DownloadTask();
-        downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
+                JSONObject json_data = jsonArray.getJSONObject(i);
+
+                LatLng origin = new LatLng(json_data.getDouble("latitude_inicio"), json_data.getDouble("longitude_inicio"));
+                LatLng destination = new LatLng(json_data.getDouble("latitude_fim"), json_data.getDouble("longitude_fim"));
+
+                String stringOrigin = "origin=" + origin.latitude + "," + origin.longitude;
+                String stringDestination = "destination=" + destination.latitude + "," + destination.longitude;
+
+                String parameters = stringOrigin + "&" + stringDestination + "&sensor=false&mode=driving";
+
+                DownloadTask downloadTask = new DownloadTask();
+                downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
