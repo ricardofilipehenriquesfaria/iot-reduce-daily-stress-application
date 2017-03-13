@@ -74,6 +74,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
         googleMap = arg0;
         googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        String estrada;
 
         if( DbHelper.retrieveLocationsData(getContext()) == null ) return;
         String[] separated = DbHelper.retrieveLocationsData(getContext()).split(",");
@@ -90,17 +91,19 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
             for (int i = 0; i < jsonArray.length(); i++) {
 
-                JSONObject json_data = jsonArray.getJSONObject(i);
+                JSONObject jsonData = jsonArray.getJSONObject(i);
 
-                LatLng origin = new LatLng(json_data.getDouble("latitude_inicio"), json_data.getDouble("longitude_inicio"));
-                LatLng destination = new LatLng(json_data.getDouble("latitude_fim"), json_data.getDouble("longitude_fim"));
+                estrada = jsonData.getString("estrada");
+
+                LatLng origin = new LatLng(jsonData.getDouble("latitude_inicio"), jsonData.getDouble("longitude_inicio"));
+                LatLng destination = new LatLng(jsonData.getDouble("latitude_fim"), jsonData.getDouble("longitude_fim"));
 
                 String stringOrigin = "origin=" + origin.latitude + "," + origin.longitude;
                 String stringDestination = "destination=" + destination.latitude + "," + destination.longitude;
 
                 String parameters = stringOrigin + "&" + stringDestination + "&sensor=false&mode=driving";
 
-                DownloadTask downloadTask = new DownloadTask();
+                DownloadTask downloadTask = new DownloadTask(estrada);
                 downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
             }
         } catch (JSONException e) {
@@ -109,6 +112,12 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
+
+        private String mEstrada;
+
+        private DownloadTask(String estrada){
+            mEstrada = estrada;
+        }
 
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
@@ -152,12 +161,18 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            ParserTask parserTask = new ParserTask();
+            ParserTask parserTask = new ParserTask(mEstrada);
             parserTask.execute(result);
         }
     }
 
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        private String mEstrada;
+
+        private ParserTask(String estrada){
+            mEstrada = estrada;
+        }
 
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
@@ -199,7 +214,14 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
                 lineOptions.addAll(arrayListPoints);
                 lineOptions.width(5);
-                lineOptions.color(Color.RED);
+
+                if(mEstrada.equals("estrada_fechada")){
+                    lineOptions.color(Color.RED);
+                }
+                else{
+                    lineOptions.color(Color.YELLOW);
+                }
+
                 lineOptions.geodesic(true);
             }
             googleMap.addPolyline(lineOptions);
