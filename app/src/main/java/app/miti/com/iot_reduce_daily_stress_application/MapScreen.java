@@ -104,7 +104,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 String parameters = stringOrigin + "&" + stringDestination + "&sensor=false&mode=driving";
 
                 DownloadTask downloadTask = new DownloadTask(estrada);
-                downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
+                downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyBaKakWMul-QuxWpvcFG4CIeYwJ-qNsC9w&" + parameters);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -224,7 +224,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
                 lineOptions.geodesic(true);
             }
-            googleMap.addPolyline(lineOptions);
+            if (lineOptions != null) {
+                googleMap.addPolyline(lineOptions);
+            }
         }
     }
 }

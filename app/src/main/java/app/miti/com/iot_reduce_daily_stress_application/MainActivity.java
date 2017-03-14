@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected LocationRequest locationRequest = null;
     protected String activity = null;
     protected String location = null;
+    private JsonBroadcastReceiver broadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,12 +60,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        IntentFilter intentFilter = new IntentFilter(JsonBroadcastReceiver.PROCESS_RESPONSE);
-        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-
-        JsonBroadcastReceiver broadcastReceiver = new JsonBroadcastReceiver();
-        registerReceiver(broadcastReceiver, intentFilter);
 
         Intent intentService = new Intent(this, JsonParsingService.class);
         startService(intentService);
@@ -153,5 +148,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             transaction.add(R.id.map, mapScreen);
             transaction.commit();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter intentFilter = new IntentFilter(JsonBroadcastReceiver.PROCESS_RESPONSE);
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        broadcastReceiver = new JsonBroadcastReceiver();
+        registerReceiver(broadcastReceiver, intentFilter);
     }
 }
