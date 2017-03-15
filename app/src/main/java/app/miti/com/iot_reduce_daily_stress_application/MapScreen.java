@@ -1,6 +1,8 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -57,6 +60,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         super.onResume();
         doWhenMapIsReady();
     }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -210,23 +214,38 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                     LatLng position = new LatLng(lat, lng);
 
                     arrayListPoints.add(position);
+
+                    if(j == 0) {
+                        if(mEstrada.equals("estrada_fechada")) {
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(position)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeIcons(R.mipmap.ic_closed)))
+                                    .title("Estrada Fechada"));
+                            lineOptions.color(Color.RED);
+                        }
+                        else{
+                            googleMap.addMarker(new MarkerOptions()
+                                    .position(position)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeIcons(R.mipmap.ic_conditioned)))
+                                    .title("Estrada Condicionada"));
+                            lineOptions.color(Color.YELLOW);
+                        }
+                    }
                 }
 
                 lineOptions.addAll(arrayListPoints);
                 lineOptions.width(5);
-
-                if(mEstrada.equals("estrada_fechada")){
-                    lineOptions.color(Color.RED);
-                }
-                else{
-                    lineOptions.color(Color.YELLOW);
-                }
-
                 lineOptions.geodesic(true);
             }
             if (lineOptions != null) {
                 googleMap.addPolyline(lineOptions);
             }
         }
+    }
+
+    public Bitmap resizeIcons(int drawable){
+        BitmapDrawable bitmapDrawable = (BitmapDrawable) getResources().getDrawable(drawable);
+        Bitmap bitmap = bitmapDrawable.getBitmap();
+        return Bitmap.createScaledBitmap(bitmap, 40, 40, false);
     }
 }
