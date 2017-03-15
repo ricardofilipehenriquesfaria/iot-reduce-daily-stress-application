@@ -134,10 +134,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         @Override
         public void onReceive(Context context, Intent intent) {
 
+            String stringExtra = intent.getStringExtra(JsonParsingService.RESPONSE_STRING);
+
             Bundle data = new Bundle();
             MapScreen mapScreen = new MapScreen();
-
-            String stringExtra = intent.getStringExtra(JsonParsingService.RESPONSE_STRING);
 
             data.putString("data", stringExtra);
             mapScreen.setArguments(data);
