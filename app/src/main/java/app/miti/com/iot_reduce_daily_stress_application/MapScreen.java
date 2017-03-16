@@ -16,6 +16,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -86,6 +87,13 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         LatLng latLng = new LatLng(Double.parseDouble(separated[0]), Double.parseDouble(separated[1]));
         googleMap.addMarker(new MarkerOptions().position(latLng).title("Localização Atual"));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+
+        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
+            }
+        });
 
         Bundle extras = getArguments();
         String data = extras.getString("data");
@@ -186,7 +194,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
             try {
                 jObject = new JSONObject(jsonData[0]);
-                DirectionsJsonParsing parser = new DirectionsJsonParsing();
+                DirectionsJsonParsing parser = new DirectionsJsonParsing(getContext());
 
                 routes = parser.parse(jObject);
             } catch (Exception e) {

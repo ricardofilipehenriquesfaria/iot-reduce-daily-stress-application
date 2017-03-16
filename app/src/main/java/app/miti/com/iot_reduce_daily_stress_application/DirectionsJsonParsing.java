@@ -1,5 +1,8 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -14,7 +17,13 @@ import java.util.List;
  * Created by Ricardo on 10-03-2017.
  */
 
-public class DirectionsJsonParsing{
+class DirectionsJsonParsing{
+
+    private Context context;
+
+    DirectionsJsonParsing(Context context){
+        this.context = context;
+    }
 
     List<List<HashMap<String,String>>> parse(JSONObject jObject){
 
@@ -22,6 +31,7 @@ public class DirectionsJsonParsing{
         JSONArray jsonRoutes;
         JSONArray jsonLegs;
         JSONArray jsonSteps;
+        Intent polylineIntent = new Intent(context, PolylineAlgorithm.class);
 
         try {
 
@@ -33,6 +43,7 @@ public class DirectionsJsonParsing{
 
                 for(int j=0; j<jsonLegs.length(); j++){
                     jsonSteps = ( (JSONObject)jsonLegs.get(j)).getJSONArray("steps");
+                    polylineIntent.putExtra("LOCALIZACAO_INICIAL", jsonLegs.getJSONObject(j).getString("start_address"));
 
                     for(int k=0; k<jsonSteps.length(); k++){
                         String polyline = (String)((JSONObject)((JSONObject)jsonSteps.get(k)).get("polyline")).get("points");
@@ -42,6 +53,9 @@ public class DirectionsJsonParsing{
                             HashMap<String, String> hashMap = new HashMap<>();
                             hashMap.put("lat", Double.toString(((LatLng)list.get(l)).latitude) );
                             hashMap.put("lng", Double.toString(((LatLng)list.get(l)).longitude) );
+                            polylineIntent.putExtra("LATITUDE", ((LatLng)list.get(l)).latitude);
+                            polylineIntent.putExtra("LONGITUDE", ((LatLng)list.get(l)).longitude);
+                            context.startService(polylineIntent);
                             path.add(hashMap);
                         }
                     }
