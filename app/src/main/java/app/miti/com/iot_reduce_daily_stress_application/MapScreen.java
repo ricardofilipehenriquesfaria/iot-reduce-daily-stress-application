@@ -59,7 +59,8 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
     @Override
     public void onResume() {
         super.onResume();
-        doWhenMapIsReady();
+        if(googleMap != null && isResumed())
+            googleMap.setMyLocationEnabled(true);
     }
 
     @Override
@@ -67,11 +68,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         super.onPause();
         if(googleMap != null)
             googleMap.setMyLocationEnabled(false);
-    }
-
-    void doWhenMapIsReady() {
-        if(googleMap != null && isResumed())
-            googleMap.setMyLocationEnabled(true);
     }
 
     @Override

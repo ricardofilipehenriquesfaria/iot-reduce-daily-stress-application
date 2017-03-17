@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" package="app.miti.com.iot_reduce_daily_stress_application">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="app.miti.com.iot_reduce_daily_stress_application">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -32,7 +33,8 @@
         <service android:name=".PolylineAlgorithm"
             android:exported="false" />
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -272,7 +274,6 @@
             android:writePermission="app.miti.com.WRITE_CONTEXT_DATA"
             >
         </provider>
-
         <provider
             android:name="app.miti.com.iot_reduce_daily_stress_application.PolylineProvider"
             android:authorities="${applicationId}.provider.polyline"

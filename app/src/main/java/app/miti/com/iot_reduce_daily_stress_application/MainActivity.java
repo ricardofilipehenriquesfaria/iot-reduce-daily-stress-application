@@ -1,5 +1,6 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
+import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,18 +55,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         location = DbHelper.retrieveLocationsData(MainActivity.this);
         TextView textLocations = (TextView)findViewById(R.id.textLocations);
         textLocations.setText(location);
-
-        googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-        googleApiClient.connect();
-
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        Intent intentService = new Intent(this, JsonParsingService.class);
-        startService(intentService);
-
-        Intent intent = new Intent(this, AddressService.class);
-        startService(intent);
     }
 
     @Override
@@ -159,6 +148,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onResume() {
         super.onResume();
+
+        KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        boolean isPhoneLocked = keyguardManager.inKeyguardRestrictedInputMode();
+
+        if(googleApiClient == null && !isPhoneLocked) {
+
+            googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
+            googleApiClient.connect();
+
+            locationRequest = LocationRequest.create();
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            Intent intentService = new Intent(this, JsonParsingService.class);
+            startService(intentService);
+
+            Intent intent = new Intent(this, AddressService.class);
+            startService(intent);
+        }
+
         IntentFilter intentFilter = new IntentFilter(JsonBroadcastReceiver.PROCESS_RESPONSE);
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
         broadcastReceiver = new JsonBroadcastReceiver();
