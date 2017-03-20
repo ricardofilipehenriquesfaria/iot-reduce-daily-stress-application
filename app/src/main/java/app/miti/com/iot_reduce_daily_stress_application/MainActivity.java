@@ -18,8 +18,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aware.Aware;
@@ -57,14 +57,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
 
-        activity = DbHelper.retrieveActivityRecognitionData(MainActivity.this);
-        TextView textActivityRecognition = (TextView)findViewById(R.id.textActivityRecognition);
-        textActivityRecognition.setText(activity);
-
-        location = DbHelper.retrieveLocationsData(MainActivity.this);
-        TextView textLocations = (TextView)findViewById(R.id.textLocations);
-        textLocations.setText(location);
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -72,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = navigationView.getMenu();
+        activity = DbHelper.retrieveActivityRecognitionData(MainActivity.this);
+        menu.findItem(R.id.nav_activity).setTitle(activity);
+        location = DbHelper.retrieveLocationsData(MainActivity.this);
+        menu.findItem(R.id.nav_location).setTitle(location);
         navigationView.setNavigationItemSelectedListener(this);
     }
 
@@ -140,9 +137,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_activity) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_location) {
 
         } else if (id == R.id.nav_slideshow) {
 

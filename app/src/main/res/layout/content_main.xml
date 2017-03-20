@@ -13,24 +13,7 @@
     tools:context="app.miti.com.iot_reduce_daily_stress_application.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <TextView
-        android:id="@+id/textActivityRecognition"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/textActivityRecognition" />
-
-    <TextView
-        android:id="@+id/textLocations"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/textLocations"
-        android:layout_marginTop="29dp"
-        android:layout_below="@+id/textActivityRecognition"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
     <include layout="@layout/map_screen"
-        android:layout_below="@+id/textLocations"
         android:layout_height="wrap_content"
         android:layout_width="match_parent" />
 
