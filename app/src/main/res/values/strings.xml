@@ -2,4 +2,7 @@
     <string name="app_name">iot-reduce-daily-stress-application</string>
     <string name="textLocations"> </string>
     <string name="textActivityRecognition"> </string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
 </resources>
