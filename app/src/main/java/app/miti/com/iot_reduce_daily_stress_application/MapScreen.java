@@ -1,11 +1,13 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -74,7 +76,27 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
     public void onMapReady(GoogleMap arg0) {
 
         googleMap = arg0;
-        googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String value = mSharedPreference.getString("PREFERENCES", "Híbrido");
+
+        googleMap = arg0;
+
+        switch (value) {
+            case "Híbrido":
+                googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                break;
+            case "Estradas":
+                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                break;
+            case "Satélite":
+                googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                break;
+            default:
+                googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+        }
+
         String estrada;
 
         if( DbHelper.retrieveLocationsData(getContext()) == null ) return;

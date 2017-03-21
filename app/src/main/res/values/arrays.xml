@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="mapValues">
+        <item>Híbrido</item>
+        <item>Estradas</item>
+        <item>Satélite</item>
+        <item>Terreno</item>
+    </string-array>
+    <string-array name="preferenceValues">
+        <item>Híbrido</item>
+        <item>Estradas</item>
+        <item>Satélite</item>
+        <item>Terreno</item>
+    </string-array>
+</resources>

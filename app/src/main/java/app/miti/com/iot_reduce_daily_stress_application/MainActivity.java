@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -73,6 +75,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent();
+            intent.setClass(MainActivity.this, SettingsActivity.class);
+            startActivityForResult(intent, 100);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onConnected(@Nullable Bundle bundle) {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
         builder.setAlwaysShow(true);
@@ -125,8 +151,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             wifi.setWifiEnabled(true);
 
         } else {
-
             Toast.makeText(getApplicationContext(), "GPS desligado", Toast.LENGTH_LONG).show();
+        }
+
+        if (requestCode == 100) {
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            String mapType = sharedPreferences.getString("mapPreferences", null);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            editor.putString("PREFERENCES", mapType);
+            editor.commit();
 
         }
     }
@@ -200,12 +235,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             locationRequest = LocationRequest.create();
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-            Intent intentService = new Intent(this, JsonParsingService.class);
-            startService(intentService);
-
             Intent intent = new Intent(this, AddressService.class);
             startService(intent);
         }
+
+        Intent intentService = new Intent(this, JsonParsingService.class);
+        startService(intentService);
 
         IntentFilter intentFilter = new IntentFilter(JsonBroadcastReceiver.PROCESS_RESPONSE);
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
@@ -222,6 +257,4 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             super.onBackPressed();
         }
     }
-
-
 }
