@@ -31,18 +31,18 @@ public class PolylineProvider extends ContentProvider {
 
     public static final class PolylineProvider_Data implements BaseColumns {
         private PolylineProvider_Data() {
-        };
+        }
 
-        public static final Uri CONTENT_URI = Uri.parse("content://"+ PolylineProvider.AUTHORITY + "/polyline");
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.app.miti.com.iot_reduce_daily_stress_application.provider.polyline";
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.app.miti.com.iot_reduce_daily_stress_application.provider.polyline";
+        static final Uri CONTENT_URI = Uri.parse("content://"+ PolylineProvider.AUTHORITY + "/polyline");
+        static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.app.miti.com.iot_reduce_daily_stress_application.provider.polyline";
+        static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.app.miti.com.iot_reduce_daily_stress_application.provider.polyline";
 
-        public static final String _ID = "_id";
-        public static final String TIMESTAMP = "timestamp";
-        public static final String DEVICE_ID = "device_id";
-        public static final String LOCALIZACAO_INICIAL = "localizacao_inicial";
-        public static final String LATITUDE = "latitude";
-        public static final String LONGITUDE = "longitude";
+        static final String _ID = "_id";
+        static final String TIMESTAMP = "timestamp";
+        static final String DEVICE_ID = "device_id";
+        static final String LOCALIZACAO_INICIAL = "localizacao_inicial";
+        static final String LATITUDE = "latitude";
+        static final String LONGITUDE = "longitude";
     }
 
     public static String DATABASE_NAME = "polyline.db";
@@ -130,8 +130,9 @@ public class PolylineProvider extends ContentProvider {
                     Uri new_uri = ContentUris.withAppendedId(
                             PolylineProvider.PolylineProvider_Data.CONTENT_URI,
                             _id);
-                    getContext().getContentResolver().notifyChange(new_uri,
-                            null);
+                    if(getContext() != null){
+                        getContext().getContentResolver().notifyChange(new_uri, null);
+                    }
                     return new_uri;
                 }
                 throw new SQLException("Failed to insert row into " + uri);
@@ -159,8 +160,9 @@ public class PolylineProvider extends ContentProvider {
 
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-
-        getContext().getContentResolver().notifyChange(uri, null);
+        if(getContext() != null){
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return count;
     }
 
@@ -183,7 +185,9 @@ public class PolylineProvider extends ContentProvider {
                 database.close();
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+        if(getContext() != null){
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return count;
     }
 }

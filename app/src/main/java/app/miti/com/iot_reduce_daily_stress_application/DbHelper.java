@@ -14,7 +14,7 @@ import static java.lang.String.valueOf;
 
 class DbHelper {
 
-    public DbHelper(){};
+    public DbHelper(){}
 
     static String retrieveActivityRecognitionData(Context context)
     {

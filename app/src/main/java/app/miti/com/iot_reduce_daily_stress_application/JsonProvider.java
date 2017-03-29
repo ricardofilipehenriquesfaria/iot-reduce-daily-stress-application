@@ -31,26 +31,26 @@ public class JsonProvider extends ContentProvider{
 
     public static final class JsonProvider_Data implements BaseColumns {
         private JsonProvider_Data() {
-        };
+        }
 
-        public static final Uri CONTENT_URI = Uri.parse("content://"+ JsonProvider.AUTHORITY + "/estradas");
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.app.miti.com.iot_reduce_daily_stress_application.jsonProvider.estradas";
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.app.miti.com.iot_reduce_daily_stress_application.jsonProvider.estradas";
+        static final Uri CONTENT_URI = Uri.parse("content://"+ JsonProvider.AUTHORITY + "/estradas");
+        static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.app.miti.com.iot_reduce_daily_stress_application.jsonProvider.estradas";
+        static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.app.miti.com.iot_reduce_daily_stress_application.jsonProvider.estradas";
 
-        public static final String _ID = "_id";
-        public static final String TIMESTAMP = "timestamp";
-        public static final String DEVICE_ID = "device_id";
-        public static final String ESTRADA = "estrada";
-        public static final String RUA = "rua";
-        public static final String DATA_INICIO = "data_inicio";
-        public static final String DATA_FIM = "data_fim";
+        static final String _ID = "_id";
+        static final String TIMESTAMP = "timestamp";
+        static final String DEVICE_ID = "device_id";
+        static final String ESTRADA = "estrada";
+        static final String RUA = "rua";
+        static final String DATA_INICIO = "data_inicio";
+        static final String DATA_FIM = "data_fim";
 
-        public static final String HORA_INICIO = "hora_inicio";
-        public static final String HORA_FIM = "hora_fim";
-        public static final String LATITUDE_INICIO = "latitude_inicio";
-        public static final String LATITUDE_FIM = "latitude_fim";
-        public static final String LONGITUDE_INICIO = "longitude_inicio";
-        public static final String LONGITUDE_FIM = "longitude_fim";
+        static final String HORA_INICIO = "hora_inicio";
+        static final String HORA_FIM = "hora_fim";
+        static final String LATITUDE_INICIO = "latitude_inicio";
+        static final String LATITUDE_FIM = "latitude_fim";
+        static final String LONGITUDE_INICIO = "longitude_inicio";
+        static final String LONGITUDE_FIM = "longitude_fim";
     }
 
     public static String DATABASE_NAME = "estradas.db";
@@ -144,8 +144,10 @@ public class JsonProvider extends ContentProvider{
                     Uri new_uri = ContentUris.withAppendedId(
                             JsonProvider_Data.CONTENT_URI,
                             _id);
-                    getContext().getContentResolver().notifyChange(new_uri,
-                            null);
+                    if(getContext() != null){
+                        getContext().getContentResolver().notifyChange(new_uri,
+                                null);
+                    }
                     return new_uri;
                 }
                 throw new SQLException("Failed to insert row into " + uri);
@@ -172,8 +174,9 @@ public class JsonProvider extends ContentProvider{
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-
-        getContext().getContentResolver().notifyChange(uri, null);
+        if(getContext() != null){
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return count;
     }
 
@@ -197,7 +200,9 @@ public class JsonProvider extends ContentProvider{
                 database.close();
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+        if(getContext() != null){
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return count;
     }
 }

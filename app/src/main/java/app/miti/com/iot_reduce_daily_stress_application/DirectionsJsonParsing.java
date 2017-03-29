@@ -39,7 +39,7 @@ class DirectionsJsonParsing{
 
             for(int i=0; i<jsonRoutes.length(); i++){
                 jsonLegs = ( (JSONObject)jsonRoutes.get(i)).getJSONArray("legs");
-                List path = new ArrayList<>();
+                List<HashMap<String, String>> path = new ArrayList<>();
 
                 for(int j=0; j<jsonLegs.length(); j++){
                     jsonSteps = ( (JSONObject)jsonLegs.get(j)).getJSONArray("steps");
@@ -71,7 +71,7 @@ class DirectionsJsonParsing{
 
     private List decodePoly(String encoded) {
 
-        List poly = new ArrayList();
+        List<LatLng> poly = new ArrayList<>();
         int index = 0, length = encoded.length();
         int latitude = 0, longitude = 0;
 

@@ -1,6 +1,7 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -9,8 +10,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,7 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static android.R.attr.data;
 
 /**
  * Created by Ricardo on 31-01-2017.
@@ -44,10 +44,10 @@ import static android.R.attr.data;
 
 public class MapScreen extends SupportMapFragment implements OnMapReadyCallback {
 
-    private GoogleMap googleMap = null;
+    private GoogleMap mGoogleMap = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getMapAsync(this);
     }
@@ -61,39 +61,43 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
     @Override
     public void onResume() {
         super.onResume();
-        if(googleMap != null && isResumed())
-            googleMap.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if(mGoogleMap != null && isResumed())
+                mGoogleMap.setMyLocationEnabled(true);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if(googleMap != null)
-            googleMap.setMyLocationEnabled(false);
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            assert mGoogleMap != null;
+            mGoogleMap.setMyLocationEnabled(false);
+        }
     }
 
     @Override
     public void onMapReady(GoogleMap arg0) {
 
-        googleMap = arg0;
+        mGoogleMap = arg0;
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
         String value = mSharedPreference.getString("PREFERENCES", "Híbrido");
 
-        googleMap = arg0;
+        mGoogleMap = arg0;
 
         switch (value) {
             case "Híbrido":
-                googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
                 break;
             case "Estradas":
-                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 break;
             case "Satélite":
-                googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                 break;
             default:
-                googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
                 break;
         }
 
@@ -103,13 +107,13 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         String[] separated = DbHelper.retrieveLocationsData(getContext()).split(",");
 
         LatLng latLng = new LatLng(Double.parseDouble(separated[0]), Double.parseDouble(separated[1]));
-        googleMap.addMarker(new MarkerOptions().position(latLng).title("Localização Atual"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+        mGoogleMap.addMarker(new MarkerOptions().position(latLng).title("Localização Atual"));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
 
-        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+        mGoogleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
             }
         });
 
@@ -227,7 +231,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
             for (int i = 0; i < result.size(); i++) {
 
-                ArrayList arrayListPoints = new ArrayList();
+                ArrayList<LatLng> arrayListPoints = new ArrayList<>();
                 lineOptions = new PolylineOptions();
                 List<HashMap<String, String>> path = result.get(i);
 
@@ -243,18 +247,18 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
                     if(j == 0) {
                         if(mEstrada.equals("estrada_fechada")) {
-                            googleMap.addMarker(new MarkerOptions()
+                            mGoogleMap.addMarker(new MarkerOptions()
                                     .position(position)
                                     .icon(BitmapDescriptorFactory.fromBitmap(resizeIcons(R.mipmap.ic_closed)))
                                     .title("Estrada Fechada"));
                             lineOptions.color(Color.RED);
                         }
                         else{
-                            googleMap.addMarker(new MarkerOptions()
+                            mGoogleMap.addMarker(new MarkerOptions()
                                     .position(position)
                                     .icon(BitmapDescriptorFactory.fromBitmap(resizeIcons(R.mipmap.ic_conditioned)))
                                     .title("Estrada Condicionada"));
-                            lineOptions.color(Color.YELLOW);
+                            lineOptions.color(Color.rgb(255,165,0));
                         }
                     }
                 }
@@ -264,13 +268,13 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 lineOptions.geodesic(true);
             }
             if (lineOptions != null) {
-                googleMap.addPolyline(lineOptions);
+                mGoogleMap.addPolyline(lineOptions);
             }
         }
     }
 
     public Bitmap resizeIcons(int drawable){
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) getResources().getDrawable(drawable);
+        BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), drawable);
         Bitmap bitmap = bitmapDrawable.getBitmap();
         return Bitmap.createScaledBitmap(bitmap, 40, 40, false);
     }
