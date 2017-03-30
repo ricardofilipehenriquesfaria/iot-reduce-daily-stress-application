@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -139,6 +140,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
                 DownloadTask downloadTask = new DownloadTask(estrada);
                 downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyBaKakWMul-QuxWpvcFG4CIeYwJ-qNsC9w&" + parameters);
+
+                ElevationTask elevationTask = new ElevationTask();
+                elevationTask.execute(origin);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -277,5 +281,50 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), drawable);
         Bitmap bitmap = bitmapDrawable.getBitmap();
         return Bitmap.createScaledBitmap(bitmap, 40, 40, false);
+    }
+
+    private class ElevationTask extends AsyncTask<LatLng, Void, Void> {
+
+        @Override
+        protected Void doInBackground(LatLng... elevations) {
+
+            double result = -1;
+            int r;
+            HttpURLConnection urlConnection = null;
+            URL url;
+
+            try {
+                url = new URL("https://maps.googleapis.com/maps/api/elevation/xml?locations="
+                        + String.valueOf(elevations[0].latitude) + "," + String.valueOf(elevations[0].longitude)
+                        + "&sensor=true&key=AIzaSyBaKakWMul-QuxWpvcFG4CIeYwJ-qNsC9w");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.connect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                assert urlConnection != null;
+                InputStream inputStream = urlConnection.getInputStream();
+
+                StringBuilder stringBuilder = new StringBuilder();
+                while ((r = inputStream.read()) != -1)
+                    stringBuilder.append((char) r);
+                String tagOpen = "<elevation>";
+                String tagClose = "</elevation>";
+                if (stringBuilder.indexOf(tagOpen) != -1) {
+                    int start = stringBuilder.indexOf(tagOpen) + tagOpen.length();
+                    int end = stringBuilder.indexOf(tagClose);
+                    String value = stringBuilder.substring(start, end);
+                    result = (Double.parseDouble(value));
+                }
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Log.d("Altitude: ", String.valueOf(result));
+            return null;
+        }
     }
 }
