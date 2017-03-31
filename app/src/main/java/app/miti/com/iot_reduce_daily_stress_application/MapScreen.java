@@ -46,6 +46,8 @@ import java.util.List;
 public class MapScreen extends SupportMapFragment implements OnMapReadyCallback {
 
     private GoogleMap mGoogleMap = null;
+    private HttpURLConnection urlConnection = null;
+    private URL url = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -162,8 +164,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         protected String doInBackground(String... string) {
 
             String data = null;
-            HttpURLConnection urlConnection = null;
-            URL url;
 
             try {
                 url = new URL(string[0]);
@@ -288,13 +288,10 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         @Override
         protected Void doInBackground(LatLng... elevations) {
 
-            double result = -1;
             int r;
-            HttpURLConnection urlConnection = null;
-            URL url;
 
             try {
-                url = new URL("https://maps.googleapis.com/maps/api/elevation/xml?locations="
+                url = new URL("https://maps.googleapis.com/maps/api/elevation/json?locations="
                         + String.valueOf(elevations[0].latitude) + "," + String.valueOf(elevations[0].longitude)
                         + "&sensor=true&key=AIzaSyBaKakWMul-QuxWpvcFG4CIeYwJ-qNsC9w");
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -308,22 +305,26 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 InputStream inputStream = urlConnection.getInputStream();
 
                 StringBuilder stringBuilder = new StringBuilder();
+
                 while ((r = inputStream.read()) != -1)
                     stringBuilder.append((char) r);
-                String tagOpen = "<elevation>";
-                String tagClose = "</elevation>";
-                if (stringBuilder.indexOf(tagOpen) != -1) {
-                    int start = stringBuilder.indexOf(tagOpen) + tagOpen.length();
-                    int end = stringBuilder.indexOf(tagClose);
-                    String value = stringBuilder.substring(start, end);
-                    result = (Double.parseDouble(value));
+
+                JSONObject jsonObject = new JSONObject(String.valueOf(stringBuilder));
+
+                JSONArray jsonElevations;
+                jsonElevations = jsonObject.getJSONArray("results");
+
+                String altitude = null;
+                for(int i=0; i<jsonElevations.length(); i++) {
+                    altitude = String.valueOf(((JSONObject) jsonElevations.get(i)).getDouble("elevation"));
                 }
+
+                Log.d("Altitude: ", String.valueOf(altitude));
                 inputStream.close();
-            } catch (IOException e) {
+
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-
-            Log.d("Altitude: ", String.valueOf(result));
             return null;
         }
     }

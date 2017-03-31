@@ -2,7 +2,7 @@
     <string name="app_name">Traffic App</string>
     <string name="textLocations"> </string>
     <string name="textActivityRecognition"> </string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Abrir</string>
+    <string name="navigation_drawer_close">Fechar</string>
     <string name="action_settings">Definições</string>
 </resources>

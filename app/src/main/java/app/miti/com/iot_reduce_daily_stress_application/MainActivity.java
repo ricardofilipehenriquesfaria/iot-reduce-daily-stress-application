@@ -38,10 +38,8 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<LocationSettingsResult>, NavigationView.OnNavigationItemSelectedListener {
 
-    protected GoogleApiClient googleApiClient = null;
-    protected LocationRequest locationRequest = null;
-    protected String activity = null;
-    protected String location = null;
+    private GoogleApiClient googleApiClient = null;
+    private LocationRequest locationRequest = null;
     private JsonBroadcastReceiver broadcastReceiver;
 
     @Override
@@ -56,21 +54,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         startService(aware);
 
         Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
-
         Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu menu = navigationView.getMenu();
-        activity = DbHelper.retrieveActivityRecognitionData(MainActivity.this);
+
+        String activity = DbHelper.retrieveActivityRecognitionData(MainActivity.this);
         menu.findItem(R.id.nav_activity).setTitle(activity);
-        location = DbHelper.retrieveLocationsData(MainActivity.this);
+
+        String location = DbHelper.retrieveLocationsData(MainActivity.this);
         menu.findItem(R.id.nav_location).setTitle(location);
+
         navigationView.setNavigationItemSelectedListener(this);
     }
 

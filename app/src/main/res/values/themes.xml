@@ -13,5 +13,6 @@
         <item name="editTextPreferenceStyle">@style/Preference.DialogPreference.EditTextPreference</item>
         <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList</item>
         <item name="dropdownPreferenceStyle">@style/Preference.DropDown</item>
+        <item name="android:textColor">@color/colorWhite</item>
     </style>
 </resources>
