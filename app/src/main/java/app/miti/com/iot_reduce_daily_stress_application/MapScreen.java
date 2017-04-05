@@ -2,16 +2,13 @@ package app.miti.com.iot_reduce_daily_stress_application;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -19,9 +16,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CustomCap;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
@@ -231,7 +231,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
         @Override
         protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            PolylineOptions lineOptions = null;
+            PolylineOptions lineOptions;
 
             for (int i = 0; i < result.size(); i++) {
 
@@ -248,39 +248,52 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                     LatLng position = new LatLng(lat, lng);
 
                     arrayListPoints.add(position);
-
-                    if(j == 0) {
-                        if(mEstrada.equals("estrada_fechada")) {
-                            mGoogleMap.addMarker(new MarkerOptions()
-                                    .position(position)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeIcons(R.mipmap.ic_closed)))
-                                    .title("Estrada Fechada"));
-                            lineOptions.color(Color.RED);
-                        }
-                        else{
-                            mGoogleMap.addMarker(new MarkerOptions()
-                                    .position(position)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeIcons(R.mipmap.ic_conditioned)))
-                                    .title("Estrada Condicionada"));
-                            lineOptions.color(Color.rgb(255,165,0));
-                        }
-                    }
                 }
 
                 lineOptions.addAll(arrayListPoints);
-                lineOptions.width(5);
+                lineOptions.width(8);
                 lineOptions.geodesic(true);
+
+                Polyline polyline = mGoogleMap.addPolyline(lineOptions);
+                polyline.setJointType(JointType.ROUND);
+                polyline.setTag(mEstrada);
+                setPolylineStyle(polyline);
             }
-            if (lineOptions != null) {
-                mGoogleMap.addPolyline(lineOptions);
-            }
+
+            mGoogleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+                public void onPolylineClick(Polyline polyline) {
+                    int strokeColor = ~polyline.getColor();
+                    polyline.setColor(strokeColor);
+                }
+            });
         }
     }
 
-    public Bitmap resizeIcons(int drawable){
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), drawable);
-        Bitmap bitmap = bitmapDrawable.getBitmap();
-        return Bitmap.createScaledBitmap(bitmap, 40, 40, false);
+    private void setPolylineStyle(Polyline polyline){
+
+        String type = "";
+        CustomCap customCap;
+
+        if (polyline.getTag() != null) {
+            type = polyline.getTag().toString();
+        }
+
+        switch (type) {
+            case "estrada_fechada":
+                customCap = new CustomCap(BitmapDescriptorFactory.fromResource(R.mipmap.ic_closed), 40);
+                polyline.setStartCap(customCap);
+                polyline.setEndCap(customCap);
+                polyline.setColor(Color.argb(150, 255, 0, 0));
+                break;
+
+            case "estrada_condicionada":
+                customCap = new CustomCap(BitmapDescriptorFactory.fromResource(R.mipmap.ic_conditioned), 40);
+                polyline.setStartCap(customCap);
+                polyline.setEndCap(customCap);
+                polyline.setColor(Color.argb(150, 255, 165, 0));
+                break;
+        }
+        polyline.setClickable(true);
     }
 
     private class ElevationTask extends AsyncTask<LatLng, Void, Void> {
