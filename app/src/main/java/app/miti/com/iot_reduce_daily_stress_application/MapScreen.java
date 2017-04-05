@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -142,9 +141,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
                 DownloadTask downloadTask = new DownloadTask(estrada);
                 downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyBaKakWMul-QuxWpvcFG4CIeYwJ-qNsC9w&" + parameters);
-
-                ElevationTask elevationTask = new ElevationTask();
-                elevationTask.execute(origin);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -238,6 +234,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 ArrayList<LatLng> arrayListPoints = new ArrayList<>();
                 lineOptions = new PolylineOptions();
                 List<HashMap<String, String>> path = result.get(i);
+                LatLng arrayPoints[] = new LatLng[path.size()];
 
                 for (int j = 0; j < path.size(); j++) {
 
@@ -248,7 +245,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                     LatLng position = new LatLng(lat, lng);
 
                     arrayListPoints.add(position);
+                    arrayPoints[j] = position;
                 }
+
+                ElevationTask elevationTask = new ElevationTask();
+                elevationTask.execute(arrayPoints);
 
                 lineOptions.addAll(arrayListPoints);
                 lineOptions.width(8);
@@ -296,17 +297,31 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         polyline.setClickable(true);
     }
 
-    private class ElevationTask extends AsyncTask<LatLng, Void, Void> {
+    private class ElevationTask extends AsyncTask<LatLng, Void, JSONObject> {
+
+        LatLng mElevations[] = null;
 
         @Override
-        protected Void doInBackground(LatLng... elevations) {
+        protected JSONObject doInBackground(LatLng... elevations) {
 
+            mElevations = elevations;
+            JSONObject jsonObject = null;
             int r;
 
             try {
-                url = new URL("https://maps.googleapis.com/maps/api/elevation/json?locations="
-                        + String.valueOf(elevations[0].latitude) + "," + String.valueOf(elevations[0].longitude)
-                        + "&sensor=true&key=AIzaSyBaKakWMul-QuxWpvcFG4CIeYwJ-qNsC9w");
+                String stringUrl = "http://open.mapquestapi.com/elevation/v1/profile?key=hUuNdwLPB9fzsW1N1Zh5XeeWpqAYEqrU&latLngCollection=";
+                int value = 0;
+                for (LatLng elevation : elevations) {
+
+                    if(value == 0){
+                        stringUrl = stringUrl + String.valueOf(elevation.latitude) + "," + String.valueOf(elevation.longitude);
+                        value = 1;
+                    }
+                    else{
+                        stringUrl = stringUrl + "," + String.valueOf(elevation.latitude) + "," + String.valueOf(elevation.longitude);
+                    }
+                }
+                url = new URL(stringUrl);
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.connect();
             } catch (IOException e) {
@@ -322,23 +337,50 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 while ((r = inputStream.read()) != -1)
                     stringBuilder.append((char) r);
 
-                JSONObject jsonObject = new JSONObject(String.valueOf(stringBuilder));
+                jsonObject = new JSONObject(String.valueOf(stringBuilder));
 
-                JSONArray jsonElevations;
-                jsonElevations = jsonObject.getJSONArray("results");
-
-                String altitude = null;
-                for(int i=0; i<jsonElevations.length(); i++) {
-                    altitude = String.valueOf(((JSONObject) jsonElevations.get(i)).getDouble("elevation"));
-                }
-
-                Log.d("Altitude: ", String.valueOf(altitude));
                 inputStream.close();
 
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-            return null;
+            return jsonObject;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+
+            try {
+
+                JSONArray elevationProfile = jsonObject.getJSONArray("elevationProfile");
+                double distance[] = new double[elevationProfile.length()];
+                double height[] = new double[elevationProfile.length()];
+
+                for(int i = 0; i < elevationProfile.length(); i++) {
+
+                    height[i] = ((JSONObject) elevationProfile.get(i)).getDouble("height");
+                    distance[i] = ((JSONObject) elevationProfile.get(i)).getDouble("distance");
+
+                    if(i != 0){
+                        Double distanceCalc = distance[i] - distance[i-1];
+                        Double heightCalc = height[i] - height[i-1];
+                        Double inclination = getSlope(distanceCalc, heightCalc);
+                        mGoogleMap.addMarker(new MarkerOptions()
+                                .position(mElevations[i])
+                                .title(String.valueOf(inclination)));
+                    }
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        double getSlope(double height, double distance) {
+
+            if (distance == 0.0d) return Math.abs(0.0d);
+            else return Math.abs(height / distance);
+
         }
     }
 }
