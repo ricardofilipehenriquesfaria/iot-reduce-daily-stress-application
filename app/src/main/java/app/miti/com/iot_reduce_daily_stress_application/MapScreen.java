@@ -2,13 +2,16 @@ package app.miti.com.iot_reduce_daily_stress_application;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -355,22 +358,35 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 JSONArray elevationProfile = jsonObject.getJSONArray("elevationProfile");
                 double distance[] = new double[elevationProfile.length()];
                 double height[] = new double[elevationProfile.length()];
+                int statusCode = jsonObject.getJSONObject("info").getInt("statuscode");
+                double controlVariable = 0.1;
+                int previousIndex = 0;
 
                 for(int i = 0; i < elevationProfile.length(); i++) {
 
                     height[i] = ((JSONObject) elevationProfile.get(i)).getDouble("height");
                     distance[i] = ((JSONObject) elevationProfile.get(i)).getDouble("distance");
 
-                    if(i != 0){
-                        Double distanceCalc = distance[i] - distance[i-1];
-                        Double heightCalc = height[i] - height[i-1];
-                        Double inclination = getSlope(distanceCalc, heightCalc);
-                        mGoogleMap.addMarker(new MarkerOptions()
-                                .position(mElevations[i])
-                                .title(String.valueOf(inclination)));
+                    if(i != 0 && statusCode == 0){
+
+                        if(distance[i] >= controlVariable || i == (elevationProfile.length()-1)){
+
+                            controlVariable = (Math.floor(distance[i] * 10) / 10) + 0.1;
+
+                            Double distanceCalc = (distance[i] - distance[previousIndex]) * 1000;
+                            Double heightCalc = height[i] - height[previousIndex];
+                            Double inclination = getSlope(heightCalc, distanceCalc);
+
+                            previousIndex = i;
+                            if(inclination >= 10) {
+                                mGoogleMap.addMarker(new MarkerOptions()
+                                        .position(mElevations[i])
+                                        .icon(BitmapDescriptorFactory.fromBitmap(resizeIcons(R.mipmap.ic_slope)))
+                                        .title(String.valueOf(inclination) + "%"));
+                            }
+                        }
                     }
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -379,8 +395,14 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         double getSlope(double height, double distance) {
 
             if (distance == 0.0d) return Math.abs(0.0d);
-            else return Math.abs(height / distance);
+            else return Math.round(Math.abs(height / distance) * 100);
 
+        }
+
+        Bitmap resizeIcons(int drawable){
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), drawable);
+            Bitmap bitmap = bitmapDrawable.getBitmap();
+            return Bitmap.createScaledBitmap(bitmap, 40, 40, false);
         }
     }
 }
