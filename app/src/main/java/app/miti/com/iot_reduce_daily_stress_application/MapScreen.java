@@ -87,7 +87,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         mGoogleMap = arg0;
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String value = mSharedPreference.getString("PREFERENCES", "Híbrido");
+        String value = mSharedPreference.getString("PREFERENCES", "NULL");
 
         mGoogleMap = arg0;
 
@@ -101,8 +101,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
             case "Satélite":
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                 break;
-            default:
+            case "Terreno":
                 mGoogleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+            default:
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
                 break;
         }
 
@@ -375,14 +378,16 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
                             Double distanceCalc = (distance[i] - distance[previousIndex]) * 1000;
                             Double heightCalc = height[i] - height[previousIndex];
-                            Double inclination = getSlope(heightCalc, distanceCalc);
+                            Double slope = getSlope(heightCalc, distanceCalc);
+                            Double slopeDegrees = getSlopeDegrees(heightCalc, distanceCalc);
 
                             previousIndex = i;
-                            if(inclination >= 10) {
+
+                            if(slope >= 10) {
                                 mGoogleMap.addMarker(new MarkerOptions()
                                         .position(mElevations[i])
-                                        .icon(BitmapDescriptorFactory.fromBitmap(resizeIcons(R.mipmap.ic_slope)))
-                                        .title(String.valueOf(inclination) + "%"));
+                                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_slope))
+                                        .title(String.valueOf(slope) + "%, " + String.valueOf(slopeDegrees) + "º"));
                             }
                         }
                     }
@@ -393,16 +398,20 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         }
 
         double getSlope(double height, double distance) {
-
             if (distance == 0.0d) return Math.abs(0.0d);
             else return Math.round(Math.abs(height / distance) * 100);
-
         }
 
         Bitmap resizeIcons(int drawable){
             BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), drawable);
             Bitmap bitmap = bitmapDrawable.getBitmap();
             return Bitmap.createScaledBitmap(bitmap, 40, 40, false);
+        }
+
+        double getSlopeDegrees(double height, double distance){
+            double slope = getSlope(height, distance);
+            if (slope != 0.0) return Math.round(Math.toDegrees(Math.atan(slope/100)));
+            else return 0;
         }
     }
 }

@@ -1,6 +1,5 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,10 +26,5 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Definições");
 
         getFragmentManager().beginTransaction().replace(R.id.fragment_container, new SettingsFragment()).commit();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 }

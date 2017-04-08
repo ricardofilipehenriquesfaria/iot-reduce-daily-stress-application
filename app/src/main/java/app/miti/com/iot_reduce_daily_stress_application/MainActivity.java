@@ -36,11 +36,12 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<LocationSettingsResult>, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<LocationSettingsResult>, NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private GoogleApiClient googleApiClient = null;
     private LocationRequest locationRequest = null;
     private JsonBroadcastReceiver broadcastReceiver;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +70,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         String location = DbHelper.retrieveLocationsData(MainActivity.this);
         menu.findItem(R.id.nav_location).setTitle(location);
-
         navigationView.setNavigationItemSelectedListener(this);
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -152,17 +155,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         } else {
             Toast.makeText(getApplicationContext(), "GPS desligado", Toast.LENGTH_LONG).show();
         }
-
-        if (requestCode == 100) {
-
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            String mapType = sharedPreferences.getString("mapPreferences", null);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-
-            editor.putString("PREFERENCES", mapType);
-            editor.apply();
-
-        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -188,6 +180,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+        if(key.equals("mapPreferences")){
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            String mapType = sharedPreferences.getString(key, null);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            editor.putString("PREFERENCES", mapType);
+            editor.apply();
+        }
     }
 
     public class JsonBroadcastReceiver extends BroadcastReceiver {

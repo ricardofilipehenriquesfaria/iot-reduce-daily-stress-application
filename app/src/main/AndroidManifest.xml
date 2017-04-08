@@ -44,12 +44,8 @@
 
         <activity android:name=".SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute">
         </activity>
 
         <provider
