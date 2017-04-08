@@ -193,6 +193,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             editor.putString("PREFERENCES", mapType);
             editor.apply();
         }
+        if(key.equals("elevation")){
+
+            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            Boolean slope = sharedPreferences.getBoolean(key, false);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            editor.putBoolean("INCLINACAO", slope);
+            editor.apply();
+        }
     }
 
     public class JsonBroadcastReceiver extends BroadcastReceiver {

@@ -5,4 +5,6 @@
     <string name="navigation_drawer_open">Abrir</string>
     <string name="navigation_drawer_close">Fechar</string>
     <string name="action_settings">Definições</string>
+    <string name="elevation_id">elevation</string>
+    <string name="elevation_title">Inclinação da Estrada</string>
 </resources>

@@ -235,6 +235,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         protected void onPostExecute(List<List<HashMap<String, String>>> result) {
             PolylineOptions lineOptions;
 
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+            Boolean value = mSharedPreference.getBoolean("INCLINACAO", false);
+
             for (int i = 0; i < result.size(); i++) {
 
                 ArrayList<LatLng> arrayListPoints = new ArrayList<>();
@@ -254,8 +257,10 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                     arrayPoints[j] = position;
                 }
 
-                ElevationTask elevationTask = new ElevationTask();
-                elevationTask.execute(arrayPoints);
+                if(value){
+                    ElevationTask elevationTask = new ElevationTask();
+                    elevationTask.execute(arrayPoints);
+                }
 
                 lineOptions.addAll(arrayListPoints);
                 lineOptions.width(8);
