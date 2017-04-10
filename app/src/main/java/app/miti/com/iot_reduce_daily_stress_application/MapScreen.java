@@ -50,6 +50,8 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
     private GoogleMap mGoogleMap = null;
     private HttpURLConnection urlConnection = null;
     private URL url = null;
+    private Polyline polyline = null;
+    private Marker marker = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -114,9 +116,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
         if( DbHelper.retrieveLocationsData(getContext()) == null ) return;
         String[] separated = DbHelper.retrieveLocationsData(getContext()).split(",");
 
-        LatLng latLng = new LatLng(Double.parseDouble(separated[0]), Double.parseDouble(separated[1]));
-        mGoogleMap.addMarker(new MarkerOptions().position(latLng).title("Localização Atual"));
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+        final LatLng currentPosition = new LatLng(Double.parseDouble(separated[0]), Double.parseDouble(separated[1]));
+        mGoogleMap.addMarker(new MarkerOptions().position(currentPosition).title("Localização Atual"));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 17));
 
         mGoogleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -140,17 +142,45 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 LatLng origin = new LatLng(jsonData.getDouble("latitude_inicio"), jsonData.getDouble("longitude_inicio"));
                 LatLng destination = new LatLng(jsonData.getDouble("latitude_fim"), jsonData.getDouble("longitude_fim"));
 
-                String stringOrigin = "origin=" + origin.latitude + "," + origin.longitude;
-                String stringDestination = "destination=" + destination.latitude + "," + destination.longitude;
-
-                String parameters = stringOrigin + "&" + stringDestination + "&sensor=false&mode=driving";
-
-                DownloadTask downloadTask = new DownloadTask(estrada);
-                downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?key=AIzaSyBaKakWMul-QuxWpvcFG4CIeYwJ-qNsC9w&" + parameters);
+                setUrl(origin, destination, estrada);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener(){
+
+            @Override
+            public void onMapClick(LatLng destination) {
+
+                MarkerOptions options = new MarkerOptions();
+
+                if(marker != null) {
+                    marker.remove();
+                    polyline.remove();
+                }
+
+                options.position(destination);
+                options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+
+                marker = mGoogleMap.addMarker(options);
+                setUrl(currentPosition, destination, "");
+
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
+            }
+        });
+    }
+
+    public void setUrl(LatLng origin, LatLng destination, String estrada){
+
+        String stringOrigin = "origin=" + origin.latitude + "," + origin.longitude;
+        String stringDestination = "destination=" + destination.latitude + "," + destination.longitude;
+
+        String parameters = stringOrigin + "&" + stringDestination + "&sensor=false&mode=driving";
+
+        DownloadTask downloadTask = new DownloadTask(estrada);
+        downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
@@ -266,7 +296,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 lineOptions.width(8);
                 lineOptions.geodesic(true);
 
-                Polyline polyline = mGoogleMap.addPolyline(lineOptions);
+                polyline = mGoogleMap.addPolyline(lineOptions);
                 polyline.setJointType(JointType.ROUND);
                 polyline.setTag(mEstrada);
                 setPolylineStyle(polyline);
