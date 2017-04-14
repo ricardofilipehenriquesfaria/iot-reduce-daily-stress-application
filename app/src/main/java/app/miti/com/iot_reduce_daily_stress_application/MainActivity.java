@@ -23,13 +23,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.plugin.google.activity_recognition.ActivityRecognitionObserver;
+import com.aware.plugin.google.fused_location.LocationObserver;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String activity = ActivityRecognitionObserver.retrieveActivityName(MainActivity.this);
         menu.findItem(R.id.nav_activity).setTitle(activity);
 
-        String location = DbHelper.retrieveLocationsData(MainActivity.this);
+        String location = LocationObserver.retrieveCurrentLocation(MainActivity.this);
         menu.findItem(R.id.nav_location).setTitle(location);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -91,9 +91,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         public void handleMessage(Message message) {
 
             switch (message.what) {
-                case 2:
+                case 1:
                     String activity = (String) message.obj;
                     menu.findItem(R.id.nav_activity).setTitle(activity);
+                    break;
+                case 2:
+                    String location = (String) message.obj;
+                    menu.findItem(R.id.nav_activity).setTitle(location);
                     break;
                 default:
                     break;

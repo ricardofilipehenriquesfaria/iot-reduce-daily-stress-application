@@ -25,7 +25,7 @@ public class ActivityRecognitionObserver extends ContentObserver {
     @ Override
     public void onChange (boolean selfChange) {
 
-        mHandler.obtainMessage(2, retrieveActivityName(mContext)).sendToTarget();
+        mHandler.obtainMessage(1, retrieveActivityName(mContext)).sendToTarget();
     }
 
     public static String retrieveActivityName(Context context)
