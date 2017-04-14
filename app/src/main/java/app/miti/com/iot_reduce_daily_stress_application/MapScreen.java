@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -334,6 +335,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 polyline.setEndCap(customCap);
                 polyline.setColor(Color.argb(150, 255, 165, 0));
                 break;
+
+            default:
+                polyline.setStartCap(new RoundCap());
+                polyline.setEndCap(new RoundCap());
+                polyline.setColor(Color.argb(150, 0, 255, 0));
         }
         polyline.setClickable(true);
     }

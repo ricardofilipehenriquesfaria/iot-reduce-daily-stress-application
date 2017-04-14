@@ -7,8 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,11 +23,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.aware.Aware;
+import com.aware.plugin.google.activity_recognition.ActivityRecognitionObserver;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -42,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private LocationRequest locationRequest = null;
     private JsonBroadcastReceiver broadcastReceiver;
     SharedPreferences sharedPreferences;
+    Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,15 +63,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
         Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
 
+        ActivityRecognitionObserver activityRecognitionObserver = new ActivityRecognitionObserver(this, mHandler);
+        getContentResolver (). registerContentObserver (Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, activityRecognitionObserver);
+
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        Menu menu = navigationView.getMenu();
+        menu = navigationView.getMenu();
 
-        String activity = DbHelper.retrieveActivityRecognitionData(MainActivity.this);
+        String activity = ActivityRecognitionObserver.retrieveActivityName(MainActivity.this);
         menu.findItem(R.id.nav_activity).setTitle(activity);
 
         String location = DbHelper.retrieveLocationsData(MainActivity.this);
@@ -75,6 +84,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
+
+    private Handler mHandler = new Handler () {
+
+        @Override
+        public void handleMessage(Message message) {
+
+            switch (message.what) {
+                case 2:
+                    String activity = (String) message.obj;
+                    menu.findItem(R.id.nav_activity).setTitle(activity);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

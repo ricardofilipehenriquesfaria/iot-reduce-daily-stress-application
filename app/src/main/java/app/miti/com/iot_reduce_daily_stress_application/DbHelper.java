@@ -3,7 +3,6 @@ package app.miti.com.iot_reduce_daily_stress_application;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.aware.plugin.google.activity_recognition.Google_AR_Provider;
 import com.aware.providers.Locations_Provider;
 
 import static java.lang.String.valueOf;
@@ -15,24 +14,6 @@ import static java.lang.String.valueOf;
 class DbHelper {
 
     public DbHelper(){}
-
-    static String retrieveActivityRecognitionData(Context context)
-    {
-        String row = null;
-        Cursor cursor = context.getContentResolver().query(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI, null, null, null, null);
-
-        assert cursor != null;
-        if(cursor.moveToLast()) {
-            row = valueOf(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_NAME)));
-            cursor.close();
-        }
-
-        if(row == null) {
-            row = "still";
-        }
-
-        return row;
-    }
 
     static String retrieveLocationsData(Context context)
     {
