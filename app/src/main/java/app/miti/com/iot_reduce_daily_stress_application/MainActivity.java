@@ -45,9 +45,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private GoogleApiClient googleApiClient = null;
     private LocationRequest locationRequest = null;
-    private JsonBroadcastReceiver broadcastReceiver;
-    SharedPreferences sharedPreferences;
-    Menu menu;
+    private JsonBroadcastReceiver broadcastReceiver = null;
+    private Menu menu = null;
+    private ActivityRecognitionObserver activityRecognitionObserver = null;
+    private LocationObserver locationObserver = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +64,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
         Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
 
-        ActivityRecognitionObserver activityRecognitionObserver = new ActivityRecognitionObserver(this, mHandler);
-        getContentResolver (). registerContentObserver (Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, activityRecognitionObserver);
+        activityRecognitionObserver = new ActivityRecognitionObserver(this, mHandler);
+        getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, activityRecognitionObserver);
+
+        locationObserver = new LocationObserver(this, mHandler);
+        getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.locations/locations"), true, locationObserver);
 
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -81,14 +85,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         menu.findItem(R.id.nav_location).setTitle(location);
         navigationView.setNavigationItemSelectedListener(this);
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
-    private Handler mHandler = new Handler () {
+    private Handler mHandler = new Handler (new Handler.Callback() {
 
         @Override
-        public void handleMessage(Message message) {
+        public boolean handleMessage(Message message) {
 
             switch (message.what) {
                 case 1:
@@ -97,13 +101,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     break;
                 case 2:
                     String location = (String) message.obj;
-                    menu.findItem(R.id.nav_activity).setTitle(location);
+                    menu.findItem(R.id.nav_location).setTitle(location);
                     break;
                 default:
                     break;
             }
+            return true;
         }
-    };
+    });
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -298,5 +303,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        getContentResolver().unregisterContentObserver(activityRecognitionObserver);
+        getContentResolver().unregisterContentObserver(locationObserver);
     }
 }
