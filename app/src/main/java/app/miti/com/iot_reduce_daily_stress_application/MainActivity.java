@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.aware.Aware;
 import com.aware.plugin.google.activity_recognition.ActivityRecognitionObserver;
+import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.aware.plugin.google.fused_location.LocationObserver;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -40,6 +41,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<LocationSettingsResult>, NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Menu menu = null;
     private ActivityRecognitionObserver activityRecognitionObserver = null;
     private LocationObserver locationObserver = null;
-    public static String LOCATION = null;
+    private LatLng location = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +84,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String activity = ActivityRecognitionObserver.retrieveActivityName(MainActivity.this);
         menu.findItem(R.id.nav_activity).setTitle(activity);
 
-        LOCATION = LocationObserver.retrieveCurrentLocation(MainActivity.this);
-        menu.findItem(R.id.nav_location).setTitle(LOCATION);
+        CurrentLocation currentLocation = new CurrentLocation();
+        currentLocation.setCurrentLocation(MainActivity.this);
+        location = currentLocation.getCoordinates();
+        menu.findItem(R.id.nav_location).setTitle(String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude));
         navigationView.setNavigationItemSelectedListener(this);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -101,8 +105,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     menu.findItem(R.id.nav_activity).setTitle(activity);
                     break;
                 case 2:
-                    String location = (String) message.obj;
-                    menu.findItem(R.id.nav_location).setTitle(location);
+                    String currentLocation = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
+                    menu.findItem(R.id.nav_location).setTitle(currentLocation);
                     break;
                 default:
                     break;

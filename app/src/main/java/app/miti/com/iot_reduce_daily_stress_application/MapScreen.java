@@ -13,6 +13,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -114,11 +115,8 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
         String estrada;
 
-        String[] separated = MainActivity.LOCATION.split(",");
-
-        final LatLng currentPosition = new LatLng(Double.parseDouble(separated[0]), Double.parseDouble(separated[1]));
-        mGoogleMap.addMarker(new MarkerOptions().position(currentPosition).title("Localização Atual"));
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 17));
+        mGoogleMap.addMarker(new MarkerOptions().position(CurrentLocation.coordinates).title("Localização Atual"));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CurrentLocation.coordinates, 17));
 
         mGoogleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -164,9 +162,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
                 marker = mGoogleMap.addMarker(options);
-                setUrl(currentPosition, destination, "");
+                setUrl(CurrentLocation.coordinates, destination, "");
 
-                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(currentPosition));
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(CurrentLocation.coordinates));
                 mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
             }
         });
