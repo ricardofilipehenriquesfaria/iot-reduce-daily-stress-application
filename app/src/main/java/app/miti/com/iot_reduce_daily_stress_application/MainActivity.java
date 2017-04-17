@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Menu menu = null;
     private ActivityRecognitionObserver activityRecognitionObserver = null;
     private LocationObserver locationObserver = null;
+    public static String LOCATION = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +82,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String activity = ActivityRecognitionObserver.retrieveActivityName(MainActivity.this);
         menu.findItem(R.id.nav_activity).setTitle(activity);
 
-        String location = LocationObserver.retrieveCurrentLocation(MainActivity.this);
-        menu.findItem(R.id.nav_location).setTitle(location);
+        LOCATION = LocationObserver.retrieveCurrentLocation(MainActivity.this);
+        menu.findItem(R.id.nav_location).setTitle(LOCATION);
         navigationView.setNavigationItemSelectedListener(this);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -183,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (requestCode == 0) if (resultCode == RESULT_OK) {
 
             Toast.makeText(getApplicationContext(), "GPS ligado", Toast.LENGTH_LONG).show();
-            WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             wifi.setWifiEnabled(true);
 
         } else {

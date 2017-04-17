@@ -114,8 +114,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
         String estrada;
 
-        if( DbHelper.retrieveLocationsData(getContext()) == null ) return;
-        String[] separated = DbHelper.retrieveLocationsData(getContext()).split(",");
+        String[] separated = MainActivity.LOCATION.split(",");
 
         final LatLng currentPosition = new LatLng(Double.parseDouble(separated[0]), Double.parseDouble(separated[1]));
         mGoogleMap.addMarker(new MarkerOptions().position(currentPosition).title("Localização Atual"));
