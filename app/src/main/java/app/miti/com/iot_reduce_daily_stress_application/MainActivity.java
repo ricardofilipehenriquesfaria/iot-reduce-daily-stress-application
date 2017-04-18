@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -23,6 +24,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -41,9 +44,12 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.model.LatLng;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<LocationSettingsResult>, NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<LocationSettingsResult>, NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener, PlaceSelectionListener {
 
     private GoogleApiClient googleApiClient = null;
     private LocationRequest locationRequest = null;
@@ -92,6 +98,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+
+        autocompleteFragment.setOnPlaceSelectedListener(this);
     }
 
     private Handler mHandler = new Handler (new Handler.Callback() {
@@ -206,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             // Handle the camera action
         } else if (id == R.id.nav_location) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_places) {
 
         } else if (id == R.id.nav_manage) {
 
@@ -241,6 +251,26 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             editor.putBoolean("INCLINACAO", slope);
             editor.apply();
         }
+    }
+
+    @Override
+    public void onPlaceSelected(Place place) {
+        menu.findItem(R.id.nav_places).setTitle(fromHTML(getResources(), place.getName(), place.getId(),
+                place.getAddress(), place.getPhoneNumber(), place.getWebsiteUri()));
+    }
+
+    private static Spanned fromHTML(Resources resources, CharSequence name, String id, CharSequence address, CharSequence phoneNumber, Uri websiteUri) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            return Html.fromHtml(resources.getString(R.string.place_details, name, id, address, phoneNumber, websiteUri), Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            return Html.fromHtml(resources.getString(R.string.place_details, name, id, address, phoneNumber, websiteUri));
+        }
+
+    }
+
+    @Override
+    public void onError(Status status) {
+        Toast.makeText(this, "Nenhum lugar encontrado: " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
     }
 
     public class JsonBroadcastReceiver extends BroadcastReceiver {
@@ -289,10 +319,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             Intent intent = new Intent(this, AddressService.class);
             startService(intent);
-        }
 
-        Intent intentService = new Intent(this, JsonParsingService.class);
-        startService(intentService);
+            Intent intentService = new Intent(this, JsonParsingService.class);
+            startService(intentService);
+        }
 
         IntentFilter intentFilter = new IntentFilter(JsonBroadcastReceiver.PROCESS_RESPONSE);
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);

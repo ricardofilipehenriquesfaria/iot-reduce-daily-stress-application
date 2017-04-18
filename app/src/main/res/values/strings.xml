@@ -7,4 +7,17 @@
     <string name="action_settings">Definições</string>
     <string name="elevation_id">elevation</string>
     <string name="elevation_title">Inclinação da Estrada</string>
+    <string name="place_details">
+    <![CDATA[
+        <b>Procura: %1$s</b>
+        <br/>
+        <i>Id: %2$s</i>
+        <br/>
+        Morada: %3$s
+        <br/>
+        Telefone: %4$s
+        <br/>
+        Website: %5$s
+    ]]>
+    </string>
 </resources>
