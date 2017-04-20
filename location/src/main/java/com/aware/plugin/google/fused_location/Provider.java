@@ -20,9 +20,6 @@ import com.aware.utils.DatabaseHelper;
 
 import java.util.HashMap;
 
-/**
- * Created by denzil on 08/06/16.
- */
 public class Provider extends ContentProvider {
 
     public static String AUTHORITY = "app.miti.com.iot_reduce_daily_stress_application.provider.geofences";
@@ -95,7 +92,7 @@ public class Provider extends ContentProvider {
     }
 
     private static UriMatcher sUriMatcher;
-    private static DatabaseHelper databaseHelper;
+    private DatabaseHelper databaseHelper;
     private static SQLiteDatabase database;
 
     private static HashMap<String, String> geoHash, geoDataHash;
@@ -106,19 +103,15 @@ public class Provider extends ContentProvider {
     private static final int GEO_DATA_ITEM = 4;
 
     private boolean initializeDB() {
-        if (databaseHelper == null) {
-            databaseHelper = new DatabaseHelper(getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS);
-        }
-        if (database == null || !database.isOpen()) {
-            database = databaseHelper.getWritableDatabase();
-        }
+        if (databaseHelper == null) databaseHelper = new DatabaseHelper(getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS);
+        if (database == null || !database.isOpen()) database = databaseHelper.getWritableDatabase();
         return (database != null && databaseHelper != null);
     }
 
     @Override
     public boolean onCreate() {
 
-        AUTHORITY = getContext().getPackageName() + ".provider.geofences";
+        if (getContext() != null) AUTHORITY = getContext().getPackageName() + ".provider.geofences";
 
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(AUTHORITY, DATABASE_TABLES[0], GEO_DIR);
@@ -151,12 +144,14 @@ public class Provider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+
         if (!initializeDB()) {
             Log.w("", "Database unavailable...");
             return null;
         }
 
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+
         switch (sUriMatcher.match(uri)) {
             case GEO_DIR:
                 qb.setTables(DATABASE_TABLES[0]);
@@ -170,13 +165,11 @@ public class Provider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
         try {
-            Cursor c = qb.query(database, projection, selection, selectionArgs,
-                    null, null, sortOrder);
-            c.setNotificationUri(getContext().getContentResolver(), uri);
+            Cursor c = qb.query(database, projection, selection, selectionArgs, null, null, sortOrder);
+            if (getContext() != null) c.setNotificationUri(getContext().getContentResolver(), uri);
             return c;
         } catch (IllegalStateException e) {
-            if (Aware.DEBUG)
-                Log.e(Aware.TAG, e.getMessage());
+            if (Aware.DEBUG) Log.e(Aware.TAG, e.getMessage());
             return null;
         }
     }
@@ -201,19 +194,21 @@ public class Provider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues new_values) {
+
         if (!initializeDB()) {
             Log.w("", "Database unavailable...");
             return null;
         }
 
         ContentValues values = (new_values != null) ? new ContentValues(new_values) : new ContentValues();
-        long _id = 0;
+        long _id;
+
         switch (sUriMatcher.match(uri)) {
             case GEO_DIR:
                 _id = database.insert(DATABASE_TABLES[0], Geofences.DEVICE_ID, values);
                 if (_id > 0) {
                     Uri dataUri = ContentUris.withAppendedId(Geofences.CONTENT_URI, _id);
-                    getContext().getContentResolver().notifyChange(dataUri, null);
+                    if (getContext() != null) getContext().getContentResolver().notifyChange(dataUri, null);
                     return dataUri;
                 }
                 throw new SQLException("Failed to insert row into " + uri);
@@ -221,7 +216,7 @@ public class Provider extends ContentProvider {
                 _id = database.insert(DATABASE_TABLES[1], Geofences_Data.DEVICE_ID, values);
                 if (_id > 0) {
                     Uri dataUri = ContentUris.withAppendedId(Geofences_Data.CONTENT_URI, _id);
-                    getContext().getContentResolver().notifyChange(dataUri, null);
+                    if (getContext() != null) getContext().getContentResolver().notifyChange(dataUri, null);
                     return dataUri;
                 }
                 throw new SQLException("Failed to insert row into " + uri);
@@ -232,12 +227,14 @@ public class Provider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
+
         if (!initializeDB()) {
             Log.w("", "Database unavailable...");
             return 0;
         }
 
         int count;
+
         switch (sUriMatcher.match(uri)) {
             case GEO_DIR:
                 count = database.delete(DATABASE_TABLES[0], selection, selectionArgs);
@@ -248,12 +245,14 @@ public class Provider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+
+        if (getContext() != null) getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+
         if (!initializeDB()) {
             Log.w("", "Database unavailable...");
             return 0;
@@ -271,7 +270,8 @@ public class Provider extends ContentProvider {
                 database.close();
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+
+        if (getContext() != null) getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 }

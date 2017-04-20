@@ -1,6 +1,3 @@
-/**
-@author: denzil
-*/
 package com.aware.plugin.google.fused_location;
 
 import android.app.IntentService;
@@ -19,7 +16,7 @@ import static com.google.android.gms.location.LocationResult.hasResult;
 public class Algorithm extends IntentService {
 
     public Algorithm() {
-        super("Google Fused Location");
+        super(Plugin.TAG);
     }
 
     @Override

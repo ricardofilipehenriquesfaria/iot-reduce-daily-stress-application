@@ -4,9 +4,6 @@ import android.net.Uri;
 
 import com.aware.utils.Aware_Plugin;
 
-/**
- * Created by denzil on 08/06/16.
- */
 public class Geofences extends Aware_Plugin {
 
     public static final String ACTION_AWARE_PLUGIN_FUSED_ENTERED_GEOFENCE = "ACTION_AWARE_PLUGIN_FUSED_ENTERED_GEOFENCE";

@@ -1,4 +1,3 @@
-
 package com.aware.plugin.google.fused_location;
 
 import android.Manifest;
@@ -26,23 +25,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-/**
- * Fused location service for Aware framework
- * Requires Google Services API available on the device.
- *
- * @author denzil
- */
 public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    /**
-     * Broadcasted event: new location available
-     */
     public static final String ACTION_AWARE_LOCATIONS = "ACTION_AWARE_LOCATIONS";
     public static final String EXTRA_DATA = "data";
 
-    /**
-     * This plugin's package name
-     */
     private final String PACKAGE_NAME = "com.aware.plugin.google.fused_location";
 
     private static GoogleApiClient mLocationClient;
@@ -64,15 +51,19 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         CONTEXT_URIS = new Uri[]{Locations_Data.CONTENT_URI};
 
         CONTEXT_PRODUCER = new ContextProducer() {
+
             @Override
             public void onContext() {
+
                 Location currentLocation = new Location("Current location");
                 Cursor data = getContentResolver().query(Locations_Data.CONTENT_URI, null, null, null, Locations_Data.TIMESTAMP + " DESC LIMIT 1");
+
                 if (data != null && data.moveToFirst()) {
                     currentLocation.setLatitude(data.getDouble(data.getColumnIndex(Locations_Data.LATITUDE)));
                     currentLocation.setLongitude(data.getDouble(data.getColumnIndex(Locations_Data.LONGITUDE)));
                     currentLocation.setAccuracy(data.getFloat(data.getColumnIndex(Locations_Data.ACCURACY)));
                 }
+
                 if (data != null && !data.isClosed()) data.close();
 
                 Intent context = new Intent(ACTION_AWARE_LOCATIONS);
@@ -88,8 +79,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         REQUIRED_PERMISSIONS.add(Manifest.permission.ACCESS_FINE_LOCATION);
 
         if (!is_google_services_available()) {
-            if (DEBUG)
-                Log.e(TAG, "Google Services fused location is not available on this device.");
+            if (DEBUG) Log.e(TAG, "Google Services fused location is not available on this device.");
         } else {
             mLocationClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -141,7 +131,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
             if (mLocationClient != null && !mLocationClient.isConnected())
                 mLocationClient.connect();
 
-            checkGeofences(); //checks the geofences every 5 minutes
+            checkGeofences();
 
         } else {
             Intent permissions = new Intent(this, PermissionsHandler.class);
@@ -153,10 +143,8 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         return super.onStartCommand(intent, flags, startId);
     }
 
-    /**
-     * How are we doing regarding the geofences?
-     */
     private void checkGeofences() {
+
         Location currentLocation = new Location("Current location");
         Cursor data = getContentResolver().query(Locations_Data.CONTENT_URI, null, null, null, Locations_Data.TIMESTAMP + " DESC LIMIT 1");
         if (data != null && data.moveToFirst()) {
@@ -167,16 +155,16 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         }
         if (data != null && !data.isClosed()) data.close();
 
-        Cursor geofences = GeofenceUtils.getLabels(this, null); //get list of defined geofences
+        Cursor geofences = GeofenceUtils.getLabels(this, null);
         if (geofences != null && geofences.moveToFirst()) {
             do {
                 Location geofenceLocation = new Location("Geofence location");
                 geofenceLocation.setLatitude(geofences.getDouble(geofences.getColumnIndex(Provider.Geofences.GEO_LAT)));
                 geofenceLocation.setLongitude(geofences.getDouble(geofences.getColumnIndex(Provider.Geofences.GEO_LONG)));
 
-                //Current location is within this geofence
-                if (GeofenceUtils.getDistance(currentLocation, geofenceLocation) <= 0.05) { //50 meters (0.05 km)
-                    //First time in this geofence
+
+                if (GeofenceUtils.getDistance(currentLocation, geofenceLocation) <= 0.05) {
+
                     if (lastGeofence == null) {
 
                         ContentValues entered = new ContentValues();
@@ -213,7 +201,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
                 }
             } while (geofences.moveToNext());
 
-            if (lastGeofence != null && GeofenceUtils.getDistance(currentLocation, lastGeofence) > 0.05) { //exited last geofence
+            if (lastGeofence != null && GeofenceUtils.getDistance(currentLocation, lastGeofence) > 0.05) {
                 String label = GeofenceUtils.getLabel(this, lastGeofence);
                 long radius = GeofenceUtils.getLabelLocationRadius(this, GeofenceUtils.getLabel(this, lastGeofence));
 

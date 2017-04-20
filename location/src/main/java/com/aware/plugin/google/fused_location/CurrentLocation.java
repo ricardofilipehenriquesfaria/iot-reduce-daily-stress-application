@@ -14,8 +14,8 @@ import static java.lang.Double.valueOf;
 
 public class CurrentLocation {
 
-    public static Double longitude;
-    public static Double latitude;
+    private static Double longitude;
+    private static Double latitude;
     public static LatLng coordinates;
 
     public CurrentLocation(){
@@ -30,8 +30,7 @@ public class CurrentLocation {
             latitude = valueOf(cursor.getDouble(cursor.getColumnIndex(Locations_Provider.Locations_Data.LATITUDE)));
             longitude = valueOf(cursor.getDouble(cursor.getColumnIndex(Locations_Provider.Locations_Data.LONGITUDE)));
             cursor.close();
-        }
-        else {
+        } else {
             latitude = 32.761063;
             longitude = -16.960402;
         }

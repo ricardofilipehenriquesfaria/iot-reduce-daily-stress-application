@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">AWARE: Google Fused Location</string>
+    <string name="name_this_location">Name this location</string>
+    <string name="geolabel">Geolabel</string>
+    <string name="change">Change</string>
+    <string name="x">x</string>
 </resources>
