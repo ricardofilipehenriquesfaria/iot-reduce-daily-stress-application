@@ -1,14 +1,4 @@
-/**
-@author: denzil
- */
-
 package com.aware.plugin.google.activity_recognition;
-
-import java.util.List;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.IntentService;
 import android.content.ContentValues;
@@ -20,6 +10,12 @@ import com.aware.Aware_Preferences;
 import com.aware.plugin.google.activity_recognition.Google_AR_Provider.Google_Activity_Recognition_Data;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.List;
 
 public class Algorithm extends IntentService {
 
@@ -38,6 +34,7 @@ public class Algorithm extends IntentService {
             
             JSONArray activities = new JSONArray();
             List<DetectedActivity> otherActivities = result.getProbableActivities();
+
             for(DetectedActivity activity : otherActivities ) {
                 try {
                     JSONObject item = new JSONObject();

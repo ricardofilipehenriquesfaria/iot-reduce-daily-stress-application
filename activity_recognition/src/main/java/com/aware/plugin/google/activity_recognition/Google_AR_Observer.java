@@ -11,12 +11,12 @@ import static java.lang.String.valueOf;
  * Created by Ricardo on 14-04-2017.
  */
 
-public class ActivityRecognitionObserver extends ContentObserver {
+public class Google_AR_Observer extends ContentObserver {
 
     private Context mContext;
     private Handler mHandler;
 
-    public ActivityRecognitionObserver(Context context, Handler handler) {
+    public Google_AR_Observer(Context context, Handler handler) {
         super(handler);
         mContext = context;
         mHandler = handler;
@@ -24,11 +24,10 @@ public class ActivityRecognitionObserver extends ContentObserver {
 
     @ Override
     public void onChange (boolean selfChange) {
-
-        mHandler.obtainMessage(1, retrieveActivityName(mContext)).sendToTarget();
+        mHandler.obtainMessage(1, getActivityName(mContext)).sendToTarget();
     }
 
-    public static String retrieveActivityName(Context context)
+    public static String getActivityName(Context context)
     {
         String row;
         Cursor cursor = context.getContentResolver().query(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI, null, null, null, null);

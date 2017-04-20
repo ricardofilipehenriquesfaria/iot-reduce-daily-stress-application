@@ -31,7 +31,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.aware.Aware;
-import com.aware.plugin.google.activity_recognition.ActivityRecognitionObserver;
+import com.aware.plugin.google.activity_recognition.Google_AR_Observer;
 import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.aware.plugin.google.fused_location.LocationObserver;
 import com.google.android.gms.common.ConnectionResult;
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private LocationRequest locationRequest = null;
     private JsonBroadcastReceiver broadcastReceiver = null;
     private Menu menu = null;
-    private ActivityRecognitionObserver activityRecognitionObserver = null;
+    private Google_AR_Observer googleARObserver = null;
     private LocationObserver locationObserver = null;
     private LatLng location = null;
 
@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
         Aware.startPlugin(this, "com.aware.plugin.closed_roads");
 
-        activityRecognitionObserver = new ActivityRecognitionObserver(this, mHandler);
-        getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, activityRecognitionObserver);
+        googleARObserver = new Google_AR_Observer(this, mHandler);
+        getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, googleARObserver);
 
         locationObserver = new LocationObserver(this, mHandler);
         getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.locations/locations"), true, locationObserver);
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         menu = navigationView.getMenu();
 
-        String activity = ActivityRecognitionObserver.retrieveActivityName(MainActivity.this);
+        String activity = Google_AR_Observer.getActivityName(MainActivity.this);
         menu.findItem(R.id.nav_activity).setTitle(activity);
 
         CurrentLocation currentLocation = new CurrentLocation();
@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onDestroy(){
         super.onDestroy();
-        getContentResolver().unregisterContentObserver(activityRecognitionObserver);
+        getContentResolver().unregisterContentObserver(googleARObserver);
         getContentResolver().unregisterContentObserver(locationObserver);
     }
 }

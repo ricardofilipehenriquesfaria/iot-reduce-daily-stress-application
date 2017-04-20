@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AWARE: Google Activity Recognition</string>
+    <string name="hh_mm">hh:mm</string>
+    <string name="image">Image</string>
 </resources>

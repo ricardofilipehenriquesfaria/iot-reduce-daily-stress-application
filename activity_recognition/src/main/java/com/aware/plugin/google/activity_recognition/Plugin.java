@@ -1,4 +1,3 @@
-
 package com.aware.plugin.google.activity_recognition;
 
 import android.app.PendingIntent;
@@ -55,8 +54,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         };
 
         if (!is_google_services_available()) {
-            if (DEBUG)
-                Log.e(TAG, "Google Services is not available on this device.");
+            if (DEBUG) Log.e(TAG, "Google Services is not available on this device.");
         } else {
             gARClient = new GoogleApiClient.Builder(this)
                     .addApiIfAvailable(ActivityRecognition.API)
@@ -73,7 +71,9 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
         boolean permissions_ok = true;
+
         for (String p : REQUIRED_PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
                 permissions_ok = false;
@@ -82,13 +82,17 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         }
 
         if (permissions_ok) {
+
             DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
 
             Aware.setSetting(this, Settings.STATUS_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, true);
+
             if (Aware.getSetting(this, Settings.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION).length() == 0) {
                 Aware.setSetting(this, Settings.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, 60);
             }
+
             if (gARClient != null && !gARClient.isConnected()) gARClient.connect();
+
         } else {
             Intent permissions = new Intent(this, PermissionsHandler.class);
             permissions.putExtra(PermissionsHandler.EXTRA_REQUIRED_PERMISSIONS, REQUIRED_PERMISSIONS);
@@ -104,7 +108,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         super.onDestroy();
 
         Aware.setSetting(getApplicationContext(), Settings.STATUS_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, false);
-        //we might get here if phone doesn't support Google Services
+
         if (gARClient != null && gARClient.isConnected()) {
             ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(gARClient, gARPending);
             gARClient.disconnect();
@@ -120,15 +124,12 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connection_result) {
-        if (DEBUG)
-            Log.w(TAG, "Error connecting to Google's activity recognition services, will try again in 5 minutes");
+        if (DEBUG) Log.w(TAG, "Error connecting to Google's activity recognition services, will try again in 5 minutes");
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        if (DEBUG)
-            Log.i(TAG, "Connected to Google's Activity Recognition API");
-
+        if (DEBUG) Log.i(TAG, "Connected to Google's Activity Recognition API");
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(gARClient, Long.valueOf(Aware.getSetting(getApplicationContext(), Settings.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION)) * 1000, gARPending);
     }
 

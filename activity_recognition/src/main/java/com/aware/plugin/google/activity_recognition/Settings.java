@@ -13,15 +13,9 @@ import com.aware.Aware;
 
 public class Settings extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 
-    /**
-     * State of Google's Activity Recognition plugin
-     */
+
     public static final String STATUS_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION = "status_plugin_google_activity_recognition";
 
-    /**
-     * Frequency of Google's Activity Recognition plugin in seconds<br/>
-     * By default = 60 seconds
-     */
     public static final String FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION = "frequency_plugin_google_activity_recognition";
 
     private static CheckBoxPreference status;

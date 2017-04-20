@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:baselineAligned="false">
 
     <LinearLayout
         android:id="@+id/activity_still"
@@ -18,14 +19,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_action_still" />
+            android:src="@drawable/ic_action_still"
+            android:contentDescription="@string/image" />
 
         <TextView
             android:id="@+id/time_still"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="hh:mm"
+            android:text="@string/hh_mm"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/black" />
 
@@ -49,13 +51,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/ic_action_walking" />
+                android:src="@drawable/ic_action_walking"
+                android:contentDescription="@string/image" />
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/imageView"
-                android:src="@drawable/ic_action_running" />
+                android:src="@drawable/ic_action_running"
+                android:contentDescription="@string/image" />
         </LinearLayout>
 
         <TextView
@@ -63,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="hh:mm"
+            android:text="@string/hh_mm"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/black" />
 
@@ -71,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="hh:mm"
+            android:text="@string/hh_mm"
             android:id="@+id/time_running"
             android:layout_gravity="center_horizontal"
             android:textColor="#000" />
@@ -90,14 +94,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_action_biking" />
+            android:src="@drawable/ic_action_biking"
+            android:contentDescription="@string/image" />
 
         <TextView
             android:id="@+id/time_biking"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="hh:mm"
+            android:text="@string/hh_mm"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/black" />
 
@@ -115,14 +120,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_action_vehicle" />
+            android:src="@drawable/ic_action_vehicle"
+            android:contentDescription="@string/image" />
 
         <TextView
             android:id="@+id/time_vehicle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="hh:mm"
+            android:text="@string/hh_mm"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@android:color/black" />
 
