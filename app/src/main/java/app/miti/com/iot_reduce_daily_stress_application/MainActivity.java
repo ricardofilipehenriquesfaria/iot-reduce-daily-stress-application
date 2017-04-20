@@ -318,9 +318,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             locationRequest = LocationRequest.create();
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-            Intent intent = new Intent(this, AddressService.class);
-            startService(intent);
-
             Intent intentService = new Intent(this, JsonParsingService.class);
             startService(intentService);
         }

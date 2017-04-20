@@ -25,9 +25,6 @@
         <service android:name=".NotificationService"
             android:exported="false"/>
 
-        <service android:name=".AddressService"
-            android:exported="false"/>
-
         <service android:name=".JsonParsingService"
             android:exported="false" />
 
