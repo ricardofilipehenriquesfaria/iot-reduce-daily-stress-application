@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
         Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
+        Aware.startPlugin(this, "com.aware.plugin.closed_roads");
 
         activityRecognitionObserver = new ActivityRecognitionObserver(this, mHandler);
         getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, activityRecognitionObserver);

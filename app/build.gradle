@@ -43,4 +43,5 @@ dependencies {
     compile 'com.android.support:design:25.3.1'
     compile project(':activity_recognition')
     compile project(':location')
+    compile project(':closed_roads')
 }
