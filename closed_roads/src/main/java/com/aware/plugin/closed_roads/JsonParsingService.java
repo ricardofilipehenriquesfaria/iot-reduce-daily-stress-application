@@ -3,6 +3,7 @@ package com.aware.plugin.closed_roads;
 import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.content.Intent;
+import android.database.Cursor;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -63,33 +64,41 @@ public class JsonParsingService extends IntentService {
 
             for (int i = 0; i < jsonArray.length(); i++) {
 
+                Cursor cursor = getContentResolver().query(Provider.Provider_Data.CONTENT_URI, null, null, null, null);
                 JSONObject jsonData = jsonArray.getJSONObject(i);
 
-                locationIntent.putExtra("ID", jsonData.getInt("id"));
-                locationIntent.putExtra("ESTRADA", jsonData.getString("estrada"));
-                locationIntent.putExtra("RUA", jsonData.getString("rua"));
-                locationIntent.putExtra("DATA_INICIO", jsonData.getString("data_inicio"));
-                locationIntent.putExtra("DATA_FIM", jsonData.getString("data_fim"));
-                locationIntent.putExtra("HORA_INICIO", jsonData.getString("hora_inicio"));
-                locationIntent.putExtra("HORA_FIM", jsonData.getString("hora_fim"));
-                locationIntent.putExtra("LATITUDE_INICIO", jsonData.getDouble("latitude_inicio"));
-                locationIntent.putExtra("LONGITUDE_INICIO", jsonData.getDouble("longitude_inicio"));
-                locationIntent.putExtra("LATITUDE_FIM", jsonData.getDouble("latitude_fim"));
-                locationIntent.putExtra("LONGITUDE_FIM", jsonData.getDouble("longitude_fim"));
+                if(cursor != null)
+                {
+                    if((cursor.moveToLast() && cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA_ID)) < jsonData.getInt("id")) || (cursor.getCount() == 0)) {
 
-                Log.i("Output", "id: " + jsonData.getInt("id") +
-                        ", estrada: " + jsonData.getString("estrada") +
-                        ", rua: " + jsonData.getString("rua") +
-                        ", data_inicio: " + jsonData.getString("data_inicio") +
-                        ", data_fim: " + jsonData.getString("data_fim") +
-                        ", hora_inicio: " + jsonData.getString("hora_inicio") +
-                        ", hora_fim: " + jsonData.getString("hora_fim") +
-                        ", latitude_inicio: " + jsonData.getDouble("latitude_inicio") +
-                        ", longitude_inicio: " + jsonData.getDouble("longitude_inicio") +
-                        ", latitude_fim: " + jsonData.getDouble("latitude_fim") +
-                        ", longitude_inicio: " + jsonData.getDouble("longitude_fim")
-                );
-                startService(locationIntent);
+                        locationIntent.putExtra("ESTRADA_ID", jsonData.getInt("id"));
+                        locationIntent.putExtra("ESTRADA", jsonData.getString("estrada"));
+                        locationIntent.putExtra("RUA", jsonData.getString("rua"));
+                        locationIntent.putExtra("DATA_INICIO", jsonData.getString("data_inicio"));
+                        locationIntent.putExtra("DATA_FIM", jsonData.getString("data_fim"));
+                        locationIntent.putExtra("HORA_INICIO", jsonData.getString("hora_inicio"));
+                        locationIntent.putExtra("HORA_FIM", jsonData.getString("hora_fim"));
+                        locationIntent.putExtra("LATITUDE_INICIO", jsonData.getDouble("latitude_inicio"));
+                        locationIntent.putExtra("LONGITUDE_INICIO", jsonData.getDouble("longitude_inicio"));
+                        locationIntent.putExtra("LATITUDE_FIM", jsonData.getDouble("latitude_fim"));
+                        locationIntent.putExtra("LONGITUDE_FIM", jsonData.getDouble("longitude_fim"));
+
+                        Log.i("Output", "id: " + jsonData.getInt("id") +
+                                ", estrada: " + jsonData.getString("estrada") +
+                                ", rua: " + jsonData.getString("rua") +
+                                ", data_inicio: " + jsonData.getString("data_inicio") +
+                                ", data_fim: " + jsonData.getString("data_fim") +
+                                ", hora_inicio: " + jsonData.getString("hora_inicio") +
+                                ", hora_fim: " + jsonData.getString("hora_fim") +
+                                ", latitude_inicio: " + jsonData.getDouble("latitude_inicio") +
+                                ", longitude_inicio: " + jsonData.getDouble("longitude_inicio") +
+                                ", latitude_fim: " + jsonData.getDouble("latitude_fim") +
+                                ", longitude_inicio: " + jsonData.getDouble("longitude_fim")
+                        );
+                        cursor.close();
+                        startService(locationIntent);
+                    }
+                }
             }
         } catch (JSONException e) {
             Log.e("Error parsing data: ", e.toString());

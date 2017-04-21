@@ -50,6 +50,7 @@ public class Provider extends ContentProvider {
         static final String _ID = "_id";
         static final String TIMESTAMP = "timestamp";
         static final String DEVICE_ID = "device_id";
+        static final String ESTRADA_ID = "estrada_id";
         static final String ESTRADA = "estrada";
         static final String RUA = "rua";
         static final String DATA_INICIO = "data_inicio";
@@ -67,6 +68,7 @@ public class Provider extends ContentProvider {
             Provider_Data._ID + " integer primary key autoincrement," +
                     Provider_Data.TIMESTAMP + " real default 0," +
                     Provider_Data.DEVICE_ID + " text default ''," +
+                    Provider_Data.ESTRADA_ID + " int default 0," +
                     Provider_Data.ESTRADA + " text default ''," +
                     Provider_Data.RUA + " text default ''," +
                     Provider_Data.DATA_INICIO + " text default ''," +

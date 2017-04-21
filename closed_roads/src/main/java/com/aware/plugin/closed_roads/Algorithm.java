@@ -23,6 +23,7 @@ public class Algorithm extends IntentService {
         ContentValues rowData = new ContentValues();
         rowData.put(Provider.Provider_Data.TIMESTAMP, System.currentTimeMillis());
         rowData.put(Provider.Provider_Data.DEVICE_ID, Aware.getSetting(this, Aware_Preferences.DEVICE_ID));
+        rowData.put(Provider.Provider_Data.ESTRADA_ID, intent.getIntExtra("ESTRADA_ID", 0));
         rowData.put(Provider.Provider_Data.ESTRADA, intent.getStringExtra("ESTRADA"));
         rowData.put(Provider.Provider_Data.RUA, intent.getStringExtra("RUA"));
         rowData.put(Provider.Provider_Data.DATA_INICIO, intent.getStringExtra("DATA_INICIO"));
