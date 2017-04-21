@@ -43,25 +43,25 @@ public class Provider extends ContentProvider {
     public static final class Provider_Data implements AWAREColumns {
         private Provider_Data(){
         }
-        static final Uri CONTENT_URI = Uri.parse("content://"+ Provider.AUTHORITY + "/closed_roads");
-        static final String CONTENT_TYPE = "vnd.com.aware.plugin.closed_roads.provider.closed_roads";
-        static final String CONTENT_ITEM_TYPE = "vnd.com.aware.plugin.closed_roads.provider.closed_roads";
+        public static final Uri CONTENT_URI = Uri.parse("content://"+ Provider.AUTHORITY + "/closed_roads");
+        public static final String CONTENT_TYPE = "vnd.com.aware.plugin.closed_roads.provider.closed_roads";
+        public static final String CONTENT_ITEM_TYPE = "vnd.com.aware.plugin.closed_roads.provider.closed_roads";
 
-        static final String _ID = "_id";
-        static final String TIMESTAMP = "timestamp";
-        static final String DEVICE_ID = "device_id";
-        static final String ESTRADA_ID = "estrada_id";
-        static final String ESTRADA = "estrada";
-        static final String RUA = "rua";
-        static final String DATA_INICIO = "data_inicio";
-        static final String DATA_FIM = "data_fim";
+        public static final String _ID = "_id";
+        public static final String TIMESTAMP = "timestamp";
+        public static final String DEVICE_ID = "device_id";
+        public static final String ESTRADA_ID = "estrada_id";
+        public static final String ESTRADA = "estrada";
+        public static final String RUA = "rua";
+        public static final String DATA_INICIO = "data_inicio";
+        public static final String DATA_FIM = "data_fim";
 
-        static final String HORA_INICIO = "hora_inicio";
-        static final String HORA_FIM = "hora_fim";
-        static final String LATITUDE_INICIO = "latitude_inicio";
-        static final String LATITUDE_FIM = "latitude_fim";
-        static final String LONGITUDE_INICIO = "longitude_inicio";
-        static final String LONGITUDE_FIM = "longitude_fim";
+        public static final String HORA_INICIO = "hora_inicio";
+        public static final String HORA_FIM = "hora_fim";
+        public static final String LATITUDE_INICIO = "latitude_inicio";
+        public static final String LATITUDE_FIM = "latitude_fim";
+        public static final String LONGITUDE_INICIO = "longitude_inicio";
+        public static final String LONGITUDE_FIM = "longitude_fim";
     }
 
     private static final String DB_TBL_TEMPLATE_FIELDS =

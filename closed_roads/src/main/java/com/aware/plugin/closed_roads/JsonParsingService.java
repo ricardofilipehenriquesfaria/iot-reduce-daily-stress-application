@@ -95,9 +95,9 @@ public class JsonParsingService extends IntentService {
                                 ", latitude_fim: " + jsonData.getDouble("latitude_fim") +
                                 ", longitude_inicio: " + jsonData.getDouble("longitude_fim")
                         );
-                        cursor.close();
                         startService(locationIntent);
                     }
+                    cursor.close();
                 }
             }
         } catch (JSONException e) {

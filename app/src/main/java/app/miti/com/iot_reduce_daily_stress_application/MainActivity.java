@@ -1,10 +1,8 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
 import android.app.KeyguardManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -53,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private GoogleApiClient googleApiClient = null;
     private LocationRequest locationRequest = null;
-    private JsonBroadcastReceiver broadcastReceiver = null;
     private Menu menu = null;
     private Google_AR_Observer googleARObserver = null;
     private LocationObserver locationObserver = null;
@@ -103,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
         autocompleteFragment.setOnPlaceSelectedListener(this);
+        addMapFragment();
     }
 
     private Handler mHandler = new Handler (new Handler.Callback() {
@@ -110,21 +108,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         @Override
         public boolean handleMessage(Message message) {
 
-            switch (message.what) {
-                case 1:
-                    String activity = (String) message.obj;
-                    menu.findItem(R.id.nav_activity).setTitle(activity);
-                    break;
-                case 2:
-                    String currentLocation = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
-                    menu.findItem(R.id.nav_location).setTitle(currentLocation);
-                    break;
-                default:
-                    break;
-            }
-            return true;
+        switch (message.what) {
+            case 1:
+                String activity = (String) message.obj;
+                menu.findItem(R.id.nav_activity).setTitle(activity);
+                break;
+            case 2:
+                String currentLocation = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
+                menu.findItem(R.id.nav_location).setTitle(currentLocation);
+                break;
+            default:
+                break;
+        }
+        return true;
         }
     });
+
+    private void addMapFragment() {
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.add(R.id.map, new MapScreen());
+        transaction.commit();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -266,7 +271,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         } else {
             return Html.fromHtml(resources.getString(R.string.place_details, name, id, address, phoneNumber, websiteUri));
         }
-
     }
 
     @Override
@@ -274,33 +278,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Toast.makeText(this, "Nenhum lugar encontrado: " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
     }
 
-    public class JsonBroadcastReceiver extends BroadcastReceiver {
-
-        public static final String PROCESS_RESPONSE = "app.miti.com.iot_reduce_daily_stress_application.PROCESS_RESPONSE";
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String stringExtra = intent.getStringExtra(JsonParsingService.RESPONSE_STRING);
-
-            Bundle data = new Bundle();
-            MapScreen mapScreen = new MapScreen();
-
-            data.putString("data", stringExtra);
-            mapScreen.setArguments(data);
-
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-
-            transaction.add(R.id.map, mapScreen);
-            transaction.commit();
-        }
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(broadcastReceiver);
     }
 
     @Override
@@ -317,15 +297,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             locationRequest = LocationRequest.create();
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-            Intent intentService = new Intent(this, JsonParsingService.class);
-            startService(intentService);
         }
-
-        IntentFilter intentFilter = new IntentFilter(JsonBroadcastReceiver.PROCESS_RESPONSE);
-        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-        broadcastReceiver = new JsonBroadcastReceiver();
-        registerReceiver(broadcastReceiver, intentFilter);
     }
 
     @Override

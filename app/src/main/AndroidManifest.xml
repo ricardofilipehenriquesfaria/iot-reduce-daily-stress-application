@@ -25,12 +25,6 @@
         <service android:name=".NotificationService"
             android:exported="false"/>
 
-        <service android:name=".JsonParsingService"
-            android:exported="false" />
-
-        <service android:name=".Algorithm"
-            android:exported="false"/>
-
         <service android:name=".PolylineAlgorithm"
             android:exported="false" />
 
@@ -49,14 +43,6 @@
             tools:ignore="UnusedAttribute">
         </activity>
 
-        <provider
-            android:name="app.miti.com.iot_reduce_daily_stress_application.JsonProvider"
-            android:authorities="${applicationId}.provider.estradas"
-            android:exported="true"
-            android:readPermission="app.miti.com.READ_CONTEXT_DATA"
-            android:writePermission="app.miti.com.WRITE_CONTEXT_DATA"
-            >
-        </provider>
         <provider
             android:name="app.miti.com.iot_reduce_daily_stress_application.PolylineProvider"
             android:authorities="${applicationId}.provider.polyline"
