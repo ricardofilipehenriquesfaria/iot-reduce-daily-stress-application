@@ -29,6 +29,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.aware.Aware;
+import com.aware.plugin.closed_roads.ClosedRoads;
+import com.aware.plugin.closed_roads.ClosedRoadsObserver;
 import com.aware.plugin.google.activity_recognition.Google_AR_Observer;
 import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.aware.plugin.google.fused_location.LocationObserver;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Menu menu = null;
     private Google_AR_Observer googleARObserver = null;
     private LocationObserver locationObserver = null;
+    private ClosedRoadsObserver closedRoadsObserver = null;
     private LatLng location = null;
 
     @Override
@@ -77,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         locationObserver = new LocationObserver(this, mHandler);
         getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.locations/locations"), true, locationObserver);
 
+        closedRoadsObserver = new ClosedRoadsObserver(this, mHandler);
+        getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.closed_roads/closed_roads"), true, closedRoadsObserver);
+
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
@@ -91,6 +97,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         CurrentLocation currentLocation = new CurrentLocation();
         currentLocation.setCurrentLocation(MainActivity.this);
         location = currentLocation.getCoordinates();
+
+        ClosedRoads closedRoads = new ClosedRoads();
+        closedRoads.setClosedRoads(MainActivity.this);
+
         menu.findItem(R.id.nav_location).setTitle(String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude));
         navigationView.setNavigationItemSelectedListener(this);
 

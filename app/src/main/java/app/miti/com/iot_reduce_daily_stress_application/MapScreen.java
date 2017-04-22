@@ -2,7 +2,6 @@ package app.miti.com.iot_reduce_daily_stress_application;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,7 +13,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
-import com.aware.plugin.closed_roads.Provider;
+import com.aware.plugin.closed_roads.ClosedRoads;
 import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -115,8 +114,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
                 break;
         }
 
-        String estrada;
-
         mGoogleMap.addMarker(new MarkerOptions().position(CurrentLocation.coordinates).title("Localização Atual"));
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CurrentLocation.coordinates, 17));
 
@@ -127,13 +124,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
             }
         });
 
-        Cursor cursor = getContext().getContentResolver().query(Provider.Provider_Data.CONTENT_URI, null, null, null, null);
-
-        if(cursor != null){
-            cursor.moveToFirst();
-            getRoadData(cursor);
-            while(cursor.moveToNext()) getRoadData(cursor);
-            cursor.close();
+        for(int i = 0; i < ClosedRoads.closedRoadsList.size(); i++) {
+            setUrl(
+                    ClosedRoads.closedRoadsList.get(i).getInitialCoordinates(),
+                    ClosedRoads.closedRoadsList.get(i).getFinalCoordinates(),
+                    ClosedRoads.closedRoadsList.get(i).getEstrada());
         }
 
         mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener(){
@@ -169,13 +164,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
         DownloadTask downloadTask = new DownloadTask(estrada);
         downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
-    }
-
-    public void getRoadData(Cursor cursor){
-        LatLng origin = new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO)));
-        LatLng destination = new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM)));
-        String estrada = cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA));
-        setUrl(origin, destination, estrada);
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
