@@ -12,9 +12,14 @@ import android.preference.PreferenceManager;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
 
 import com.aware.plugin.closed_roads.ClosedRoads;
 import com.aware.plugin.google.fused_location.CurrentLocation;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -48,17 +53,22 @@ import java.util.List;
  * Created by Ricardo on 31-01-2017.
  */
 
-public class MapScreen extends SupportMapFragment implements OnMapReadyCallback {
+public class MapScreen extends SupportMapFragment implements OnMapReadyCallback, PlaceSelectionListener {
 
     private GoogleMap mGoogleMap = null;
     private HttpURLConnection urlConnection = null;
     private URL url = null;
     private Polyline polyline = null;
     private Marker marker = null;
+    private Marker searchMarker = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getActivity().getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        autocompleteFragment.setOnPlaceSelectedListener(this);
+
         getMapAsync(this);
     }
 
@@ -164,6 +174,25 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback 
 
         DownloadTask downloadTask = new DownloadTask(estrada);
         downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
+    }
+
+    @Override
+    public void onPlaceSelected(Place place) {
+
+        if(searchMarker != null){
+            searchMarker.setPosition(place.getLatLng());
+            searchMarker.setTitle(String.valueOf(place.getAddress()));
+        } else {
+            searchMarker = mGoogleMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                    .position(place.getLatLng())
+                    .title(String.valueOf(place.getAddress())));
+        }
+    }
+
+    @Override
+    public void onError(Status status) {
+        Toast.makeText(getActivity(), "Nenhum lugar encontrado: " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
