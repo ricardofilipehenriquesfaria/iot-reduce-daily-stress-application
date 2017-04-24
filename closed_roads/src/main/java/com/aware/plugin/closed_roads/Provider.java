@@ -130,14 +130,13 @@ public class Provider extends ContentProvider {
 
         database.setTransactionSuccessful();
         database.endTransaction();
-
-        getContext().getContentResolver().notifyChange(uri, null);
+        if(getContext() != null && uri != null) getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
+    public Uri insert(@Nullable Uri uri, ContentValues initialValues) {
 
         initializeDatabase();
 
@@ -153,7 +152,7 @@ public class Provider extends ContentProvider {
                 database.endTransaction();
                 if (_id > 0) {
                     Uri dataUri = ContentUris.withAppendedId(Provider_Data.CONTENT_URI, _id);
-                    getContext().getContentResolver().notifyChange(dataUri, null);
+                    if (getContext() != null) getContext().getContentResolver().notifyChange(dataUri, null);
                     return dataUri;
                 }
                 database.endTransaction();
@@ -166,7 +165,7 @@ public class Provider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@Nullable Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
         initializeDatabase();
 
@@ -185,7 +184,7 @@ public class Provider extends ContentProvider {
         try {
             Cursor c = qb.query(database, projection, selection, selectionArgs,
                     null, null, sortOrder);
-            c.setNotificationUri(getContext().getContentResolver(), uri);
+            if(getContext() != null) c.setNotificationUri(getContext().getContentResolver(), uri);
             return c;
         } catch (IllegalStateException e) {
             if (Aware.DEBUG)
@@ -196,7 +195,7 @@ public class Provider extends ContentProvider {
 
     @Nullable
     @Override
-    public String getType(Uri uri) {
+    public String getType(@Nullable Uri uri) {
         switch (sUriMatcher.match(uri)) {
 
             case PROVIDER:
@@ -210,7 +209,7 @@ public class Provider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@Nullable Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 
         initializeDatabase();
 
@@ -229,9 +228,7 @@ public class Provider extends ContentProvider {
         }
         database.setTransactionSuccessful();
         database.endTransaction();
-
-        getContext().getContentResolver().notifyChange(uri, null);
-
+        if(getContext() != null && uri != null) getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 }

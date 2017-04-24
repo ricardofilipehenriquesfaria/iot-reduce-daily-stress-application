@@ -28,9 +28,7 @@ public class Plugin extends Aware_Plugin {
         CONTEXT_PRODUCER = new ContextProducer() {
             @Override
             public void onContext() {
-
             }
-
         };
 
         DATABASE_TABLES = Provider.DATABASE_TABLES;
@@ -45,7 +43,7 @@ public class Plugin extends Aware_Plugin {
 
             DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
 
-            Aware.setSetting(this, Settings.STATUS_PLUGIN_TEMPLATE, true);
+            Aware.setSetting(this, Settings.STATUS_PLUGIN_CLOSED_ROADS, true);
 
             Aware.startAWARE();
 
@@ -55,9 +53,7 @@ public class Plugin extends Aware_Plugin {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        Aware.setSetting(this, Settings.STATUS_PLUGIN_TEMPLATE, false);
-
+        Aware.setSetting(this, Settings.STATUS_PLUGIN_CLOSED_ROADS, false);
         Aware.stopAWARE();
     }
 }
