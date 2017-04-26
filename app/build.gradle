@@ -44,4 +44,5 @@ dependencies {
     compile project(':activity_recognition')
     compile project(':location')
     compile project(':closed_roads')
+    compile project(':openCV')
 }

@@ -1,1 +1,2 @@
 include ':app', ':activity_recognition', ':location', ':closed_roads'
+include ':openCV'
