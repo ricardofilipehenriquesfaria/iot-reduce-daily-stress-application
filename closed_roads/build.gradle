@@ -39,7 +39,7 @@ if (System.getenv("storeFile") != null && System.getenv("storePassword") != null
 }
 
 repositories {
-    maven { url 'https://jitpack.io' } //this allows library generation directly from GitHub source-code
+    maven { url 'https://jitpack.io' }
 }
 
 configurations.all {
@@ -48,7 +48,7 @@ configurations.all {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "com.android.support:appcompat-v7:${support_libs}"
+    compile "com.android.support:appcompat-v7:25.3.1"
     compile "com.awareframework:aware-core:${aware_libs}@aar"
-    compile 'com.google.android.gms:play-services-maps:10.2.1'
+    compile "com.google.android.gms:play-services-maps:10.2.1"
 }
