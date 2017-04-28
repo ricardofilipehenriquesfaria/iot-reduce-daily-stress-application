@@ -164,6 +164,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             intent.setClass(MainActivity.this, SettingsActivity.class);
             startActivityForResult(intent, 100);
         }
+        if (id == R.id.action_camera) {
+            Intent intent = new Intent();
+            intent.setClass(MainActivity.this, CameraActivity.class);
+            startActivityForResult(intent, 200);
+        }
 
         return super.onOptionsItemSelected(item);
     }
