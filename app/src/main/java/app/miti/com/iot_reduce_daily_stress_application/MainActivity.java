@@ -33,6 +33,7 @@ import com.aware.plugin.google.activity_recognition.Google_AR_Observer;
 import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.aware.plugin.google.fused_location.LocationObserver;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private ClosedRoadsObserver closedRoadsObserver = null;
     private LatLng location = null;
     private static final String TAG = "MainActivity";
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     static{
         if(!OpenCVLoader.initDebug()){
@@ -73,47 +75,67 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Intent aware = new Intent(this, Aware.class);
-        startService(aware);
+        if (checkGooglePlayServices()) {
 
-        Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
-        Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
-        Aware.startPlugin(this, "com.aware.plugin.closed_roads");
+            Intent aware = new Intent(this, Aware.class);
+            startService(aware);
 
-        googleARObserver = new Google_AR_Observer(this, mHandler);
-        getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, googleARObserver);
+            Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
+            Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
+            Aware.startPlugin(this, "com.aware.plugin.closed_roads");
 
-        locationObserver = new LocationObserver(this, mHandler);
-        getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.locations/locations"), true, locationObserver);
+            googleARObserver = new Google_AR_Observer(this, mHandler);
+            getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, googleARObserver);
 
-        closedRoadsObserver = new ClosedRoadsObserver(this, mHandler);
-        getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.closed_roads/closed_roads"), true, closedRoadsObserver);
+            locationObserver = new LocationObserver(this, mHandler);
+            getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.locations/locations"), true, locationObserver);
 
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+            closedRoadsObserver = new ClosedRoadsObserver(this, mHandler);
+            getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.closed_roads/closed_roads"), true, closedRoadsObserver);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        menu = navigationView.getMenu();
+            DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawerLayout.addDrawerListener(toggle);
+            toggle.syncState();
 
-        String activity = Google_AR_Observer.getActivityName(MainActivity.this);
-        menu.findItem(R.id.nav_activity).setTitle(activity);
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            menu = navigationView.getMenu();
 
-        CurrentLocation currentLocation = new CurrentLocation();
-        currentLocation.setCurrentLocation(MainActivity.this);
-        location = currentLocation.getCoordinates();
+            String activity = Google_AR_Observer.getActivityName(MainActivity.this);
+            menu.findItem(R.id.nav_activity).setTitle(activity);
 
-        ClosedRoads closedRoads = new ClosedRoads();
-        closedRoads.setClosedRoads(MainActivity.this);
+            CurrentLocation currentLocation = new CurrentLocation();
+            currentLocation.setCurrentLocation(MainActivity.this);
+            location = currentLocation.getCoordinates();
 
-        menu.findItem(R.id.nav_location).setTitle(String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude));
-        navigationView.setNavigationItemSelectedListener(this);
+            ClosedRoads closedRoads = new ClosedRoads();
+            closedRoads.setClosedRoads(MainActivity.this);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+            menu.findItem(R.id.nav_location).setTitle(String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude));
+            navigationView.setNavigationItemSelectedListener(this);
 
-        addMapFragment();
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+            addMapFragment();
+        }
+    }
+
+    private boolean checkGooglePlayServices() {
+
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this);
+
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (googleApiAvailability.isUserResolvableError(resultCode)) {
+                googleApiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i(TAG, "Este dispositivo não é suportado.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 
     private Handler mHandler = new Handler (new Handler.Callback() {
