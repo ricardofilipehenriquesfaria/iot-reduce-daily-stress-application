@@ -1,14 +1,18 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
+import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -16,7 +20,12 @@ import android.widget.Toast;
 
 import com.aware.plugin.closed_roads.ClosedRoads;
 import com.aware.plugin.google.fused_location.CurrentLocation;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
@@ -54,7 +63,7 @@ import java.util.List;
  * Created by Ricardo on 31-01-2017.
  */
 
-public class MapScreen extends SupportMapFragment implements OnMapReadyCallback, PlaceSelectionListener {
+public class MapScreen extends SupportMapFragment implements OnMapReadyCallback, PlaceSelectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private GoogleMap mGoogleMap = null;
     private HttpURLConnection urlConnection = null;
@@ -62,7 +71,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private Polyline polyline = null;
     private Marker marker = null;
     private Marker searchMarker = null;
+    private Marker locationMarker = null;
     private LatLngBounds boundsMadeira = new LatLngBounds(new LatLng(32.621831, -17.283089), new LatLng(32.910233, -16.621391));
+    private GoogleApiClient mGoogleApiClient = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +83,13 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         autocompleteFragment.setOnPlaceSelectedListener(this);
         autocompleteFragment.setHint("Procurar Local");
         autocompleteFragment.setBoundsBias(boundsMadeira);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
 
         getMapAsync(this);
     }
@@ -98,6 +116,14 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             assert mGoogleMap != null;
             mGoogleMap.setMyLocationEnabled(false);
         }
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        if (mGoogleApiClient != null) mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -128,7 +154,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 break;
         }
 
-        mGoogleMap.addMarker(new MarkerOptions().position(CurrentLocation.coordinates).title("Localização Atual"));
+        locationMarker = mGoogleMap.addMarker(new MarkerOptions().position(CurrentLocation.coordinates).title("Localização Atual"));
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CurrentLocation.coordinates, 17));
 
         mGoogleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -197,6 +223,33 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     @Override
     public void onError(Status status) {
         Toast.makeText(getActivity(), "Nenhum lugar encontrado: " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        LocationRequest mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        LatLng newPosition = new LatLng(location.getLatitude(), location.getLongitude());
+        locationMarker.setPosition(newPosition);
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
