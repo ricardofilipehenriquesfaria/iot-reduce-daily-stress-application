@@ -120,6 +120,12 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     }
 
     @Override
+    public void onStart(){
+        super.onStart();
+        if (mGoogleApiClient != null) mGoogleApiClient.connect();
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
