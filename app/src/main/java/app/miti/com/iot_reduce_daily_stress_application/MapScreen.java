@@ -70,7 +70,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private URL url = null;
     private Polyline polyline = null;
     private Marker marker = null;
-    private Marker searchMarker = null;
     private Marker locationMarker = null;
     private LatLngBounds boundsMadeira = new LatLngBounds(new LatLng(32.621831, -17.283089), new LatLng(32.910233, -16.621391));
     private GoogleApiClient mGoogleApiClient = null;
@@ -116,7 +115,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             assert mGoogleMap != null;
             mGoogleMap.setMyLocationEnabled(false);
         }
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        if(mGoogleApiClient.isConnected()) LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
     @Override
@@ -128,7 +127,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     @Override
     public void onStop() {
         super.onStop();
-        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        if(mGoogleApiClient.isConnected()) LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         if (mGoogleApiClient != null) mGoogleApiClient.disconnect();
     }
 
@@ -215,11 +214,15 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     @Override
     public void onPlaceSelected(Place place) {
 
-        if(searchMarker != null){
-            searchMarker.setPosition(place.getLatLng());
-            searchMarker.setTitle(String.valueOf(place.getAddress()));
+        setUrl(CurrentLocation.coordinates, place.getLatLng(), "");
+
+        if(marker != null){
+            marker.remove();
+            polyline.remove();
+            marker.setPosition(place.getLatLng());
+            marker.setTitle(String.valueOf(place.getAddress()));
         } else {
-            searchMarker = mGoogleMap.addMarker(new MarkerOptions()
+            marker = mGoogleMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                     .position(place.getLatLng())
                     .title(String.valueOf(place.getAddress())));

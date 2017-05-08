@@ -24,6 +24,14 @@ public class CameraActivity extends AppCompatActivity implements View.OnTouchLis
     private CameraBridgeViewBase mOpenCvCameraView;
     private Mat mRgba;
 
+    static{
+        if(!OpenCVLoader.initDebug()){
+            Log.d(TAG, "OpenCV not loaded");
+        } else {
+            Log.d(TAG, "OpenCV loaded");
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
