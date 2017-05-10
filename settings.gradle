@@ -1,2 +1,2 @@
-include ':app', ':activity_recognition', ':location', ':closed_roads'
+include ':app', ':activity_recognition', ':location', ':closed_roads', ':wifi'
 include ':openCV'

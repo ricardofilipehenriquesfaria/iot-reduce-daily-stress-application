@@ -3,11 +3,18 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/activity_recognition/activity_recognition.iml" filepath="$PROJECT_DIR$/activity_recognition/activity_recognition.iml" />
+      <module fileurl="file://$PROJECT_DIR$/activity_recognition/activity_recognition.iml" filepath="$PROJECT_DIR$/activity_recognition/activity_recognition.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/closed_roads/closed_roads.iml" filepath="$PROJECT_DIR$/closed_roads/closed_roads.iml" />
+      <module fileurl="file://$PROJECT_DIR$/closed_roads/closed_roads.iml" filepath="$PROJECT_DIR$/closed_roads/closed_roads.iml" />
+      <module fileurl="file://$PROJECT_DIR$/iot-reduce-daily-stress-application.iml" filepath="$PROJECT_DIR$/iot-reduce-daily-stress-application.iml" />
       <module fileurl="file://$PROJECT_DIR$/iot-reduce-daily-stress-application.iml" filepath="$PROJECT_DIR$/iot-reduce-daily-stress-application.iml" />
       <module fileurl="file://$PROJECT_DIR$/location/location.iml" filepath="$PROJECT_DIR$/location/location.iml" />
+      <module fileurl="file://$PROJECT_DIR$/location/location.iml" filepath="$PROJECT_DIR$/location/location.iml" />
       <module fileurl="file://$PROJECT_DIR$/openCV/openCV.iml" filepath="$PROJECT_DIR$/openCV/openCV.iml" />
+      <module fileurl="file://$PROJECT_DIR$/openCV/openCV.iml" filepath="$PROJECT_DIR$/openCV/openCV.iml" />
+      <module fileurl="file://$PROJECT_DIR$/wifi/wifi.iml" filepath="$PROJECT_DIR$/wifi/wifi.iml" />
     </modules>
   </component>
 </project>
