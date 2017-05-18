@@ -25,6 +25,7 @@ public class Algorithm extends IntentService {
         rowData.put(Provider.Provider_Data.DEVICE_ID, Aware.getSetting(this, Aware_Preferences.DEVICE_ID));
         rowData.put(Provider.Provider_Data.WIFI_SSID, intent.getStringExtra("WIFI_SSID"));
         rowData.put(Provider.Provider_Data.WIFI_BSSID, intent.getStringExtra("WIFI_BSSID"));
+        rowData.put(Provider.Provider_Data.ACCESSES, 1);
         getContentResolver().insert(Provider.Provider_Data.CONTENT_URI, rowData);
     }
 }

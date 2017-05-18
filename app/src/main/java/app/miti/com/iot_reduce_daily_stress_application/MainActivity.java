@@ -3,13 +3,17 @@ package app.miti.com.iot_reduce_daily_stress_application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -29,9 +33,12 @@ import com.aware.plugin.closed_roads.ClosedRoadsObserver;
 import com.aware.plugin.google.activity_recognition.Google_AR_Observer;
 import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.aware.plugin.google.fused_location.LocationObserver;
+import com.aware.plugin.wifi.Provider;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -43,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = "MainActivity";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,8 +101,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
+            initializeWifiPlugin();
             addMapFragment();
         }
+    }
+
+    private void initializeWifiPlugin(){
+
+        ArrayList<String> SSID = new ArrayList<>();
+        ArrayList<String> BSSID = new ArrayList<>();
+        boolean wifiControl = false;
+
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
+        long timestamp = System.currentTimeMillis();
+        long beginOfDay = timestamp - (timestamp % 86400000);
+
+        Cursor cursor = getContentResolver().query(Provider.Provider_Data.CONTENT_URI, null, "timestamp >= " + beginOfDay, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+
+            do {
+                SSID.add(cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.WIFI_SSID)));
+                BSSID.add(cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.WIFI_BSSID)));
+            } while (cursor.moveToNext());
+
+            cursor.close();
+
+            for (int i = 0; i < SSID.size(); i++) {
+                if ((wifiInfo.getSSID().equals(SSID.get(i)) && wifiInfo.getBSSID().equals(BSSID.get(i)))) wifiControl = true;
+            }
+
+            if(!wifiControl) Aware.startPlugin(this, "com.aware.plugin.wifi");
+
+        } else Aware.startPlugin(this, "com.aware.plugin.wifi");
     }
 
     private boolean checkGooglePlayServices() {

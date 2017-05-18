@@ -55,11 +55,13 @@ public class ClosedRoads {
     }
 
     private static void setClosedRoadsList(Cursor cursor) {
-        closedRoadsList.add(new ClosedRoads(
-                new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO))),
-                new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM))),
-                cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA))
-        ));
+        if (cursor != null){
+            closedRoadsList.add(new ClosedRoads(
+                    new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO))),
+                    new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM))),
+                    cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA))
+            ));
+        }
     }
 }
 
