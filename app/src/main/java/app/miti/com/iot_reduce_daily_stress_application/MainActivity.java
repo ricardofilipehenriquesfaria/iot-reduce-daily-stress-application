@@ -49,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private LatLng location = null;
     private static final String TAG = "MainActivity";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    public static boolean WIFI_ENABLED = false;
+    public WifiManager wifiManager;
+    public WifiInfo wifiInfo;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -58,6 +61,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiInfo  = wifiManager.getConnectionInfo();
+        WIFI_ENABLED = wifiManager.isWifiEnabled();
 
         if (checkGooglePlayServices()) {
 
@@ -92,8 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             currentLocation.setCurrentLocation(MainActivity.this);
             location = currentLocation.getCoordinates();
 
-            ClosedRoads closedRoads = new ClosedRoads();
-            closedRoads.setClosedRoads(MainActivity.this);
+
 
             menu.findItem(R.id.nav_location).setTitle(String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude));
             navigationView.setNavigationItemSelectedListener(this);
@@ -101,7 +107,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-            initializeWifiPlugin();
+            if(WIFI_ENABLED){
+                ClosedRoads closedRoads = new ClosedRoads();
+                closedRoads.setClosedRoads(MainActivity.this);
+                initializeWifiPlugin();
+            }
+
             addMapFragment();
         }
     }
@@ -111,9 +122,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ArrayList<String> SSID = new ArrayList<>();
         ArrayList<String> BSSID = new ArrayList<>();
         boolean wifiControl = false;
-
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
         long timestamp = System.currentTimeMillis();
         long beginOfDay = timestamp - (timestamp % 86400000);

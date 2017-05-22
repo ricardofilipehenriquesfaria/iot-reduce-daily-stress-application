@@ -58,6 +58,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static app.miti.com.iot_reduce_daily_stress_application.MainActivity.WIFI_ENABLED;
+
 
 /**
  * Created by Ricardo on 31-01-2017.
@@ -80,7 +82,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getActivity().getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         autocompleteFragment.setOnPlaceSelectedListener(this);
-        autocompleteFragment.setHint("Procurar Local");
+        if (autocompleteFragment.getActivity() != null) autocompleteFragment.setHint("Procurar Local");
         autocompleteFragment.setBoundsBias(boundsMadeira);
 
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
@@ -185,14 +187,15 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
                 if(marker != null) {
                     marker.remove();
-                    polyline.remove();
+                    if (polyline != null) polyline.remove();
                 }
 
                 options.position(destination);
                 options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
                 marker = mGoogleMap.addMarker(options);
-                setUrl(CurrentLocation.coordinates, destination, "");
+
+                if(WIFI_ENABLED) setUrl(CurrentLocation.coordinates, destination, "");
 
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(CurrentLocation.coordinates));
                 mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
@@ -218,7 +221,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
         if(marker != null){
             marker.remove();
-            polyline.remove();
+            if (polyline != null) polyline.remove();
             marker.setPosition(place.getLatLng());
             marker.setTitle(String.valueOf(place.getAddress()));
         } else {
