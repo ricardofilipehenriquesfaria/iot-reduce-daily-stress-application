@@ -8,6 +8,8 @@
     <string name="action_camera">Camera</string>
     <string name="elevation_id">elevation</string>
     <string name="elevation_title">Inclinação da Estrada</string>
+    <string name="access_token">hUuNdwLPB9fzsW1N1Zh5XeeWpqAYEqrU</string>
+    <string name="waiting_route">Carregando a rota…</string>
     <string name="place_details">
     <![CDATA[
         <b>Procura: %1$s</b>

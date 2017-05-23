@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = "MainActivity";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     public static boolean WIFI_ENABLED = false;
+    public static boolean WIFI_STATE = false;
     public WifiManager wifiManager;
     public WifiInfo wifiInfo;
 
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiInfo  = wifiManager.getConnectionInfo();
         WIFI_ENABLED = wifiManager.isWifiEnabled();
+        WIFI_STATE = wifiManager.getWifiState() == 3;
 
         if (checkGooglePlayServices()) {
 
@@ -107,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-            if(WIFI_ENABLED){
+            if(WIFI_ENABLED && WIFI_STATE){
                 ClosedRoads closedRoads = new ClosedRoads();
                 closedRoads.setClosedRoads(MainActivity.this);
                 initializeWifiPlugin();

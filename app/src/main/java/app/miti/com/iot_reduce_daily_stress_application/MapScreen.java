@@ -1,6 +1,8 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.aware.plugin.closed_roads.ClosedRoads;
@@ -44,6 +47,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,10 +57,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import static app.miti.com.iot_reduce_daily_stress_application.MainActivity.WIFI_ENABLED;
 
@@ -67,6 +74,7 @@ import static app.miti.com.iot_reduce_daily_stress_application.MainActivity.WIFI
 
 public class MapScreen extends SupportMapFragment implements OnMapReadyCallback, PlaceSelectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    private static final String TAG = "MapScreen";
     private GoogleMap mGoogleMap = null;
     private HttpURLConnection urlConnection = null;
     private URL url = null;
@@ -75,10 +83,14 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private Marker locationMarker = null;
     private LatLngBounds boundsMadeira = new LatLngBounds(new LatLng(32.621831, -17.283089), new LatLng(32.910233, -16.621391));
     private GoogleApiClient mGoogleApiClient = null;
+    private String MAPQUEST_API_KEY;
+    private static final String MAPQUEST_STATUS_CODE_OK = "0";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        MAPQUEST_API_KEY = getResources().getString(R.string.access_token);
 
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getActivity().getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         autocompleteFragment.setOnPlaceSelectedListener(this);
@@ -172,7 +184,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         });
 
         for(int i = 0; i < ClosedRoads.closedRoadsList.size(); i++) {
-            setUrl(
+            requestNewRoute(
                     ClosedRoads.closedRoadsList.get(i).getInitialCoordinates(),
                     ClosedRoads.closedRoadsList.get(i).getFinalCoordinates(),
                     ClosedRoads.closedRoadsList.get(i).getEstrada());
@@ -195,7 +207,10 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
                 marker = mGoogleMap.addMarker(options);
 
-                if(WIFI_ENABLED) setUrl(CurrentLocation.coordinates, destination, "");
+                if(WIFI_ENABLED) {
+                    requestNewRoute(CurrentLocation.coordinates, destination, "");
+                    requestNewMapQuestRoute(CurrentLocation.coordinates, destination);
+                }
 
                 mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(CurrentLocation.coordinates));
                 mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
@@ -203,7 +218,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         });
     }
 
-    public void setUrl(LatLng origin, LatLng destination, String estrada){
+    public void requestNewRoute(LatLng origin, LatLng destination, String estrada){
 
         String stringOrigin = "origin=" + origin.latitude + "," + origin.longitude;
         String stringDestination = "destination=" + destination.latitude + "," + destination.longitude;
@@ -214,10 +229,94 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
     }
 
+    private void requestNewMapQuestRoute (LatLng originPosition, LatLng destinationPosition){
+
+        String request_url = "http://open.mapquestapi.com/directions/v2/route?key=" + MAPQUEST_API_KEY +
+                "&callback=renderAdvancedNarrative&outFormat=json" +
+                "&routeType=fastest" +
+                "&timeType=1&enhancedNarrative=false&shapeFormat=raw&generalize=0" +
+                "&locale=" + Locale.getDefault() +
+                "&unit=m" +
+                "&mustAvoidLinkIds=116334520" +
+                "&from=" + originPosition.latitude + "," + originPosition.longitude +
+                "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude +
+                "&drivingStyle=2&highwayEfficiency=21.0";
+
+        new GetRouteTask(getActivity()).execute(request_url);
+    }
+
+    private class GetRouteTask extends AsyncTask<String, Void, JSONObject> {
+
+        private ProgressDialog progress_dialog;
+        private GetRouteTask(Activity activity) {
+            progress_dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progress_dialog.setMessage(getResources().getString(R.string.waiting_route));
+            progress_dialog.show();
+        }
+
+        @Override
+        protected JSONObject doInBackground(String... strings) {
+
+            URLConnection urlConnection;
+            InputStream inputStream = null;
+            JSONObject jsonResponse = null;
+
+            try {
+                URL url = new URL(strings[0]);
+
+                urlConnection = url.openConnection();
+                urlConnection.setRequestProperty("Referrer", "MY_REFERRER");
+
+                inputStream = urlConnection.getInputStream();
+                String string = IOUtils.toString( urlConnection.getInputStream(), "utf-8");
+
+                jsonResponse = new JSONObject(string.replace("renderAdvancedNarrative(", "").replace(")", ""));
+
+            }catch (MalformedURLException e){
+                Log.e(TAG, Log.getStackTraceString(e));
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+            } finally {
+                try{
+                    assert inputStream != null;
+                    inputStream.close();
+                } catch (IOException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                }
+            }
+            return jsonResponse;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonResponse) {
+
+            if (progress_dialog.isShowing()) {
+                progress_dialog.dismiss();
+            }
+
+            String statuscode = "-1";
+            try{
+                JSONObject info = jsonResponse.getJSONObject("info");
+                statuscode = info.optString("statuscode");
+            } catch (JSONException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+
+            if(statuscode.equals(MAPQUEST_STATUS_CODE_OK)) {
+                MapQuestParserTask mapQuestParserTask = new MapQuestParserTask();
+                mapQuestParserTask.execute(String.valueOf(jsonResponse));
+            }
+        }
+    }
+
     @Override
     public void onPlaceSelected(Place place) {
 
-        setUrl(CurrentLocation.coordinates, place.getLatLng(), "");
+        requestNewRoute(CurrentLocation.coordinates, place.getLatLng(), "");
 
         if(marker != null){
             marker.remove();
@@ -333,7 +432,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
             try {
                 jObject = new JSONObject(jsonData[0]);
-                DirectionsJsonParsing parser = new DirectionsJsonParsing(getContext());
+                DirectionsParsing parser = new DirectionsParsing(getContext());
 
                 routes = parser.parse(jObject);
             } catch (Exception e) {
@@ -380,6 +479,76 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 polyline = mGoogleMap.addPolyline(lineOptions);
                 polyline.setJointType(JointType.ROUND);
                 polyline.setTag(mEstrada);
+                setPolylineStyle(polyline);
+            }
+
+            mGoogleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+                public void onPolylineClick(Polyline polyline) {
+                    int strokeColor = ~polyline.getColor();
+                    polyline.setColor(strokeColor);
+                }
+            });
+        }
+    }
+
+    private class MapQuestParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try {
+
+                jObject = new JSONObject(jsonData[0]);
+                MapQuestDirectionsParsing parser = new MapQuestDirectionsParsing(getContext());
+                routes = parser.parse(jObject);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+
+            PolylineOptions lineOptions;
+
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+            Boolean value = mSharedPreference.getBoolean("INCLINACAO", false);
+
+            for (int i = 0; i < result.size(); i++) {
+
+                ArrayList<LatLng> arrayListPoints = new ArrayList<>();
+                lineOptions = new PolylineOptions();
+                List<HashMap<String, String>> path = result.get(i);
+                LatLng arrayPoints[] = new LatLng[path.size()];
+
+                for (int j = 0; j < path.size(); j++) {
+
+                    HashMap<String, String>  point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    arrayListPoints.add(position);
+                    arrayPoints[j] = position;
+                }
+
+                if(value){
+                    ElevationTask elevationTask = new ElevationTask();
+                    elevationTask.execute(arrayPoints);
+                }
+
+                lineOptions.addAll(arrayListPoints);
+                lineOptions.width(8);
+                lineOptions.geodesic(true);
+
+                polyline = mGoogleMap.addPolyline(lineOptions);
+                polyline.setJointType(JointType.ROUND);
                 setPolylineStyle(polyline);
             }
 

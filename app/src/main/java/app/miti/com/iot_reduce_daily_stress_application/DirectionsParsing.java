@@ -17,11 +17,11 @@ import java.util.List;
  * Created by Ricardo on 10-03-2017.
  */
 
-class DirectionsJsonParsing{
+class DirectionsParsing {
 
     private Context context;
 
-    DirectionsJsonParsing(Context context){
+    DirectionsParsing(Context context){
         this.context = context;
     }
 
