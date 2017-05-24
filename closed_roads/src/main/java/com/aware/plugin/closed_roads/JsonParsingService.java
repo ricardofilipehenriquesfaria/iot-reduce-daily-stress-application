@@ -83,18 +83,6 @@ public class JsonParsingService extends IntentService {
                         locationIntent.putExtra("LATITUDE_FIM", jsonData.getDouble("latitude_fim"));
                         locationIntent.putExtra("LONGITUDE_FIM", jsonData.getDouble("longitude_fim"));
 
-                        Log.i("Output", "id: " + jsonData.getInt("id") +
-                                ", estrada: " + jsonData.getString("estrada") +
-                                ", rua: " + jsonData.getString("rua") +
-                                ", data_inicio: " + jsonData.getString("data_inicio") +
-                                ", data_fim: " + jsonData.getString("data_fim") +
-                                ", hora_inicio: " + jsonData.getString("hora_inicio") +
-                                ", hora_fim: " + jsonData.getString("hora_fim") +
-                                ", latitude_inicio: " + jsonData.getDouble("latitude_inicio") +
-                                ", longitude_inicio: " + jsonData.getDouble("longitude_inicio") +
-                                ", latitude_fim: " + jsonData.getDouble("latitude_fim") +
-                                ", longitude_inicio: " + jsonData.getDouble("longitude_fim")
-                        );
                         startService(locationIntent);
                     }
                     cursor.close();

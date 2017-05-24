@@ -149,7 +149,6 @@ public class GeofenceMap extends FragmentActivity implements OnMapReadyCallback 
                 .position(new LatLng(user_location.getLatitude(), user_location.getLongitude()))
                 .flat(true)
                 .draggable(true)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_map_here))
             );
 
             geofence = googleMap.addCircle(new CircleOptions()
