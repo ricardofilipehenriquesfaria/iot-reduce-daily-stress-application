@@ -82,6 +82,8 @@ public class JsonParsingService extends IntentService {
                         locationIntent.putExtra("LONGITUDE_INICIO", jsonData.getDouble("longitude_inicio"));
                         locationIntent.putExtra("LATITUDE_FIM", jsonData.getDouble("latitude_fim"));
                         locationIntent.putExtra("LONGITUDE_FIM", jsonData.getDouble("longitude_fim"));
+                        locationIntent.putExtra("LINKID_INICIO", getLinkId(jsonData.getDouble("latitude_inicio"), jsonData.getDouble("longitude_inicio")));
+                        locationIntent.putExtra("LINKID_FIM", getLinkId(jsonData.getDouble("latitude_fim"), jsonData.getDouble("longitude_fim")));
 
                         startService(locationIntent);
                     }
@@ -91,5 +93,40 @@ public class JsonParsingService extends IntentService {
         } catch (JSONException e) {
             Log.e("Error parsing data: ", e.toString());
         }
+    }
+
+    private int getLinkId (Double latitude, Double longitude) {
+
+        int linkId = 0;
+        HttpURLConnection urlConnection = null;
+        JSONObject jsonObject;
+        int r;
+
+        try {
+            String stringUrl = "http://open.mapquestapi.com/directions/v2/findlinkid?key=hUuNdwLPB9fzsW1N1Zh5XeeWpqAYEqrU&lat=" + latitude + "&lng=" + longitude;
+            URL url = new URL(stringUrl);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.connect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            assert urlConnection != null;
+            InputStream inputStream = urlConnection.getInputStream();
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            while ((r = inputStream.read()) != -1) stringBuilder.append((char) r);
+
+            jsonObject = new JSONObject(String.valueOf(stringBuilder));
+            inputStream.close();
+            linkId = jsonObject.getInt("linkId");
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return linkId;
     }
 }

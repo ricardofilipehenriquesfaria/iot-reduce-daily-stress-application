@@ -62,6 +62,8 @@ public class Provider extends ContentProvider {
         public static final String LATITUDE_FIM = "latitude_fim";
         public static final String LONGITUDE_INICIO = "longitude_inicio";
         public static final String LONGITUDE_FIM = "longitude_fim";
+        public static final String LINKID_INICIO = "linkid_inicio";
+        public static final String LINKID_FIM = "linkid_fim";
     }
 
     private static final String DB_TBL_TEMPLATE_FIELDS =
@@ -79,6 +81,8 @@ public class Provider extends ContentProvider {
                     Provider_Data.LONGITUDE_INICIO + " real default 0," +
                     Provider_Data.LATITUDE_FIM + " real default 0," +
                     Provider_Data.LONGITUDE_FIM + " real default 0," +
+                    Provider_Data.LINKID_INICIO + " int default 0," +
+                    Provider_Data.LINKID_FIM + " int default 0," +
                     "UNIQUE (" + Provider_Data.TIMESTAMP + "," + Provider_Data.DEVICE_ID + ")";
 
     public static final String[] TABLES_FIELDS = {

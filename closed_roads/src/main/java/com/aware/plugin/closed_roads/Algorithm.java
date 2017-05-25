@@ -34,6 +34,8 @@ public class Algorithm extends IntentService {
         rowData.put(Provider.Provider_Data.LONGITUDE_INICIO, intent.getDoubleExtra("LONGITUDE_INICIO", 0));
         rowData.put(Provider.Provider_Data.LATITUDE_FIM, intent.getDoubleExtra("LATITUDE_FIM", 0));
         rowData.put(Provider.Provider_Data.LONGITUDE_FIM, intent.getDoubleExtra("LONGITUDE_FIM", 0));
+        rowData.put(Provider.Provider_Data.LINKID_INICIO, intent.getIntExtra("LINKID_INICIO", 0));
+        rowData.put(Provider.Provider_Data.LINKID_FIM, intent.getIntExtra("LINKID_FIM", 0));
         getContentResolver().insert(Provider.Provider_Data.CONTENT_URI, rowData);
     }
 }
