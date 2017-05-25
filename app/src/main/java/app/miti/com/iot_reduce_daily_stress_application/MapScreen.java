@@ -231,13 +231,25 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
     private void requestNewMapQuestRoute (LatLng originPosition, LatLng destinationPosition){
 
+        String mustAvoidLinkIds = "";
+
+        for(int i = 0; i < ClosedRoads.closedRoadsList.size(); i++) {
+            if (i < ClosedRoads.closedRoadsList.size() -1) {
+                mustAvoidLinkIds += String.valueOf(ClosedRoads.closedRoadsList.get(i).getInitialLink()) + ",";
+                mustAvoidLinkIds += String.valueOf(ClosedRoads.closedRoadsList.get(i).getFinalLink()) + ",";
+            } else {
+                mustAvoidLinkIds += String.valueOf(ClosedRoads.closedRoadsList.get(i).getInitialLink()) + ",";
+                mustAvoidLinkIds += String.valueOf(ClosedRoads.closedRoadsList.get(i).getFinalLink());
+            }
+        }
+
         String request_url = "http://open.mapquestapi.com/directions/v2/route?key=" + MAPQUEST_API_KEY +
                 "&callback=renderAdvancedNarrative&outFormat=json" +
                 "&routeType=fastest" +
                 "&timeType=1&enhancedNarrative=false&shapeFormat=raw&generalize=0" +
                 "&locale=" + Locale.getDefault() +
                 "&unit=m" +
-                "&mustAvoidLinkIds=116334520" +
+                "&mustAvoidLinkIds=" + mustAvoidLinkIds +
                 "&from=" + originPosition.latitude + "," + originPosition.longitude +
                 "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude +
                 "&drivingStyle=2&highwayEfficiency=21.0";

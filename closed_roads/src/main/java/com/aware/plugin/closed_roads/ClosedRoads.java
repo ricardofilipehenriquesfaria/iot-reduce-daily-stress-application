@@ -19,15 +19,19 @@ public class ClosedRoads {
     private LatLng initialCoordinates;
     private LatLng finalCoordinates;
     private String estrada;
+    private int initialLink;
+    private int finalLink;
 
     public ClosedRoads(){
         super();
     }
 
-    private ClosedRoads(LatLng initialCoordinates, LatLng finalCoordinates, String estrada) {
+    private ClosedRoads(LatLng initialCoordinates, LatLng finalCoordinates, String estrada, int initialLink, int finalLink) {
         this.initialCoordinates = initialCoordinates;
         this.finalCoordinates = finalCoordinates;
         this.estrada = estrada;
+        this.initialLink = initialLink;
+        this.finalLink = finalLink;
     }
 
     public LatLng getInitialCoordinates() {
@@ -41,6 +45,10 @@ public class ClosedRoads {
     public String getEstrada(){
         return estrada;
     }
+
+    public int getInitialLink(){ return initialLink;}
+
+    public int getFinalLink(){ return finalLink;}
 
     public void setClosedRoads(Context context) {
 
@@ -59,7 +67,9 @@ public class ClosedRoads {
             closedRoadsList.add(new ClosedRoads(
                     new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO))),
                     new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM))),
-                    cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA))
+                    cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA)),
+                    cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_INICIO)),
+                    cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_FIM))
             ));
         }
     }
