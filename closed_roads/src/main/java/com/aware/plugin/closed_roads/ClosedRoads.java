@@ -54,24 +54,19 @@ public class ClosedRoads {
 
         Cursor cursor = context.getContentResolver().query(Provider.Provider_Data.CONTENT_URI, null, null, null, null);
 
-        if (cursor != null) {
-            cursor.moveToFirst();
-            setClosedRoadsList(cursor);
-            while (cursor.moveToNext()) setClosedRoadsList(cursor);
+        if (cursor != null && cursor.moveToFirst()) {
+            do{
+                closedRoadsList.add(new ClosedRoads(
+                        new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO))),
+                        new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM))),
+                        cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA)),
+                        cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_INICIO)),
+                        cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_FIM))
+                ));
+            } while (cursor.moveToNext());
             cursor.close();
         }
     }
 
-    private static void setClosedRoadsList(Cursor cursor) {
-        if (cursor != null){
-            closedRoadsList.add(new ClosedRoads(
-                    new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO))),
-                    new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM))),
-                    cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA)),
-                    cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_INICIO)),
-                    cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_FIM))
-            ));
-        }
-    }
 }
 

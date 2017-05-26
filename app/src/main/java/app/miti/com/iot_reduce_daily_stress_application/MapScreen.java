@@ -9,9 +9,12 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +25,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.aware.plugin.closed_roads.ClosedRoads;
+import com.aware.plugin.closed_roads.ClosedRoadsObserver;
 import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -85,6 +89,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private GoogleApiClient mGoogleApiClient = null;
     private String MAPQUEST_API_KEY;
     private static final String MAPQUEST_STATUS_CODE_OK = "0";
+    private ClosedRoadsObserver closedRoadsObserver = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,6 +102,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         if (autocompleteFragment.getActivity() != null) autocompleteFragment.setHint("Procurar Local");
         autocompleteFragment.setBoundsBias(boundsMadeira);
 
+        closedRoadsObserver = new ClosedRoadsObserver(getActivity(), mHandler);
+        getActivity().getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.closed_roads/closed_roads"), true, closedRoadsObserver);
+
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -106,6 +114,27 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
         getMapAsync(this);
     }
+
+    private Handler mHandler = new Handler (new Handler.Callback() {
+
+        @Override
+        public boolean handleMessage(Message message) {
+
+            switch (message.what) {
+                case 3:
+                    for(int i = 0; i < ClosedRoads.closedRoadsList.size(); i++) {
+                        requestNewRoute(
+                                ClosedRoads.closedRoadsList.get(i).getInitialCoordinates(),
+                                ClosedRoads.closedRoadsList.get(i).getFinalCoordinates(),
+                                ClosedRoads.closedRoadsList.get(i).getEstrada());
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        }
+    });
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
