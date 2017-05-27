@@ -83,13 +83,14 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private HttpURLConnection urlConnection = null;
     private URL url = null;
     private Polyline polyline = null;
+    private Polyline mapQuestPolyline = null;
     private Marker marker = null;
     private Marker locationMarker = null;
     private LatLngBounds boundsMadeira = new LatLngBounds(new LatLng(32.621831, -17.283089), new LatLng(32.910233, -16.621391));
     private GoogleApiClient mGoogleApiClient = null;
     private String MAPQUEST_API_KEY;
     private static final String MAPQUEST_STATUS_CODE_OK = "0";
-    private ClosedRoadsObserver closedRoadsObserver = null;
+    private LatLng currentLocation = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -102,7 +103,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         if (autocompleteFragment.getActivity() != null) autocompleteFragment.setHint("Procurar Local");
         autocompleteFragment.setBoundsBias(boundsMadeira);
 
-        closedRoadsObserver = new ClosedRoadsObserver(getActivity(), mHandler);
+        ClosedRoadsObserver closedRoadsObserver = new ClosedRoadsObserver(getActivity(), mHandler);
         getActivity().getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.closed_roads/closed_roads"), true, closedRoadsObserver);
 
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
@@ -229,6 +230,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 if(marker != null) {
                     marker.remove();
                     if (polyline != null) polyline.remove();
+                    if (mapQuestPolyline != null) mapQuestPolyline.remove();
                 }
 
                 options.position(destination);
@@ -237,11 +239,17 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 marker = mGoogleMap.addMarker(options);
 
                 if(WIFI_ENABLED) {
-                    requestNewRoute(CurrentLocation.coordinates, destination, "");
-                    requestNewMapQuestRoute(CurrentLocation.coordinates, destination);
+                    if(currentLocation == null){
+                        requestNewRoute(CurrentLocation.coordinates, destination, "");
+                        requestNewMapQuestRoute(CurrentLocation.coordinates, destination);
+                        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(CurrentLocation.coordinates));
+                    }else{
+                        requestNewRoute(currentLocation, destination, "");
+                        requestNewMapQuestRoute(currentLocation, destination);
+                        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+                    }
                 }
 
-                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(CurrentLocation.coordinates));
                 mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(17));
             }
         });
@@ -357,11 +365,13 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     @Override
     public void onPlaceSelected(Place place) {
 
-        requestNewRoute(CurrentLocation.coordinates, place.getLatLng(), "");
+        if (currentLocation == null) requestNewRoute(CurrentLocation.coordinates, place.getLatLng(), "");
+        else requestNewRoute(currentLocation, place.getLatLng(), "");
 
         if(marker != null){
             marker.remove();
             if (polyline != null) polyline.remove();
+            if (mapQuestPolyline != null) mapQuestPolyline.remove();
             marker.setPosition(place.getLatLng());
             marker.setTitle(String.valueOf(place.getAddress()));
         } else {
@@ -400,8 +410,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
     @Override
     public void onLocationChanged(Location location) {
-        LatLng newPosition = new LatLng(location.getLatitude(), location.getLongitude());
-        locationMarker.setPosition(newPosition);
+        if(location.getAccuracy() <= 100){
+            LatLng newPosition = new LatLng(location.getLatitude(), location.getLongitude());
+            locationMarker.setPosition(newPosition);
+            currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        }
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
@@ -588,9 +601,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 lineOptions.width(8);
                 lineOptions.geodesic(true);
 
-                polyline = mGoogleMap.addPolyline(lineOptions);
-                polyline.setJointType(JointType.ROUND);
-                setPolylineStyle(polyline);
+                mapQuestPolyline = mGoogleMap.addPolyline(lineOptions);
+                mapQuestPolyline.setJointType(JointType.ROUND);
+                setPolylineStyle(mapQuestPolyline);
             }
 
             mGoogleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {

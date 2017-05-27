@@ -5,7 +5,11 @@ import android.database.Cursor;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,18 +59,31 @@ public class ClosedRoads {
         Cursor cursor = context.getContentResolver().query(Provider.Provider_Data.CONTENT_URI, null, null, null, null);
 
         if (cursor != null && cursor.moveToFirst()) {
+
+            Date date = null;
+
             do{
-                closedRoadsList.add(new ClosedRoads(
-                        new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO))),
-                        new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM))),
-                        cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA)),
-                        cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_INICIO)),
-                        cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_FIM))
-                ));
+                String string = cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.DATA_FIM)) + " " + cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.HORA_FIM));
+                DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                try {
+                    date = formatter.parse(string);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                if(date != null && (System.currentTimeMillis() < date.getTime())) {
+                    closedRoadsList.add(new ClosedRoads(
+                            new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO))),
+                            new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM))),
+                            cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA)),
+                            cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_INICIO)),
+                            cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_FIM))
+                    ));
+                }
             } while (cursor.moveToNext());
             cursor.close();
         }
     }
-
 }
 
