@@ -29,15 +29,17 @@ public class Google_AR_Observer extends ContentObserver {
 
     public static String getActivityName(Context context)
     {
-        String row;
         Cursor cursor = context.getContentResolver().query(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI, null, null, null, null);
 
         if(cursor != null && cursor.moveToLast() && cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.CONFIDENCE)) == 100) {
-            row = valueOf(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_NAME)));
+            UserActivity.activity = valueOf(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_NAME)));
+            UserActivity.confidence = cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.CONFIDENCE));
             cursor.close();
+        } else {
+            UserActivity.activity = "still";
+            UserActivity.confidence = 100;
         }
-        else row = "still";
 
-        return row;
+        return UserActivity.activity;
     }
 }
