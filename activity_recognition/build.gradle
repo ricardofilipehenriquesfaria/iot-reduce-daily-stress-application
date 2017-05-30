@@ -5,17 +5,16 @@ version = version_readable
 group = "com.awareframework"
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode version_code
         versionName version_readable
     }
     signingConfigs {
         release {
-            //set values in ~/.gradle/gradle.properties to sign with your own keystore and certificate
             storeFile file(project.hasProperty("KEYSTORE_FILE") ? KEYSTORE_FILE : "/")
             storePassword project.hasProperty("KEYSTORE_PASSWORD") ? KEYSTORE_PASSWORD : ""
             keyAlias project.hasProperty("KEY") ? KEY : ""
@@ -47,14 +46,14 @@ bintray {
         repo = 'com.awareframework'
         name = android.defaultConfig.applicationId
         licenses = ['Apache-2.0']
-        websiteUrl = 'https://github.com/denzilferreira/com.aware.plugin.google.activity_recognition' //EDIT ME
-        issueTrackerUrl = 'https://github.com/denzilferreira/com.aware.plugin.google.activity_recognition/issues' //EDIT ME
+        websiteUrl = 'https://github.com/denzilferreira/com.aware.plugin.google.activity_recognition'
+        issueTrackerUrl = 'https://github.com/denzilferreira/com.aware.plugin.google.activity_recognition/issues'
         labels = ['aar','android','framework','aware']
         publicDownloadNumbers = true
-        vcsUrl = 'https://github.com/denzilferreira/com.aware.plugin.google.activity_recognition.git' //EDIT ME
-        desc = "AWARE Plugin: Google Activity Recognition" //EDIT ME
+        vcsUrl = 'https://github.com/denzilferreira/com.aware.plugin.google.activity_recognition.git'
+        desc = "AWARE Plugin: Google Activity Recognition"
         userOrg = user
-        githubRepo = "denzilferreira/com.aware.plugin.google.activity_recognition" //EDIT ME
+        githubRepo = "denzilferreira/com.aware.plugin.google.activity_recognition"
 
         version {
             name = "$version_readable"
