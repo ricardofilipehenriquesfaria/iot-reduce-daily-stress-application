@@ -14,10 +14,6 @@
             android:name="com.aware.plugin.google.activity_recognition.Plugin"
             android:exported="false" />
 
-        <activity
-            android:name="com.aware.plugin.google.activity_recognition.Settings"
-            android:exported="true" />
-
         <provider
             android:name="com.aware.plugin.google.activity_recognition.Google_AR_Provider"
             android:authorities="${applicationId}.provider.gar"
