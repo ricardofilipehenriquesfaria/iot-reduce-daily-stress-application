@@ -14,6 +14,8 @@ public class Plugin extends Aware_Plugin {
 
     public static ContextProducer contextProducer;
 
+    public static final String STATUS_PLUGIN_CLOSED_ROADS = "status_plugin_closed_roads";
+
     private final String PACKAGE_NAME = "com.aware.plugin.closed_roads";
 
     @Override
@@ -43,7 +45,7 @@ public class Plugin extends Aware_Plugin {
 
             DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
 
-            Aware.setSetting(this, Settings.STATUS_PLUGIN_CLOSED_ROADS, true);
+            Aware.setSetting(this, Plugin.STATUS_PLUGIN_CLOSED_ROADS, true);
 
             Aware.startAWARE();
 
@@ -53,7 +55,7 @@ public class Plugin extends Aware_Plugin {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Aware.setSetting(this, Settings.STATUS_PLUGIN_CLOSED_ROADS, false);
+        Aware.setSetting(this, Plugin.STATUS_PLUGIN_CLOSED_ROADS, false);
         Aware.stopAWARE();
     }
 }

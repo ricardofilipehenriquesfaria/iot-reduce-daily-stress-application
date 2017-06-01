@@ -16,10 +16,6 @@
             android:exported="false"
             android:label="@string/app_name" />
 
-        <activity
-            android:name="com.aware.plugin.closed_roads.Settings"
-            android:exported="true" />
-
         <provider
             android:name="com.aware.plugin.closed_roads.Provider"
             android:authorities="${applicationId}.provider.closed_roads"
