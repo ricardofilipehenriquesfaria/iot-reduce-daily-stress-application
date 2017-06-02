@@ -15,10 +15,6 @@
             android:name="com.aware.plugin.wifi.Algorithm"
             android:exported="false" />
 
-        <activity
-            android:name="com.aware.plugin.wifi.Settings"
-            android:exported="true" />
-
         <provider
             android:name="com.aware.plugin.wifi.Provider"
             android:authorities="${applicationId}.provider.wifi"

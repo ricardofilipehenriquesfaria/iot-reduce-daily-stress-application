@@ -19,6 +19,8 @@ public class Plugin extends Aware_Plugin {
 
     private final String PACKAGE_NAME = "com.aware.plugin.wifi";
 
+    public static final String STATUS_PLUGIN_WIFI = "status_plugin_wifi";
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -67,7 +69,7 @@ public class Plugin extends Aware_Plugin {
 
             DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
 
-            Aware.setSetting(this, Settings.STATUS_PLUGIN_WIFI, true);
+            Aware.setSetting(this, Plugin.STATUS_PLUGIN_WIFI, true);
 
             Aware.startAWARE();
 
@@ -77,7 +79,7 @@ public class Plugin extends Aware_Plugin {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Aware.setSetting(this, Settings.STATUS_PLUGIN_WIFI, false);
+        Aware.setSetting(this, Plugin.STATUS_PLUGIN_WIFI, false);
         Aware.stopAWARE();
     }
 }
