@@ -32,6 +32,18 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
 
     private final String PACKAGE_NAME = "com.aware.plugin.google.fused_location";
 
+    public static final String STATUS_GOOGLE_FUSED_LOCATION = "status_google_fused_location";
+
+    public static final String FREQUENCY_GOOGLE_FUSED_LOCATION = "frequency_google_fused_location";
+
+    public static final String MAX_FREQUENCY_GOOGLE_FUSED_LOCATION = "max_frequency_google_fused_location";
+
+    public static final String ACCURACY_GOOGLE_FUSED_LOCATION = "accuracy_google_fused_location";
+
+    public static final String FALLBACK_LOCATION_TIMEOUT = "fallback_location_timeout";
+
+    public static final String LOCATION_SENSITIVITY = "location_sensitivity";
+
     private static GoogleApiClient mLocationClient;
     private final static LocationRequest mLocationRequest = new LocationRequest();
     private static PendingIntent pIntent;
@@ -111,22 +123,22 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
 
             DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
 
-            Aware.setSetting(this, Settings.STATUS_GOOGLE_FUSED_LOCATION, true);
+            Aware.setSetting(this, Plugin.STATUS_GOOGLE_FUSED_LOCATION, true);
 
-            if (Aware.getSetting(this, Settings.FREQUENCY_GOOGLE_FUSED_LOCATION).length() == 0)
-                Aware.setSetting(this, Settings.FREQUENCY_GOOGLE_FUSED_LOCATION, 300);
+            if (Aware.getSetting(this, Plugin.FREQUENCY_GOOGLE_FUSED_LOCATION).length() == 0)
+                Aware.setSetting(this, Plugin.FREQUENCY_GOOGLE_FUSED_LOCATION, 300);
 
-            if (Aware.getSetting(this, Settings.MAX_FREQUENCY_GOOGLE_FUSED_LOCATION).length() == 0)
-                Aware.setSetting(this, Settings.MAX_FREQUENCY_GOOGLE_FUSED_LOCATION, 60);
+            if (Aware.getSetting(this, Plugin.MAX_FREQUENCY_GOOGLE_FUSED_LOCATION).length() == 0)
+                Aware.setSetting(this, Plugin.MAX_FREQUENCY_GOOGLE_FUSED_LOCATION, 60);
 
-            if (Aware.getSetting(this, Settings.ACCURACY_GOOGLE_FUSED_LOCATION).length() == 0)
-                Aware.setSetting(this, Settings.ACCURACY_GOOGLE_FUSED_LOCATION, LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+            if (Aware.getSetting(this, Plugin.ACCURACY_GOOGLE_FUSED_LOCATION).length() == 0)
+                Aware.setSetting(this, Plugin.ACCURACY_GOOGLE_FUSED_LOCATION, LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-            if (Aware.getSetting(this, Settings.FALLBACK_LOCATION_TIMEOUT).length() == 0)
-                Aware.setSetting(this, Settings.FALLBACK_LOCATION_TIMEOUT, 20);
+            if (Aware.getSetting(this, Plugin.FALLBACK_LOCATION_TIMEOUT).length() == 0)
+                Aware.setSetting(this, Plugin.FALLBACK_LOCATION_TIMEOUT, 20);
 
-            if (Aware.getSetting(this, Settings.LOCATION_SENSITIVITY).length() == 0)
-                Aware.setSetting(this, Settings.LOCATION_SENSITIVITY, 5);
+            if (Aware.getSetting(this, Plugin.LOCATION_SENSITIVITY).length() == 0)
+                Aware.setSetting(this, Plugin.LOCATION_SENSITIVITY, 5);
 
             if (mLocationClient != null && !mLocationClient.isConnected())
                 mLocationClient.connect();
@@ -236,7 +248,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Aware.setSetting(this, Settings.STATUS_GOOGLE_FUSED_LOCATION, false);
+        Aware.setSetting(this, Plugin.STATUS_GOOGLE_FUSED_LOCATION, false);
 
         if (mLocationClient != null && mLocationClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mLocationClient, pIntent);
@@ -266,11 +278,11 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         if (DEBUG)
             Log.i(TAG, "Connected to Google's Location API");
 
-        mLocationRequest.setPriority(Integer.parseInt(Aware.getSetting(this, Settings.ACCURACY_GOOGLE_FUSED_LOCATION)));
-        mLocationRequest.setInterval(Long.parseLong(Aware.getSetting(this, Settings.FREQUENCY_GOOGLE_FUSED_LOCATION)) * 1000);
-        mLocationRequest.setFastestInterval(Long.parseLong(Aware.getSetting(this, Settings.MAX_FREQUENCY_GOOGLE_FUSED_LOCATION)) * 1000);
-        mLocationRequest.setMaxWaitTime(Long.parseLong(Aware.getSetting(this, Settings.FALLBACK_LOCATION_TIMEOUT)) * 1000); //wait X seconds for GPS
-        mLocationRequest.setSmallestDisplacement(Float.parseFloat(Aware.getSetting(this, Settings.LOCATION_SENSITIVITY)));
+        mLocationRequest.setPriority(Integer.parseInt(Aware.getSetting(this, Plugin.ACCURACY_GOOGLE_FUSED_LOCATION)));
+        mLocationRequest.setInterval(Long.parseLong(Aware.getSetting(this, Plugin.FREQUENCY_GOOGLE_FUSED_LOCATION)) * 1000);
+        mLocationRequest.setFastestInterval(Long.parseLong(Aware.getSetting(this, Plugin.MAX_FREQUENCY_GOOGLE_FUSED_LOCATION)) * 1000);
+        mLocationRequest.setMaxWaitTime(Long.parseLong(Aware.getSetting(this, Plugin.FALLBACK_LOCATION_TIMEOUT)) * 1000); //wait X seconds for GPS
+        mLocationRequest.setSmallestDisplacement(Float.parseFloat(Aware.getSetting(this, Plugin.LOCATION_SENSITIVITY)));
 
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(mLocationClient, mLocationRequest, pIntent);
