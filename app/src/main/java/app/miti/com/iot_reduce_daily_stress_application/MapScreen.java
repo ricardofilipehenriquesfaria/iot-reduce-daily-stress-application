@@ -3,6 +3,7 @@ package app.miti.com.iot_reduce_daily_stress_application;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -91,6 +92,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private String MAPQUEST_API_KEY;
     private static final String MAPQUEST_STATUS_CODE_OK = "0";
     private LatLng currentLocation = null;
+    private static ProgressDialog progressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -280,31 +282,46 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             }
         }
 
-        String request_url = "http://open.mapquestapi.com/directions/v2/route?key=" + MAPQUEST_API_KEY +
-                "&callback=renderAdvancedNarrative&outFormat=json" +
-                "&routeType=fastest" +
-                "&timeType=1&enhancedNarrative=false&shapeFormat=raw&generalize=0" +
-                "&locale=" + Locale.getDefault() +
-                "&unit=m" +
-                "&mustAvoidLinkIds=" + mustAvoidLinkIds +
-                "&from=" + originPosition.latitude + "," + originPosition.longitude +
-                "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude +
-                "&drivingStyle=2&highwayEfficiency=21.0";
+        String request_url = "http://open.mapquestapi.com/guidance/v1/route?key="
+                + MAPQUEST_API_KEY
+                + "&callback=renderAdvancedNarrative"
+                + "&outFormat=json"
+                + "&routeType=fastest"
+                + "&timeType=1"
+                + "&enhancedNarrative=false"
+                + "&shapeFormat=raw"
+                + "&generalize=0"
+                + "&narrativeType=text"
+                + "&fishbone=false"
+                + "&callback=renderBasicInformation"
+                + "&locale=" + Locale.getDefault()
+                + "&unit=m"
+                + "&mustAvoidLinkIds=" + mustAvoidLinkIds
+                + "&from=" + originPosition.latitude + "," + originPosition.longitude
+                + "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude
+                + "&drivingStyle=2"
+                + "&highwayEfficiency=21.0";
 
         new GetRouteTask(getActivity()).execute(request_url);
     }
 
     private class GetRouteTask extends AsyncTask<String, Void, JSONObject> {
 
-        private ProgressDialog progress_dialog;
         private GetRouteTask(Activity activity) {
-            progress_dialog = new ProgressDialog(activity);
+            progressDialog = new ProgressDialog(activity);
         }
 
         @Override
         protected void onPreExecute() {
-            progress_dialog.setMessage(getResources().getString(R.string.waiting_route));
-            progress_dialog.show();
+            progressDialog.setMessage(getResources().getString(R.string.waiting_route));
+            progressDialog.show();
+            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    GetRouteTask.this.cancel(true);
+                }
+            });
         }
 
         @Override
@@ -318,7 +335,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 URL url = new URL(strings[0]);
 
                 urlConnection = url.openConnection();
-                urlConnection.setRequestProperty("Referrer", "MY_REFERRER");
 
                 inputStream = urlConnection.getInputStream();
                 String string = IOUtils.toString( urlConnection.getInputStream(), "utf-8");
@@ -343,8 +359,8 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         @Override
         protected void onPostExecute(JSONObject jsonResponse) {
 
-            if (progress_dialog.isShowing()) {
-                progress_dialog.dismiss();
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
             }
 
             String statuscode = "-1";
@@ -358,6 +374,8 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             if(statuscode.equals(MAPQUEST_STATUS_CODE_OK)) {
                 MapQuestParserTask mapQuestParserTask = new MapQuestParserTask();
                 mapQuestParserTask.execute(String.valueOf(jsonResponse));
+
+                Route route = new Route(jsonResponse);
             }
         }
     }
