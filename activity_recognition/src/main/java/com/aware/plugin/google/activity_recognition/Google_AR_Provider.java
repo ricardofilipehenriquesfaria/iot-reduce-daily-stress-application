@@ -21,32 +21,30 @@ import java.util.HashMap;
 
 public class Google_AR_Provider extends ContentProvider {
 
-    public static final int DATABASE_VERSION = 5;
-
-    public static String AUTHORITY = "app.miti.com.iot_reduce_daily_stress_application.provider.gar";
-
+    private static final int DATABASE_VERSION = 1;
     private static final int GOOGLE_AR = 1;
     private static final int GOOGLE_AR_ID = 2;
 
-    public static final class Google_Activity_Recognition_Data implements BaseColumns {
-        private Google_Activity_Recognition_Data() {
-        }
+    public static final String DATABASE_NAME = "plugin_google_activity_recognition.db";
 
-        public static final Uri CONTENT_URI = Uri.parse("content://"+ Google_AR_Provider.AUTHORITY + "/plugin_google_activity_recognition");
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.aware.plugin.google.activity_recognition";
-        public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.aware.plugin.google.activity_recognition";
+    public static String AUTHORITY = "app.miti.com.iot_reduce_daily_stress_application.provider.gar";
 
-        public static final String _ID = "_id";
-        public static final String TIMESTAMP = "timestamp";
-        public static final String DEVICE_ID = "device_id";
-        public static final String ACTIVITY_NAME = "activity_name";
-        public static final String ACTIVITY_TYPE = "activity_type";
-        public static final String CONFIDENCE = "confidence";
+    static final class Google_Activity_Recognition_Data implements BaseColumns {
 
-        public static final String ACTIVITIES = "activities";
+        private Google_Activity_Recognition_Data() {}
+
+        static final Uri CONTENT_URI = Uri.parse("content://" + Google_AR_Provider.AUTHORITY + "/plugin_google_activity_recognition");
+        static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.aware.plugin.google.activity_recognition";
+        static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.aware.plugin.google.activity_recognition";
+
+        static final String _ID = "_id";
+        static final String TIMESTAMP = "timestamp";
+        static final String DEVICE_ID = "device_id";
+        static final String ACTIVITY_NAME = "activity_name";
+        static final String ACTIVITY_TYPE = "activity_type";
+        static final String CONFIDENCE = "confidence";
+        static final String ACTIVITIES = "activities";
     }
-
-    public static String DATABASE_NAME = "plugin_google_activity_recognition.db";
 
     public static final String[] DATABASE_TABLES = {
             "plugin_google_activity_recognition"
@@ -70,23 +68,24 @@ public class Google_AR_Provider extends ContentProvider {
 
     private boolean initializeDB() {
 
-        if (databaseHelper == null) databaseHelper = new DatabaseHelper( getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS );
+        if(databaseHelper == null) databaseHelper = new DatabaseHelper(getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS);
 
-        if(database == null || ! database.isOpen()) database = databaseHelper.getWritableDatabase();
+        if(database == null || !database.isOpen()) database = databaseHelper.getWritableDatabase();
 
-        return( database != null && databaseHelper != null);
+        return (database != null && databaseHelper != null);
     }
 
     @SuppressLint("LongLogTag")
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
 
-        if( ! initializeDB() ) {
-            Log.w(AUTHORITY,"Database unavailable...");
+        int count;
+
+        if(!initializeDB()) {
+            Log.w(AUTHORITY, "Database unavailable...");
             return 0;
         }
 
-        int count;
         switch (sUriMatcher.match(uri)) {
             case GOOGLE_AR:
                 count = database.delete(DATABASE_TABLES[0], selection,
@@ -103,6 +102,7 @@ public class Google_AR_Provider extends ContentProvider {
 
     @Override
     public String getType(@NonNull Uri uri) {
+
         switch (sUriMatcher.match(uri)) {
             case GOOGLE_AR:
                 return Google_Activity_Recognition_Data.CONTENT_TYPE;
@@ -117,12 +117,12 @@ public class Google_AR_Provider extends ContentProvider {
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
 
-        if( ! initializeDB() ) {
-            Log.w(AUTHORITY,"Database unavailable...");
+        ContentValues values = (initialValues != null) ? new ContentValues(initialValues) : new ContentValues();
+
+        if(!initializeDB()) {
+            Log.w(AUTHORITY, "Database unavailable...");
             return null;
         }
-
-        ContentValues values = (initialValues != null) ? new ContentValues(initialValues) : new ContentValues();
 
         switch (sUriMatcher.match(uri)) {
             case GOOGLE_AR:
@@ -149,52 +149,41 @@ public class Google_AR_Provider extends ContentProvider {
         sUriMatcher.addURI(Google_AR_Provider.AUTHORITY, DATABASE_TABLES[0] + "/#", GOOGLE_AR_ID);
 
         gARMap = new HashMap<>();
-        gARMap.put(Google_Activity_Recognition_Data._ID,
-                Google_Activity_Recognition_Data._ID);
-        gARMap.put(Google_Activity_Recognition_Data.TIMESTAMP,
-                Google_Activity_Recognition_Data.TIMESTAMP);
-        gARMap.put(Google_Activity_Recognition_Data.DEVICE_ID,
-                Google_Activity_Recognition_Data.DEVICE_ID);
-        gARMap.put(Google_Activity_Recognition_Data.ACTIVITY_NAME,
-                Google_Activity_Recognition_Data.ACTIVITY_NAME);
-        gARMap.put(Google_Activity_Recognition_Data.ACTIVITY_TYPE,
-                Google_Activity_Recognition_Data.ACTIVITY_TYPE);
-        gARMap.put(Google_Activity_Recognition_Data.CONFIDENCE,
-                Google_Activity_Recognition_Data.CONFIDENCE);
-        gARMap.put(Google_Activity_Recognition_Data.ACTIVITIES,
-                Google_Activity_Recognition_Data.ACTIVITIES);
+        gARMap.put(Google_Activity_Recognition_Data._ID, Google_Activity_Recognition_Data._ID);
+        gARMap.put(Google_Activity_Recognition_Data.TIMESTAMP, Google_Activity_Recognition_Data.TIMESTAMP);
+        gARMap.put(Google_Activity_Recognition_Data.DEVICE_ID, Google_Activity_Recognition_Data.DEVICE_ID);
+        gARMap.put(Google_Activity_Recognition_Data.ACTIVITY_NAME, Google_Activity_Recognition_Data.ACTIVITY_NAME);
+        gARMap.put(Google_Activity_Recognition_Data.ACTIVITY_TYPE, Google_Activity_Recognition_Data.ACTIVITY_TYPE);
+        gARMap.put(Google_Activity_Recognition_Data.CONFIDENCE, Google_Activity_Recognition_Data.CONFIDENCE);
+        gARMap.put(Google_Activity_Recognition_Data.ACTIVITIES, Google_Activity_Recognition_Data.ACTIVITIES);
     	
         return true;
     }
 
     @SuppressLint("LongLogTag")
     @Override
-    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
-                        String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         
-    	if( ! initializeDB() ) {
-            Log.w(AUTHORITY,"Database unavailable...");
+    	if(!initializeDB()) {
+            Log.w(AUTHORITY, "Database unavailable...");
             return null;
         }
 
-        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+        SQLiteQueryBuilder sqLiteQueryBuilder = new SQLiteQueryBuilder();
 
         switch (sUriMatcher.match(uri)) {
             case GOOGLE_AR:
-                qb.setTables(DATABASE_TABLES[0]);
-                qb.setProjectionMap(gARMap);
+                sqLiteQueryBuilder.setTables(DATABASE_TABLES[0]);
+                sqLiteQueryBuilder.setProjectionMap(gARMap);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
         try {
-            Cursor c = qb.query(database, projection, selection, selectionArgs,
-                    null, null, sortOrder);
-            if (getContext() != null) {
-                c.setNotificationUri(getContext().getContentResolver(), uri);
-            }
-            return c;
+            Cursor cursor = sqLiteQueryBuilder.query(database, projection, selection, selectionArgs, null, null, sortOrder);
+            if (getContext() != null) cursor.setNotificationUri(getContext().getContentResolver(), uri);
+            return cursor;
         } catch (IllegalStateException e) {
             if (Aware.DEBUG) Log.e(Aware.TAG, e.getMessage());
             return null;
@@ -203,19 +192,18 @@ public class Google_AR_Provider extends ContentProvider {
 
     @SuppressLint("LongLogTag")
     @Override
-    public int update(@NonNull Uri uri, ContentValues values, String selection,
-            String[] selectionArgs) {
-        
-    	if( ! initializeDB() ) {
-            Log.w(AUTHORITY,"Database unavailable...");
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+
+        int count;
+
+    	if(!initializeDB()) {
+            Log.w(AUTHORITY, "Database unavailable...");
             return 0;
         }
-    	
-        int count;
+
         switch (sUriMatcher.match(uri)) {
             case GOOGLE_AR:
-                count = database.update(DATABASE_TABLES[0], values, selection,
-                        selectionArgs);
+                count = database.update(DATABASE_TABLES[0], values, selection, selectionArgs);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);

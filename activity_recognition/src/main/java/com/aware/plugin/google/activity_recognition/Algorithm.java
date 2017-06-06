@@ -35,7 +35,7 @@ public class Algorithm extends IntentService {
             JSONArray activities = new JSONArray();
             List<DetectedActivity> otherActivities = result.getProbableActivities();
 
-            for(DetectedActivity activity : otherActivities ) {
+            for(DetectedActivity activity : otherActivities) {
                 try {
                     JSONObject item = new JSONObject();
                     item.put("activity", getActivityName(activity.getType()));
@@ -60,14 +60,12 @@ public class Algorithm extends IntentService {
 
             getContentResolver().insert(Google_Activity_Recognition_Data.CONTENT_URI, data);
 
-            if ( Plugin.DEBUG ) {
-            	Log.d(Plugin.TAG, "User is: " + activity_name + " (conf:" + Plugin.current_confidence + ")");
-            }
+            if(Plugin.DEBUG) Log.d(Plugin.TAG, "User is: " + activity_name + " (conf:" + Plugin.current_confidence + ")");
 
-            Intent context = new Intent( Plugin.ACTION_AWARE_GOOGLE_ACTIVITY_RECOGNITION );
-            context.putExtra( Plugin.EXTRA_ACTIVITY, Plugin.current_activity );
-            context.putExtra( Plugin.EXTRA_CONFIDENCE, Plugin.current_confidence );
-            sendBroadcast( context );
+            Intent context = new Intent(Plugin.ACTION_AWARE_GOOGLE_ACTIVITY_RECOGNITION);
+            context.putExtra(Plugin.EXTRA_ACTIVITY, Plugin.current_activity);
+            context.putExtra(Plugin.EXTRA_CONFIDENCE, Plugin.current_confidence);
+            sendBroadcast(context);
         }
     }
 

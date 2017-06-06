@@ -19,6 +19,9 @@ public class Route {
 
         List<Integer> tempManeuverList = new ArrayList<>();
         List<Integer> tempLinkList = new ArrayList<>();
+        List<String> tempInfoCollectionFirst = new ArrayList<>();
+        List<String> tempInfoCollectionSecond = new ArrayList<>();
+
         LatLng[] decisionPoints;
         double[] distances;
         int[] shapePointIndexes;
@@ -37,6 +40,8 @@ public class Route {
                             .getJSONObject(i).getInt("maneuverType"));
                     tempLinkList.add(guidanceNodeCollection.getJSONObject(i)
                             .getJSONArray("linkIds").getInt(0));
+                    tempInfoCollectionFirst.add(guidanceNodeCollection.getJSONObject(i).getJSONArray("infoCollection").getString(0));
+                    tempInfoCollectionSecond.add(guidanceNodeCollection.getJSONObject(i).getJSONArray("infoCollection").getString(1));
                 }
             }
 

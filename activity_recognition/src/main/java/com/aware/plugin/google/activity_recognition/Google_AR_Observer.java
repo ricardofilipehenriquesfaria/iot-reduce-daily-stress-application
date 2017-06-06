@@ -5,13 +5,18 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Handler;
 
-import static java.lang.String.valueOf;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Created by Ricardo on 14-04-2017.
  */
 
 public class Google_AR_Observer extends ContentObserver {
+
+    private static final int GOOGLE_AR_OBSERVER = 1;
+    private static final int ZERO = 0;
+    private static final String GOOGLE_AR_OBSERVER_MESSAGE = "Google_AR_Observer";
 
     private Context mContext;
     private Handler mHandler;
@@ -22,24 +27,27 @@ public class Google_AR_Observer extends ContentObserver {
         mHandler = handler;
     }
 
-    @ Override
+    @Override
     public void onChange (boolean selfChange) {
-        mHandler.obtainMessage(1, getActivityName(mContext)).sendToTarget();
+        deleteEntries(mContext);
+        mHandler.obtainMessage(GOOGLE_AR_OBSERVER, GOOGLE_AR_OBSERVER_MESSAGE).sendToTarget();
     }
 
-    public static String getActivityName(Context context)
-    {
+    private static void deleteEntries(Context context) {
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, ZERO);
+        calendar.set(Calendar.MINUTE, ZERO);
+        calendar.set(Calendar.SECOND, ZERO);
+        calendar.set(Calendar.MILLISECOND, ZERO);
+
         Cursor cursor = context.getContentResolver().query(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI, null, null, null, null);
 
-        if(cursor != null && cursor.moveToLast() && cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.CONFIDENCE)) == 100) {
-            UserActivity.activity = valueOf(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_NAME)));
-            UserActivity.confidence = cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.CONFIDENCE));
+        if(cursor != null && cursor.moveToFirst() && cursor.getCount() > 1) {
+            context.getContentResolver().delete(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI,
+                    "timestamp <" + calendar.getTimeInMillis(),
+                    null);
             cursor.close();
-        } else {
-            UserActivity.activity = "still";
-            UserActivity.confidence = 100;
         }
-
-        return UserActivity.activity;
     }
 }

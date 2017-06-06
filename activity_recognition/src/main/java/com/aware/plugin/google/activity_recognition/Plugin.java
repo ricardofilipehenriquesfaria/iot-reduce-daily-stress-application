@@ -21,20 +21,18 @@ import com.google.android.gms.location.ActivityRecognition;
 
 public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
-    private String PACKAGE_NAME = "com.aware.plugin.google.activity_recognition";
-
     public static final String STATUS_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION = "status_plugin_google_activity_recognition";
     public static final String FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION = "frequency_plugin_google_activity_recognition";
 
-    public static String ACTION_AWARE_GOOGLE_ACTIVITY_RECOGNITION = "ACTION_AWARE_GOOGLE_ACTIVITY_RECOGNITION";
-    public static String EXTRA_ACTIVITY = "activity";
-    public static String EXTRA_CONFIDENCE = "confidence";
-
-    private static GoogleApiClient gARClient;
-    private static PendingIntent gARPending;
+    public static final String ACTION_AWARE_GOOGLE_ACTIVITY_RECOGNITION = "ACTION_AWARE_GOOGLE_ACTIVITY_RECOGNITION";
+    public static final String EXTRA_ACTIVITY = "activity";
+    public static final String EXTRA_CONFIDENCE = "confidence";
 
     public static int current_activity = -1;
     public static int current_confidence = -1;
+
+    private static GoogleApiClient gARClient;
+    private static PendingIntent gARPending;
 
     @Override
     public void onCreate() {
@@ -56,7 +54,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
             }
         };
 
-        if (!is_google_services_available()) {
+        if (!(GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS)) {
             if (DEBUG) Log.e(TAG, "Google Services is not available on this device.");
         } else {
             gARClient = new GoogleApiClient.Builder(this)
@@ -65,12 +63,11 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
                     .addOnConnectionFailedListener(this)
                     .build();
 
-            Intent gARIntent = new Intent(getApplicationContext(), com.aware.plugin.google.activity_recognition.Algorithm.class);
+            Intent gARIntent = new Intent(getApplicationContext(), Algorithm.class);
             gARPending = PendingIntent.getService(getApplicationContext(), 0, gARIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Aware.setSetting(this, Plugin.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, 120);
-
-            Aware.startPlugin(this, PACKAGE_NAME);
+            Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
         }
     }
 
@@ -93,7 +90,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
             Aware.setSetting(this, Plugin.STATUS_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, true);
 
             if (Aware.getSetting(this, Plugin.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION).length() == 0) {
-                Aware.setSetting(this, Plugin.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, 60);
+                Aware.setSetting(this, Plugin.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, 120);
             }
 
             if (gARClient != null && !gARClient.isConnected()) gARClient.connect();
@@ -118,13 +115,8 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
             ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(gARClient, gARPending);
             gARClient.disconnect();
         }
-        Aware.stopAWARE();
-    }
 
-    private boolean is_google_services_available() {
-        GoogleApiAvailability googleApi = GoogleApiAvailability.getInstance();
-        int result = googleApi.isGooglePlayServicesAvailable(this);
-        return (result == ConnectionResult.SUCCESS);
+        Aware.stopAWARE();
     }
 
     @Override
@@ -140,7 +132,6 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
 
     @Override
     public void onConnectionSuspended(int i) {
-        if (DEBUG)
-            Log.w(TAG, "Error connecting to Google's activity recognition services, will try again in 5 minutes");
+        if (DEBUG) Log.w(TAG, "Error connecting to Google's activity recognition services, will try again in 5 minutes");
     }
 }

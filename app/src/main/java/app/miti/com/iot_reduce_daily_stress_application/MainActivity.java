@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.aware.Aware;
 import com.aware.plugin.closed_roads.ClosedRoads;
 import com.aware.plugin.google.activity_recognition.Google_AR_Observer;
+import com.aware.plugin.google.activity_recognition.UserActivity;
 import com.aware.plugin.google.fused_location.CurrentLocation;
 import com.aware.plugin.google.fused_location.LocationObserver;
 import com.aware.plugin.wifi.Provider;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private LatLng location = null;
     private static final String TAG = "MainActivity";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static UserActivity userActivity;
     public static boolean WIFI_ENABLED = false;
     public static boolean WIFI_STATE = false;
     public WifiManager wifiManager;
@@ -89,8 +91,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             menu = navigationView.getMenu();
 
-            String activity = Google_AR_Observer.getActivityName(MainActivity.this);
-            menu.findItem(R.id.nav_activity).setTitle(activity);
+            userActivity = new UserActivity();
+            userActivity.setUserActivity(this);
+            menu.findItem(R.id.nav_activity).setTitle(userActivity.getActivityName());
 
             CurrentLocation currentLocation = new CurrentLocation();
             currentLocation.setCurrentLocation(MainActivity.this);
@@ -165,8 +168,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         switch (message.what) {
             case 1:
-                String activity = (String) message.obj;
-                menu.findItem(R.id.nav_activity).setTitle(activity);
+                userActivity.setUserActivity(getBaseContext());
+                menu.findItem(R.id.nav_activity).setTitle(userActivity.getActivityName());
                 break;
             case 2:
                 String currentLocation = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
