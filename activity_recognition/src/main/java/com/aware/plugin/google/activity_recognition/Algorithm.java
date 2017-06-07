@@ -27,11 +27,9 @@ public class Algorithm extends IntentService {
     protected void onHandleIntent(Intent intent) {
 
         if (ActivityRecognitionResult.hasResult(intent)) {
-            
-            ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 
+            ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
             DetectedActivity mostProbable = result.getMostProbableActivity();
-            
             JSONArray activities = new JSONArray();
             List<DetectedActivity> otherActivities = result.getProbableActivities();
 
@@ -69,7 +67,7 @@ public class Algorithm extends IntentService {
         }
     }
 
-    public static String getActivityName(int type) {
+    private static String getActivityName(int type) {
         switch (type) {
             case DetectedActivity.IN_VEHICLE:
                 return "in_vehicle";

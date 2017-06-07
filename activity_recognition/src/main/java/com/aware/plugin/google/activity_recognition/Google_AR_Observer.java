@@ -14,9 +14,10 @@ import java.util.TimeZone;
 
 public class Google_AR_Observer extends ContentObserver {
 
-    private static final int GOOGLE_AR_OBSERVER = 1;
-    private static final int ZERO = 0;
+    public static final int GOOGLE_AR_OBSERVER = 1;
+
     private static final String GOOGLE_AR_OBSERVER_MESSAGE = "Google_AR_Observer";
+    private static final int ZERO = 0;
 
     private Context mContext;
     private Handler mHandler;

@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private LatLng location = null;
     private static final String TAG = "MainActivity";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private static UserActivity userActivity;
     public static boolean WIFI_ENABLED = false;
     public static boolean WIFI_STATE = false;
     public WifiManager wifiManager;
@@ -91,9 +90,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             menu = navigationView.getMenu();
 
-            userActivity = new UserActivity();
-            userActivity.setUserActivity(this);
-            menu.findItem(R.id.nav_activity).setTitle(userActivity.getActivityName());
+            UserActivity.setUserActivity(this);
+            menu.findItem(R.id.nav_activity).setTitle(UserActivity.getActivityName());
 
             CurrentLocation currentLocation = new CurrentLocation();
             currentLocation.setCurrentLocation(MainActivity.this);
@@ -167,9 +165,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public boolean handleMessage(Message message) {
 
         switch (message.what) {
-            case 1:
-                userActivity.setUserActivity(getBaseContext());
-                menu.findItem(R.id.nav_activity).setTitle(userActivity.getActivityName());
+            case Google_AR_Observer.GOOGLE_AR_OBSERVER:
+                UserActivity.setUserActivity(getBaseContext());
+                menu.findItem(R.id.nav_activity).setTitle(UserActivity.getActivityName());
                 break;
             case 2:
                 String currentLocation = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);

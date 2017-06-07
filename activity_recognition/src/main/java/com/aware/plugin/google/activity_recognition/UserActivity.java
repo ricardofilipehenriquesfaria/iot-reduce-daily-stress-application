@@ -14,67 +14,67 @@ import static java.lang.String.valueOf;
 
 public class UserActivity {
 
-    private String activity_name;
-    private int activity_type;
-    private int confidence;
-    private JSONArray activities;
+    private static String activity_name;
+    private static int activity_type;
+    private static int confidence;
+    private static JSONArray activities;
 
     public UserActivity(){
         super();
     }
 
-    public String getActivityName() {
+    public static String getActivityName() {
         return activity_name;
     }
 
-    public int getActivityType(){
+    public static int getActivityType(){
         return activity_type;
     }
 
-    public int getConfidence() {
+    public static int getConfidence() {
         return confidence;
     }
 
-    public JSONArray getActivities(){
+    public static JSONArray getActivities(){
         return activities;
     }
 
-    private void setActivityName(String activity_name) {
-        this.activity_name = activity_name;
+    private static void setActivityName(String activity_name) {
+        UserActivity.activity_name = activity_name;
     }
 
-    private void setActivityType(int activity_type){
-        this.activity_type = activity_type;
+    private static void setActivityType(int activity_type){
+        UserActivity.activity_type = activity_type;
     }
 
-    private void setConfidence(int confidence){
-        this.confidence = confidence;
+    private static void setConfidence(int confidence){
+        UserActivity.confidence = confidence;
     }
 
-    private void setActivities(JSONArray activities){
-        this.activities = activities;
+    private static void setActivities(JSONArray activities){
+        UserActivity.activities = activities;
     }
 
-    public void setUserActivity(Context context) {
+    public static void setUserActivity(Context context) {
 
         Cursor cursor = context.getContentResolver().query(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI, null, null, null, null);
 
         if(cursor != null && cursor.moveToLast()) {
-            setActivityName(valueOf(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_NAME))));
-            setActivityType(cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_TYPE)));
-            setConfidence(cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.CONFIDENCE)));
+            UserActivity.setActivityName(valueOf(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_NAME))));
+            UserActivity.setActivityType(cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_TYPE)));
+            UserActivity.setConfidence(cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.CONFIDENCE)));
             try {
-                setActivities(new JSONArray(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITIES))));
+                UserActivity.setActivities(new JSONArray(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITIES))));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             cursor.close();
         } else {
-            setActivityName("unknown");
-            setActivityType(4);
-            setConfidence(100);
+            UserActivity.setActivityName("unknown");
+            UserActivity.setActivityType(4);
+            UserActivity.setConfidence(100);
             try {
-                setActivities(new JSONArray("[{\"activity\":\"unknown\",\"confidence\":100}]"));
+                UserActivity.setActivities(new JSONArray("[{\"activity\":\"unknown\",\"confidence\":100}]"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }

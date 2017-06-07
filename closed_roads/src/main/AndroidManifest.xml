@@ -4,17 +4,14 @@
     <application
         android:label="@string/app_name">
 
-        <service
-            android:name="com.aware.plugin.closed_roads.Algorithm"
+        <service android:name="com.aware.plugin.closed_roads.Algorithm"
             android:exported="false" />
 
         <service android:name="com.aware.plugin.closed_roads.JsonParsingService"
             android:exported="false" />
 
-        <service
-            android:name="com.aware.plugin.closed_roads.Plugin"
-            android:exported="false"
-            android:label="@string/app_name" />
+        <service android:name="com.aware.plugin.closed_roads.Plugin"
+            android:exported="false" />
 
         <provider
             android:name="com.aware.plugin.closed_roads.Provider"

@@ -36,7 +36,7 @@ public class JsonParsingService extends IntentService {
         HttpURLConnection httpURLConnection = null;
 
         try {
-            URL url = new URL("http://iotapplication.esy.es");
+            URL url = new URL("http://84.23.192.131:3000");
 
             httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setRequestMethod("GET");
