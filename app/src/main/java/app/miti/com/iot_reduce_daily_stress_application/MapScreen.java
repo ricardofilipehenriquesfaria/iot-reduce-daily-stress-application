@@ -643,14 +643,14 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         }
 
         switch (type) {
-            case "estrada_fechada":
+            case "Encerrado":
                 customCap = new CustomCap(BitmapDescriptorFactory.fromResource(R.mipmap.ic_closed), 40);
                 polyline.setStartCap(customCap);
                 polyline.setEndCap(customCap);
                 polyline.setColor(Color.argb(150, 255, 0, 0));
                 break;
 
-            case "estrada_condicionada":
+            case "Condicionado":
                 customCap = new CustomCap(BitmapDescriptorFactory.fromResource(R.mipmap.ic_conditioned), 40);
                 polyline.setStartCap(customCap);
                 polyline.setEndCap(customCap);

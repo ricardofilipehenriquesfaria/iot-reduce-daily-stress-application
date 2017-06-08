@@ -69,15 +69,17 @@ public class JsonParsingService extends IntentService {
 
                 if(cursor != null)
                 {
-                    if((cursor.moveToLast() && cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA_ID)) < jsonData.getInt("id")) || (cursor.getCount() == 0)) {
+                    if((cursor.moveToLast() && cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data._ID)) < jsonData.getInt("id")) || (cursor.getCount() == 0)) {
 
-                        locationIntent.putExtra("ESTRADA_ID", jsonData.getInt("id"));
-                        locationIntent.putExtra("ESTRADA", jsonData.getString("estrada"));
-                        locationIntent.putExtra("RUA", jsonData.getString("rua"));
-                        locationIntent.putExtra("DATA_INICIO", jsonData.getString("data_inicio"));
-                        locationIntent.putExtra("DATA_FIM", jsonData.getString("data_fim"));
-                        locationIntent.putExtra("HORA_INICIO", jsonData.getString("hora_inicio"));
-                        locationIntent.putExtra("HORA_FIM", jsonData.getString("hora_fim"));
+                        locationIntent.putExtra("CONCELHO", jsonData.getString("concelho"));
+                        locationIntent.putExtra("NOME_VIA", jsonData.getString("nome_via"));
+                        locationIntent.putExtra("LOCALIZACAO", jsonData.getString("localizacao"));
+                        locationIntent.putExtra("ESTADO", jsonData.getString("estado"));
+                        locationIntent.putExtra("JUSTIFICACAO", jsonData.getString("justificacao"));
+                        locationIntent.putExtra("DATA_ENCERRAMENTO", jsonData.getString("data_encerramento"));
+                        locationIntent.putExtra("DATA_REABERTURA", jsonData.getString("data_reabertura"));
+                        locationIntent.putExtra("HORA_ENCERRAMENTO", jsonData.getString("hora_encerramento"));
+                        locationIntent.putExtra("HORA_REABERTURA", jsonData.getString("hora_reabertura"));
                         locationIntent.putExtra("LATITUDE_INICIO", jsonData.getDouble("latitude_inicio"));
                         locationIntent.putExtra("LONGITUDE_INICIO", jsonData.getDouble("longitude_inicio"));
                         locationIntent.putExtra("LATITUDE_FIM", jsonData.getDouble("latitude_fim"));

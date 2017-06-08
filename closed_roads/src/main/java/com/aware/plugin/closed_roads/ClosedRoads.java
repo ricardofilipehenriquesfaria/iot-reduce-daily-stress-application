@@ -63,7 +63,7 @@ public class ClosedRoads {
             Date date = null;
 
             do{
-                String string = cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.DATA_FIM)) + " " + cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.HORA_FIM));
+                String string = cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.DATA_REABERTURA)) + " " + cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.HORA_REABERTURA));
                 DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
                 try {
@@ -76,7 +76,7 @@ public class ClosedRoads {
                     closedRoadsList.add(new ClosedRoads(
                             new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_INICIO)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_INICIO))),
                             new LatLng(cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LATITUDE_FIM)), cursor.getDouble(cursor.getColumnIndex(Provider.Provider_Data.LONGITUDE_FIM))),
-                            cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTRADA)),
+                            cursor.getString(cursor.getColumnIndex(Provider.Provider_Data.ESTADO)),
                             cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_INICIO)),
                             cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data.LINKID_FIM))
                     ));

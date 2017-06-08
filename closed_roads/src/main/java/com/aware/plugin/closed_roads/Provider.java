@@ -50,14 +50,15 @@ public class Provider extends ContentProvider {
         public static final String _ID = "_id";
         public static final String TIMESTAMP = "timestamp";
         public static final String DEVICE_ID = "device_id";
-        public static final String ESTRADA_ID = "estrada_id";
-        public static final String ESTRADA = "estrada";
-        public static final String RUA = "rua";
-        public static final String DATA_INICIO = "data_inicio";
-        public static final String DATA_FIM = "data_fim";
-
-        public static final String HORA_INICIO = "hora_inicio";
-        public static final String HORA_FIM = "hora_fim";
+        public static final String CONCELHO = "concelho";
+        public static final String NOME_VIA = "nome_via";
+        public static final String LOCALIZACAO = "localizacao";
+        public static final String ESTADO = "estado";
+        public static final String JUSTIFICACAO = "justificacao";
+        public static final String DATA_ENCERRAMENTO = "data_encerramento";
+        public static final String DATA_REABERTURA = "data_reabertura";
+        public static final String HORA_ENCERRAMENTO = "hora_encerramento";
+        public static final String HORA_REABERTURA = "hora_reabertura";
         public static final String LATITUDE_INICIO = "latitude_inicio";
         public static final String LATITUDE_FIM = "latitude_fim";
         public static final String LONGITUDE_INICIO = "longitude_inicio";
@@ -70,13 +71,15 @@ public class Provider extends ContentProvider {
             Provider_Data._ID + " integer primary key autoincrement," +
                     Provider_Data.TIMESTAMP + " real default 0," +
                     Provider_Data.DEVICE_ID + " text default ''," +
-                    Provider_Data.ESTRADA_ID + " int default 0," +
-                    Provider_Data.ESTRADA + " text default ''," +
-                    Provider_Data.RUA + " text default ''," +
-                    Provider_Data.DATA_INICIO + " text default ''," +
-                    Provider_Data.DATA_FIM + " text default ''," +
-                    Provider_Data.HORA_INICIO + " text default ''," +
-                    Provider_Data.HORA_FIM + " text default ''," +
+                    Provider_Data.CONCELHO + " text default ''," +
+                    Provider_Data.NOME_VIA + " text default ''," +
+                    Provider_Data.LOCALIZACAO + " text default ''," +
+                    Provider_Data.ESTADO + " text default ''," +
+                    Provider_Data.JUSTIFICACAO + " text default ''," +
+                    Provider_Data.DATA_ENCERRAMENTO + " text default ''," +
+                    Provider_Data.DATA_REABERTURA + " text default ''," +
+                    Provider_Data.HORA_ENCERRAMENTO + " text default ''," +
+                    Provider_Data.HORA_REABERTURA + " text default ''," +
                     Provider_Data.LATITUDE_INICIO + " real default 0," +
                     Provider_Data.LONGITUDE_INICIO + " real default 0," +
                     Provider_Data.LATITUDE_FIM + " real default 0," +
