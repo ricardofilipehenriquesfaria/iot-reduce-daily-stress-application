@@ -67,6 +67,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         WIFI_ENABLED = wifiManager.isWifiEnabled();
         WIFI_STATE = wifiManager.getWifiState() == 3;
 
+        Intent intent = new Intent(this,SocketService.class);
+        this.startService(intent);
+
         if (checkGooglePlayServices()) {
 
             Intent aware = new Intent(this, Aware.class);
