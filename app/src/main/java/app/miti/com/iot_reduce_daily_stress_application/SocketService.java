@@ -4,45 +4,109 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.net.MalformedURLException;
 
 import io.socket.IOAcknowledge;
 import io.socket.IOCallback;
 import io.socket.SocketIO;
+import io.socket.SocketIOException;
 
 /**
  * Created by Ricardo on 10-06-2017.
  */
 
-public class SocketService extends Service implements IOCallback {
+public class SocketService extends Service {
 
-    private SocketIO mSocket;
     private static final String TAG = "SocketService";
     public static final String SERVER_IP = "http://84.23.192.131";
-    public static final int SERVER_PORT = 3000;
+    public static final int SERVER_PORT = 3001;
+
+    private boolean isRunning;
+    private Thread backgroundThread;
 
     @Override
     public void onCreate(){
         super.onCreate();
+        this.isRunning = false;
+        this.backgroundThread = new Thread(backgroundRunnable);
+    }
+
+    private Runnable backgroundRunnable = new Runnable(){
+
+        @Override
+        public void run() {
+            try {
+
+                SocketIO mSocket = new SocketIO(SERVER_IP + ":" + SERVER_PORT);
+                mSocket.connect(new IOCallback() {
+
+                    @Override
+                    public void on(String event, IOAcknowledge ioAcknowledge, Object... args) {
+
+                        switch(event){
+                            case "write":
+                                Log.d(TAG, event + " = " + args[0]);
+                                break;
+                            case "update":
+                                Log.d(TAG, event + " = " + args[0]);
+                                break;
+                            case "delete":
+                                Log.d(TAG, event + " = " + args[0]);
+                                break;
+                            default:
+                                Log.d(TAG, event + " = " + args[0]);
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onMessage(JSONObject json, IOAcknowledge ioAcknowledge) {
+                        Log.d(TAG, json.toString());
+                    }
+
+                    @Override
+                    public void onMessage(String data, IOAcknowledge ioAcknowledge) {
+                        Log.d(TAG, data);
+                    }
+
+                    @Override
+                    public void onError(SocketIOException socketIOException) {
+                        Log.d(TAG, "An Error occured");
+                        socketIOException.printStackTrace();
+                    }
+
+                    @Override
+                    public void onDisconnect() {
+                        Log.d(TAG, "Disconnected");
+                    }
+
+                    @Override
+                    public void onConnect() {
+                        Log.d(TAG, "Connected");
+                    }
+                });
+
+                mSocket.send("Hello Server");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    @Override
+    public void onDestroy() {
+        this.isRunning = false;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
-
-        mSocket = new SocketIO();
-
-        try {
-            mSocket.connect(SERVER_IP + ":" + SERVER_PORT, this);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        if(!this.isRunning){
+            this.isRunning = true;
+            this.backgroundThread.start();
         }
-
-        mSocket.send("Hello Server");
-
         return START_STICKY;
     }
 
@@ -50,40 +114,5 @@ public class SocketService extends Service implements IOCallback {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    public void onMessage(JSONObject jsonObject, IOAcknowledge ioAcknowledge) {
-        try {
-            System.out.println(TAG + " - Server said: " + jsonObject.toString(0));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onMessage(String data, IOAcknowledge ioAcknowledge) {
-        System.out.println(TAG + " - Server said: " + data);
-    }
-
-    @Override
-    public void onDisconnect() {
-        System.out.println(TAG + " - Connection terminated.");
-    }
-
-    @Override
-    public void onConnect() {
-        System.out.println(TAG + " - Connection established");
-    }
-
-    @Override
-    public void on(String event, IOAcknowledge ioAcknowledge, Object... args) {
-        System.out.println(TAG + " - Server triggered event '" + event + "'");
-    }
-
-    @Override
-    public void onError(io.socket.SocketIOException socketIOException) {
-        System.out.println(TAG + " - An Error occured");
-        socketIOException.printStackTrace();
     }
 }

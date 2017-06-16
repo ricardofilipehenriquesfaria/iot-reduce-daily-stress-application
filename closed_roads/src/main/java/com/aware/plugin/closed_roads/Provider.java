@@ -1,5 +1,6 @@
 package com.aware.plugin.closed_roads;
 
+import android.annotation.SuppressLint;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -10,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -20,51 +22,42 @@ import java.util.HashMap;
 
 public class Provider extends ContentProvider {
 
-    public static String AUTHORITY = "app.miti.com.iot_reduce_daily_stress_application.provider.closed_roads";
-
-    public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "closed_roads.db";
-
-    public static final String DB_TBL_TEMPLATE = "closed_roads";
-
+    private static final int DATABASE_VERSION = 1;
     private static final int PROVIDER = 1;
     private static final int PROVIDER_ID = 2;
 
+    public static String AUTHORITY = "app.miti.com.iot_reduce_daily_stress_application.provider.closed_roads";
+    public static final String DATABASE_NAME = "closed_roads.db";
+
     public static final String[] DATABASE_TABLES = {
-            DB_TBL_TEMPLATE
+            "closed_roads"
     };
 
-    public interface AWAREColumns extends BaseColumns {
-        String _ID = "_id";
-        String TIMESTAMP = "timestamp";
-        String DEVICE_ID = "device_id";
-    }
-
-    public static final class Provider_Data implements AWAREColumns {
+    public static final class Provider_Data implements BaseColumns {
         private Provider_Data(){
         }
-        public static final Uri CONTENT_URI = Uri.parse("content://"+ Provider.AUTHORITY + "/closed_roads");
-        public static final String CONTENT_TYPE = "vnd.com.aware.plugin.closed_roads.provider.closed_roads";
-        public static final String CONTENT_ITEM_TYPE = "vnd.com.aware.plugin.closed_roads.provider.closed_roads";
+        static final Uri CONTENT_URI = Uri.parse("content://"+ Provider.AUTHORITY + "/closed_roads");
+        static final String CONTENT_TYPE = "vnd.com.aware.plugin.closed_roads.provider.closed_roads";
+        static final String CONTENT_ITEM_TYPE = "vnd.com.aware.plugin.closed_roads.provider.closed_roads";
 
-        public static final String _ID = "_id";
-        public static final String TIMESTAMP = "timestamp";
-        public static final String DEVICE_ID = "device_id";
-        public static final String CONCELHO = "concelho";
-        public static final String NOME_VIA = "nome_via";
-        public static final String LOCALIZACAO = "localizacao";
-        public static final String ESTADO = "estado";
-        public static final String JUSTIFICACAO = "justificacao";
-        public static final String DATA_ENCERRAMENTO = "data_encerramento";
-        public static final String DATA_REABERTURA = "data_reabertura";
-        public static final String HORA_ENCERRAMENTO = "hora_encerramento";
-        public static final String HORA_REABERTURA = "hora_reabertura";
-        public static final String LATITUDE_INICIO = "latitude_inicio";
-        public static final String LATITUDE_FIM = "latitude_fim";
-        public static final String LONGITUDE_INICIO = "longitude_inicio";
-        public static final String LONGITUDE_FIM = "longitude_fim";
-        public static final String LINKID_INICIO = "linkid_inicio";
-        public static final String LINKID_FIM = "linkid_fim";
+        static final String _ID = "_id";
+        static final String TIMESTAMP = "timestamp";
+        static final String DEVICE_ID = "device_id";
+        static final String CONCELHO = "concelho";
+        static final String NOME_VIA = "nome_via";
+        static final String LOCALIZACAO = "localizacao";
+        static final String ESTADO = "estado";
+        static final String JUSTIFICACAO = "justificacao";
+        static final String DATA_ENCERRAMENTO = "data_encerramento";
+        static final String DATA_REABERTURA = "data_reabertura";
+        static final String HORA_ENCERRAMENTO = "hora_encerramento";
+        static final String HORA_REABERTURA = "hora_reabertura";
+        static final String LATITUDE_INICIO = "latitude_inicio";
+        static final String LATITUDE_FIM = "latitude_fim";
+        static final String LONGITUDE_INICIO = "longitude_inicio";
+        static final String LONGITUDE_FIM = "longitude_fim";
+        static final String LINKID_INICIO = "linkid_inicio";
+        static final String LINKID_FIM = "linkid_fim";
     }
 
     private static final String DB_TBL_TEMPLATE_FIELDS =
@@ -100,26 +93,32 @@ public class Provider extends ContentProvider {
         return uriMatcher;
     }
 
+    private static HashMap<String, String> tableOneHash;
     private DatabaseHelper databaseHelper = null;
     private static SQLiteDatabase database = null;
 
-    private void initializeDatabase() {
-        if (databaseHelper == null)
-            databaseHelper = new DatabaseHelper(getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS);
-        if (database == null)
-            database = databaseHelper.getWritableDatabase();
-    }
+    private boolean initializeDB() {
 
-    private HashMap<String, String> tableOneHash;
+        if (databaseHelper == null) databaseHelper = new DatabaseHelper(getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS);
+
+        if (database == null || ! database.isOpen()) database = databaseHelper.getWritableDatabase();
+
+        return( database != null && databaseHelper != null);
+    }
 
     @Override
     public boolean onCreate() {
         return false;
     }
 
+    @SuppressLint("LongLogTag")
     @Override
-    public int delete(@Nullable Uri uri, String selection, String[] selectionArgs) {
-        initializeDatabase();
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
+
+        if(!initializeDB()) {
+            Log.w(AUTHORITY,"Database unavailable...");
+            return 0;
+        }
 
         database.beginTransaction();
 
@@ -145,7 +144,10 @@ public class Provider extends ContentProvider {
     @Override
     public Uri insert(@Nullable Uri uri, ContentValues initialValues) {
 
-        initializeDatabase();
+        if( ! initializeDB() ) {
+            Log.w(AUTHORITY,"Database unavailable...");
+            return null;
+        }
 
         ContentValues values = (initialValues != null) ? new ContentValues(initialValues) : new ContentValues();
 
@@ -174,7 +176,10 @@ public class Provider extends ContentProvider {
     @Override
     public Cursor query(@Nullable Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
-        initializeDatabase();
+        if( ! initializeDB() ) {
+            Log.w(AUTHORITY,"Database unavailable...");
+            return null;
+        }
 
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         switch (sUriMatcher.match(uri)) {
@@ -218,7 +223,10 @@ public class Provider extends ContentProvider {
     @Override
     public int update(@Nullable Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 
-        initializeDatabase();
+        if( ! initializeDB() ) {
+            Log.w(AUTHORITY,"Database unavailable...");
+            return 0;
+        }
 
         database.beginTransaction();
 
