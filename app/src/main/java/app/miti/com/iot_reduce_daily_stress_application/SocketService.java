@@ -26,6 +26,8 @@ public class SocketService extends Service {
     private boolean isRunning;
     private Thread backgroundThread;
 
+    private SocketIO mSocket;
+
     @Override
     public void onCreate(){
         super.onCreate();
@@ -39,7 +41,7 @@ public class SocketService extends Service {
         public void run() {
             try {
 
-                SocketIO mSocket = new SocketIO(SERVER_IP + ":" + SERVER_PORT);
+                mSocket = new SocketIO(SERVER_IP + ":" + SERVER_PORT);
                 mSocket.connect(new IOCallback() {
 
                     @Override
@@ -85,11 +87,16 @@ public class SocketService extends Service {
                     @Override
                     public void onConnect() {
                         Log.d(TAG, "Connected");
+
+                        String device_data = "{\"manufacturer\":\"" + android.os.Build.MANUFACTURER +
+                                "\",\"model\":\"" + android.os.Build.MODEL +
+                                "\",\"serial\":\"" + android.os.Build.SERIAL + "\"}";
+
+                        if (!device_data.equals("")){
+                            mSocket.emit("device_id", device_data);
+                        }
                     }
                 });
-
-                mSocket.send("Hello Server");
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
