@@ -1,4 +1,4 @@
-package app.miti.com.iot_reduce_daily_stress_application;
+package com.aware.plugin.closed_roads;
 
 import android.app.Service;
 import android.content.Intent;

@@ -27,6 +27,9 @@ public class Plugin extends Aware_Plugin {
         Intent intentService = new Intent(this, JsonParsingService.class);
         startService(intentService);
 
+        Intent intent = new Intent(this,SocketService.class);
+        this.startService(intent);
+
         CONTEXT_PRODUCER = new ContextProducer() {
             @Override
             public void onContext() {

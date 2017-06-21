@@ -48,7 +48,6 @@ dependencies {
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:multidex:1.0.1'
     compile files('libs/mapquest-android-sdk-1.0.5.jar')
-    compile files('libs/socketio.jar')
     compile group: 'commons-io', name: 'commons-io', version: '2.5'
     compile project(':activity_recognition')
     compile project(':location')

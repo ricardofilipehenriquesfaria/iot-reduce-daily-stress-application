@@ -13,6 +13,9 @@
         <service android:name="com.aware.plugin.closed_roads.Plugin"
             android:exported="false" />
 
+        <service android:name="com.aware.plugin.closed_roads.SocketService"
+            android:exported="false" />
+
         <provider
             android:name="com.aware.plugin.closed_roads.Provider"
             android:authorities="${applicationId}.provider.closed_roads"

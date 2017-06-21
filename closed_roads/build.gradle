@@ -51,4 +51,5 @@ dependencies {
     compile "com.android.support:appcompat-v7:25.3.1"
     compile "com.awareframework:aware-core:${aware_libs}@aar"
     compile "com.google.android.gms:play-services-maps:10.2.1"
+    compile files('libs/socketio.jar')
 }
