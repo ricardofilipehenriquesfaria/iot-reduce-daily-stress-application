@@ -2,7 +2,11 @@ package com.aware.plugin.closed_roads;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.database.Cursor;
 import android.support.annotation.Nullable;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by Ricardo on 22-06-2017.
@@ -40,6 +44,32 @@ public class SocketParsingService extends IntentService {
             Intent deleteAlgorithmIntent = new Intent(this, DeleteAlgorithm.class);
             deleteAlgorithmIntent.putExtra("JSONDATA", jsonData);
             startService(deleteAlgorithmIntent);
+
+        } else if (intent.hasExtra("QUERY")){
+
+            String jsonData = intent.getStringExtra("QUERY");
+            JSONObject jsonObject;
+
+            try {
+                jsonObject = new JSONObject(jsonData);
+                Cursor cursor = getContentResolver().query(Provider.Provider_Data.CONTENT_URI, null,  Provider.Provider_Data._ID + "=" + jsonObject.getInt("id"), null, null);
+
+                if (cursor == null || cursor.getCount() < 1){
+                    Intent linkIdIntent = new Intent(this, LinkIdParsingService.class);
+                    linkIdIntent.putExtra("JSONDATA", jsonData);
+                    startService(linkIdIntent);
+                } else {
+                    Intent updateAlgorithmIntent = new Intent(this, UpdateAlgorithm.class);
+                    updateAlgorithmIntent.putExtra("JSONDATA", jsonData);
+                    startService(updateAlgorithmIntent);
+                }
+
+                assert cursor != null;
+                cursor.close();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

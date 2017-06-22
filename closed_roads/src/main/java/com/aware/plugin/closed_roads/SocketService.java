@@ -74,6 +74,12 @@ public class SocketService extends Service {
                         startService(deleteService);
                         Log.d(TAG, event + " = " + args[0]);
                         break;
+                    case "query":
+                        Intent queryService = new Intent(SocketService.this, SocketParsingService.class);
+                        queryService.putExtra("QUERY", String.valueOf(args[0]));
+                        startService(queryService);
+                        Log.d(TAG, event + " = " + args[0]);
+                        break;
                     default:
                         Log.d(TAG, event + " = " + args[0]);
                         break;
