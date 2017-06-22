@@ -4,7 +4,7 @@
     <application
         android:label="@string/app_name">
 
-        <service android:name="com.aware.plugin.closed_roads.Algorithm"
+        <service android:name="com.aware.plugin.closed_roads.InsertAlgorithm"
             android:exported="false" />
 
         <service android:name="com.aware.plugin.closed_roads.URLParsingService"
@@ -20,6 +20,9 @@
             android:exported="false" />
 
         <service android:name="com.aware.plugin.closed_roads.LinkIdParsingService"
+            android:exported="false" />
+
+        <service android:name="com.aware.plugin.closed_roads.UpdateAlgorithm"
             android:exported="false" />
 
         <provider

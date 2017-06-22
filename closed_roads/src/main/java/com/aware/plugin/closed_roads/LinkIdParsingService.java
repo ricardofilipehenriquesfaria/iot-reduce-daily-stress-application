@@ -25,7 +25,7 @@ public class LinkIdParsingService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
 
-        Intent algorithmIntent = new Intent(this, Algorithm.class);
+        Intent algorithmIntent = new Intent(this, InsertAlgorithm.class);
 
         assert intent != null;
         String jsonString = intent.getStringExtra("JSONDATA");

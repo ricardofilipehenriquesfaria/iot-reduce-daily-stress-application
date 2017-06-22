@@ -11,10 +11,10 @@ import com.aware.Aware_Preferences;
  * Created by Ricardo on 20-04-2017.
  */
 
-public class Algorithm extends IntentService {
+public class InsertAlgorithm extends IntentService {
 
-    public Algorithm() {
-        super(Algorithm.class.getName());
+    public InsertAlgorithm() {
+        super(InsertAlgorithm.class.getName());
     }
 
     @Override

@@ -28,6 +28,12 @@ public class SocketParsingService extends IntentService {
 
         } else if (intent.hasExtra("UPDATE")){
 
+            String jsonData = intent.getStringExtra("UPDATE");
+
+            Intent updateAlgorithmIntent = new Intent(this, UpdateAlgorithm.class);
+            updateAlgorithmIntent.putExtra("JSONDATA", jsonData);
+            startService(updateAlgorithmIntent);
+
         } else if (intent.hasExtra("DELETE")){
 
         }

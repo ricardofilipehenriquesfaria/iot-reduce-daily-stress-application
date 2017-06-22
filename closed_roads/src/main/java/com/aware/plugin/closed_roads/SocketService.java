@@ -63,6 +63,9 @@ public class SocketService extends Service {
                         Log.d(TAG, event + " = " + args[0]);
                         break;
                     case "update":
+                        Intent updateService = new Intent(SocketService.this, SocketParsingService.class);
+                        updateService.putExtra("UPDATE", String.valueOf(args[0]));
+                        startService(updateService);
                         Log.d(TAG, event + " = " + args[0]);
                         break;
                     case "delete":
