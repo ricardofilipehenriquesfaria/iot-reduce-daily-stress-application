@@ -25,6 +25,9 @@
         <service android:name="com.aware.plugin.closed_roads.UpdateAlgorithm"
             android:exported="false" />
 
+        <service android:name="com.aware.plugin.closed_roads.DeleteAlgorithm"
+            android:exported="false" />
+
         <provider
             android:name="com.aware.plugin.closed_roads.Provider"
             android:authorities="${applicationId}.provider.closed_roads"

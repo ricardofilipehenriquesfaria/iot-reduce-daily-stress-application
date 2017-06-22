@@ -69,6 +69,9 @@ public class SocketService extends Service {
                         Log.d(TAG, event + " = " + args[0]);
                         break;
                     case "delete":
+                        Intent deleteService = new Intent(SocketService.this, SocketParsingService.class);
+                        deleteService.putExtra("DELETE", String.valueOf(args[0]));
+                        startService(deleteService);
                         Log.d(TAG, event + " = " + args[0]);
                         break;
                     default:

@@ -35,7 +35,11 @@ public class SocketParsingService extends IntentService {
             startService(updateAlgorithmIntent);
 
         } else if (intent.hasExtra("DELETE")){
+            String jsonData = intent.getStringExtra("DELETE");
 
+            Intent deleteAlgorithmIntent = new Intent(this, DeleteAlgorithm.class);
+            deleteAlgorithmIntent.putExtra("JSONDATA", jsonData);
+            startService(deleteAlgorithmIntent);
         }
     }
 }
