@@ -8,6 +8,8 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+
 import io.socket.IOAcknowledge;
 import io.socket.IOCallback;
 import io.socket.SocketIO;
@@ -42,65 +44,75 @@ public class SocketService extends Service {
             try {
 
                 mSocket = new SocketIO(SERVER_IP + ":" + SERVER_PORT);
-                mSocket.connect(new IOCallback() {
-
-                    @Override
-                    public void on(String event, IOAcknowledge ioAcknowledge, Object... args) {
-
-                        switch(event){
-                            case "write":
-                                Log.d(TAG, event + " = " + args[0]);
-                                break;
-                            case "update":
-                                Log.d(TAG, event + " = " + args[0]);
-                                break;
-                            case "delete":
-                                Log.d(TAG, event + " = " + args[0]);
-                                break;
-                            default:
-                                Log.d(TAG, event + " = " + args[0]);
-                                break;
-                        }
-                    }
-
-                    @Override
-                    public void onMessage(JSONObject json, IOAcknowledge ioAcknowledge) {
-                        Log.d(TAG, json.toString());
-                    }
-
-                    @Override
-                    public void onMessage(String data, IOAcknowledge ioAcknowledge) {
-                        Log.d(TAG, data);
-                    }
-
-                    @Override
-                    public void onError(SocketIOException socketIOException) {
-                        Log.d(TAG, "An Error occured");
-                        socketIOException.printStackTrace();
-                    }
-
-                    @Override
-                    public void onDisconnect() {
-                        Log.d(TAG, "Disconnected");
-                    }
-
-                    @Override
-                    public void onConnect() {
-                        Log.d(TAG, "Connected");
-
-                        String device_data = "{\"manufacturer\":\"" + android.os.Build.MANUFACTURER +
-                                "\",\"model\":\"" + android.os.Build.MODEL +
-                                "\",\"serial\":\"" + android.os.Build.SERIAL + "\"}";
-
-                        if (!device_data.equals("")){
-                            mSocket.emit("device_id", device_data);
-                        }
-                    }
-                });
+                mSocket.connect(ioCallback);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
+        IOCallback ioCallback = new IOCallback() {
+
+            @Override
+            public void on(String event, IOAcknowledge ioAcknowledge, Object... args) {
+
+                switch(event){
+                    case "write":
+                        Intent socketIntent = new Intent(SocketService.this, SocketParsingService.class);
+                        socketIntent.putExtra("WRITE", String.valueOf(args[0]));
+                        startService(socketIntent);
+                        Log.d(TAG, event + " = " + args[0]);
+                        break;
+                    case "update":
+                        Log.d(TAG, event + " = " + args[0]);
+                        break;
+                    case "delete":
+                        Log.d(TAG, event + " = " + args[0]);
+                        break;
+                    default:
+                        Log.d(TAG, event + " = " + args[0]);
+                        break;
+                }
+            }
+
+            @Override
+            public void onMessage(JSONObject json, IOAcknowledge ioAcknowledge) {
+                Log.d(TAG, json.toString());
+            }
+
+            @Override
+            public void onMessage(String data, IOAcknowledge ioAcknowledge) {
+                Log.d(TAG, data);
+            }
+
+            @Override
+            public void onError(SocketIOException socketIOException) {
+                try {
+                    mSocket = new SocketIO(SERVER_IP + ":" + SERVER_PORT);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                mSocket.connect(ioCallback);
+                socketIOException.printStackTrace();
+            }
+
+            @Override
+            public void onDisconnect() {
+                Log.d(TAG, "Disconnected");
+            }
+
+            @Override
+            public void onConnect() {
+                Log.d(TAG, "Connected");
+
+                String device_data = "{\"manufacturer\":\"" + android.os.Build.MANUFACTURER +
+                        "\",\"model\":\"" + android.os.Build.MODEL +
+                        "\",\"serial\":\"" + android.os.Build.SERIAL + "\"}";
+
+                if (!device_data.equals("")){
+                    mSocket.emit("device_id", device_data);
+                }
+            }
+        };
     };
 
     @Override

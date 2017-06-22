@@ -7,13 +7,19 @@
         <service android:name="com.aware.plugin.closed_roads.Algorithm"
             android:exported="false" />
 
-        <service android:name="com.aware.plugin.closed_roads.JsonParsingService"
+        <service android:name="com.aware.plugin.closed_roads.URLParsingService"
             android:exported="false" />
 
         <service android:name="com.aware.plugin.closed_roads.Plugin"
             android:exported="false" />
 
         <service android:name="com.aware.plugin.closed_roads.SocketService"
+            android:exported="false" />
+
+        <service android:name="com.aware.plugin.closed_roads.SocketParsingService"
+            android:exported="false" />
+
+        <service android:name="com.aware.plugin.closed_roads.LinkIdParsingService"
             android:exported="false" />
 
         <provider

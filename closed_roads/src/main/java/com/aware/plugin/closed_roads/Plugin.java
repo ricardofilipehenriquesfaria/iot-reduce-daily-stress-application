@@ -24,11 +24,11 @@ public class Plugin extends Aware_Plugin {
 
         TAG = "AWARE::" + getResources().getString(R.string.app_name);
 
-        Intent intentService = new Intent(this, JsonParsingService.class);
-        startService(intentService);
+        Intent urlParsingService = new Intent(this, URLParsingService.class);
+        startService(urlParsingService);
 
-        Intent intent = new Intent(this,SocketService.class);
-        this.startService(intent);
+        Intent socketService = new Intent(this, SocketService.class);
+        this.startService(socketService);
 
         CONTEXT_PRODUCER = new ContextProducer() {
             @Override
