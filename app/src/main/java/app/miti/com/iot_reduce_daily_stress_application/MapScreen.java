@@ -70,6 +70,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import app.miti.com.instruction.InstructionManager;
+
 import static app.miti.com.iot_reduce_daily_stress_application.MainActivity.WIFI_ENABLED;
 
 
@@ -576,7 +578,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 jObject = new JSONObject(jsonData[0]);
                 MapQuestDirectionsParsing parser = new MapQuestDirectionsParsing(getContext());
                 routes = parser.parse(jObject);
-
+                createInstructions(jObject);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -775,5 +777,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             if (slope != 0.0) return Math.round(Math.toDegrees(Math.atan(slope/100)));
             else return 0;
         }
+    }
+
+    private void createInstructions(JSONObject guidance){
+        InstructionManager instructionManager = new InstructionManager(guidance);
     }
 }
