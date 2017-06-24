@@ -355,6 +355,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                     Log.e(TAG, Log.getStackTraceString(e));
                 }
             }
+            createInstructions(jsonResponse);
             return jsonResponse;
         }
 
@@ -578,7 +579,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 jObject = new JSONObject(jsonData[0]);
                 MapQuestDirectionsParsing parser = new MapQuestDirectionsParsing(getContext());
                 routes = parser.parse(jObject);
-                createInstructions(jObject);
             } catch (Exception e) {
                 e.printStackTrace();
             }
