@@ -35,4 +35,20 @@ public class RouteSegment {
     public int getDistance() {
         return distance;
     }
+
+    public void setStartPoint(LatLng startPoint) {
+        this.startPoint = startPoint;
+    }
+
+    public void setEndPoint(LatLng endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    public void setManeuverType(int maneuverType) {
+        this.maneuverType = maneuverType;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
 }

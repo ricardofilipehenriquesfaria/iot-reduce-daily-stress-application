@@ -13,28 +13,19 @@ import java.util.List;
  * Created by Ricardo on 23-06-2017.
  */
 
-public class Route {
+class Route {
 
     private boolean importSuccessful;
-
+    private int currentSegment;
+    private LatLng[] shapePoints;
     private List<RouteSegment> routeSegments;
 
-    private int currentSegment;
+    Route(JSONObject jsonResponse) {
 
-    private LatLng[] shapePoints;
-
-
-    public Route(JSONObject jsonResponse) {
-
-        int[] maneuverType;
-        int[] linkIdsIndex;
-        int[] shapeIndex;
-
-        LatLng[] decisionPoints;
+        int[] shapeIndexes;
         double[] distances;
-
-        List<Integer> maneuverTypeList = new ArrayList<>();
-        List<Integer> linkIdsList = new ArrayList<>();
+        LatLng[] decisionPoints;
+        List<GuidanceNode> guidanceNodes = new ArrayList<>();
 
         try {
             JSONObject guidance = jsonResponse.getJSONObject("guidance");
@@ -42,17 +33,13 @@ public class Route {
 
             for (int i = 0; i < guidanceNodeCollection.length(); i++) {
                 if ((guidanceNodeCollection.getJSONObject(i)).has("maneuverType")) {
-                    maneuverTypeList.add(guidanceNodeCollection.getJSONObject(i).getInt("maneuverType"));
-                    linkIdsList.add(guidanceNodeCollection.getJSONObject(i).getJSONArray("linkIds").getInt(0));
+                    GuidanceNode guidanceNode = new GuidanceNode(
+                            guidanceNodeCollection.getJSONObject(i).getInt("maneuverType"),
+                            guidanceNodeCollection.getJSONObject(i).getJSONArray("linkIds").getInt(0),
+                            guidanceNodeCollection.getJSONObject(i).getJSONArray("infoCollection")
+                    );
+                    guidanceNodes.add(guidanceNode);
                 }
-            }
-
-            maneuverType = new int[maneuverTypeList.size()];
-            linkIdsIndex = new int[linkIdsList.size()];
-
-            for (int i = 0; i < maneuverType.length; i++) {
-                maneuverType[i] = maneuverTypeList.get(i);
-                linkIdsIndex[i] = linkIdsList.get(i);
             }
 
             JSONArray shapePoints = guidance.getJSONArray("shapePoints");
@@ -67,20 +54,18 @@ public class Route {
             JSONArray guidanceLinkCollection = guidance.getJSONArray("GuidanceLinkCollection");
 
             distances = new double[guidanceLinkCollection.length()];
-            shapeIndex = new int[guidanceLinkCollection.length()];
+            shapeIndexes = new int[guidanceLinkCollection.length()];
 
             for (int i = 0; i < guidanceLinkCollection.length(); i++) {
                 distances[i] = guidanceLinkCollection.getJSONObject(i).getDouble("length");
-                shapeIndex[i] = guidanceLinkCollection.getJSONObject(i).getInt("shapeIndex");
+                shapeIndexes[i] = guidanceLinkCollection.getJSONObject(i).getInt("shapeIndex");
             }
 
-            createRouteSegments(maneuverType, linkIdsIndex, decisionPoints, distances, shapeIndex);
+            createRouteSegments(guidanceNodes, decisionPoints, distances, shapeIndexes);
 
             this.currentSegment = 0;
-
-            this.shapePoints = decisionPoints;
-
             this.importSuccessful = true;
+            this.shapePoints = decisionPoints;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -88,38 +73,38 @@ public class Route {
         }
     }
 
-    private void createRouteSegments (int[] maneuverType, int[] linkIdsIndex, LatLng[] decisionPoints, double[] distances, int[] shapeIndex){
+    private void createRouteSegments (List<GuidanceNode> guidanceNodes, LatLng[] decisionPoints, double[] distances, int[] shapeIndex){
 
         this.routeSegments = new ArrayList<>();
 
-        LatLng firstDecisionPoint = decisionPoints[shapeIndex[linkIdsIndex[0]]];
+        LatLng firstDecisionPoint = decisionPoints[shapeIndex[guidanceNodes.get(0).getLinkIds()]];
         double firstDistance = 0;
 
-        for (int i = 0; i < linkIdsIndex[0]; i++) {
+        for (int i = 0; i < guidanceNodes.get(0).getLinkIds(); i++) {
             firstDistance += distances[i];
         }
 
-        RouteSegment firstSegment = new RouteSegment(null, firstDecisionPoint, maneuverType[0], roundDistance(firstDistance));
+        RouteSegment firstSegment = new RouteSegment(null, firstDecisionPoint, guidanceNodes.get(0).getManeuverType(), roundDistance(firstDistance));
 
         this.routeSegments.add(firstSegment);
 
-        for (int i = 1; i < maneuverType.length; i++) {
+        for (int i = 1; i < guidanceNodes.size(); i++) {
 
-            LatLng lastDecisionPoint = decisionPoints[shapeIndex[linkIdsIndex[i - 1]]];
-            LatLng nextDecisionPoint = decisionPoints[shapeIndex[linkIdsIndex[i]]];
+            LatLng lastDecisionPoint = decisionPoints[shapeIndex[guidanceNodes.get(i-1).getLinkIds()]];
+            LatLng nextDecisionPoint = decisionPoints[shapeIndex[guidanceNodes.get(i).getLinkIds()]];
             double nextDistance = 0;
 
-            for (int j = linkIdsIndex[i - 1]; j < linkIdsIndex[i]; j++) {
+            for (int j = guidanceNodes.get(i-1).getLinkIds(); j < guidanceNodes.get(i).getLinkIds(); j++) {
                 nextDistance += distances[j];
             }
 
-            RouteSegment nextSegment = new RouteSegment(lastDecisionPoint, nextDecisionPoint, maneuverType[i], roundDistance(nextDistance));
+            RouteSegment nextSegment = new RouteSegment(lastDecisionPoint, nextDecisionPoint, guidanceNodes.get(i).getManeuverType(), roundDistance(nextDistance));
 
             this.routeSegments.add(nextSegment);
         }
     }
 
-    public int roundDistance(double distance){
+    private int roundDistance(double distance){
         if (distance >= 1) distance = Math.round(distance * 10) * 100;
         else distance = Math.round(distance * 100) * 10;
         return (int) distance;
