@@ -47,6 +47,19 @@ public abstract class Maneuver {
     public static final int TRANSIT_EXIT = 38; // Exit a public transit bus or rail station.
     public static final int TRANSIT_REMAIN_ON = 39; // Remain on the current bus/rail car.
 
+    public static int getFirstDrawableId(int maneuverType){
+        switch (maneuverType) {
+            case STRAIGHT:
+                return R.mipmap.ic_origin_straight;
+            case LEFT:
+                return R.mipmap.ic_origin_left;
+            case RIGHT:
+                return R.mipmap.ic_origin_right;
+            default:
+                return getDrawableId(maneuverType);
+        }
+    }
+
     public static int getDrawableId(int maneuverType) {
         switch (maneuverType) {
             case NONE:
@@ -67,6 +80,10 @@ public abstract class Maneuver {
                 return R.mipmap.ic_right;
             case SHARP_RIGHT:
                 return R.mipmap.ic_sharp_right;
+            case STAY_LEFT:
+                return R.mipmap.ic_stay_left;
+            case STAY_RIGHT:
+                return R.mipmap.ic_stay_right;
             case STAY_STRAIGHT:
                 return R.mipmap.ic_straight;
             case MERGE_LEFT:
@@ -85,6 +102,20 @@ public abstract class Maneuver {
                 return R.mipmap.ic_destination_right;
             case ROUNDABOUT1:
                 return R.mipmap.ic_roundabout1;
+            case ROUNDABOUT2:
+                return R.mipmap.ic_roundabout2;
+            case ROUNDABOUT3:
+                return R.mipmap.ic_roundabout3;
+            case ROUNDABOUT4:
+                return R.mipmap.ic_roundabout4;
+            case ROUNDABOUT5:
+                return R.mipmap.ic_roundabout5;
+            case ROUNDABOUT6:
+                return R.mipmap.ic_roundabout6;
+            case ROUNDABOUT7:
+                return R.mipmap.ic_roundabout7;
+            case ROUNDABOUT8:
+                return R.mipmap.ic_none;
             case TRANSIT_TAKE:
                 return R.mipmap.ic_none;
             case TRANSIT_TRANSFER:
