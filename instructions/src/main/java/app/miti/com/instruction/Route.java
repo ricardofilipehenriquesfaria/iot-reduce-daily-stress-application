@@ -19,13 +19,14 @@ class Route {
     private int currentSegment;
     private LatLng[] shapePoints;
     private List<RouteSegment> routeSegments;
+    public List<GuidanceNode> guidanceNodes;
 
     Route(JSONObject jsonResponse) {
 
         int[] shapeIndexes;
         double[] distances;
         LatLng[] decisionPoints;
-        List<GuidanceNode> guidanceNodes = new ArrayList<>();
+        guidanceNodes = new ArrayList<>();
 
         try {
             JSONObject guidance = jsonResponse.getJSONObject("guidance");

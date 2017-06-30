@@ -11,4 +11,28 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageViewInstruction"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@string/instruction_image"
+            android:layout_alignParentBottom="true" />
+
+        <TextView
+            android:id="@+id/textViewInstruction"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:textSize="8pt"
+            android:textColor="@color/colorBlack"
+            android:layout_toRightOf="@id/imageViewInstruction"
+            android:layout_toEndOf="@id/imageViewInstruction"
+            android:layout_alignBaseline="@id/imageViewInstruction"
+            android:layout_alignParentBottom="true"/>
+
+    </RelativeLayout>
+
 </FrameLayout>

@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -17,12 +18,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aware.plugin.closed_roads.ClosedRoads;
@@ -70,7 +74,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import app.miti.com.instruction.Instruction;
 import app.miti.com.instruction.InstructionManager;
+import app.miti.com.instruction.Maneuver;
 
 import static app.miti.com.iot_reduce_daily_stress_application.MainActivity.WIFI_ENABLED;
 
@@ -79,7 +85,7 @@ import static app.miti.com.iot_reduce_daily_stress_application.MainActivity.WIFI
  * Created by Ricardo on 31-01-2017.
  */
 
-public class MapScreen extends SupportMapFragment implements OnMapReadyCallback, PlaceSelectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MapScreen extends SupportMapFragment implements OnMapReadyCallback, PlaceSelectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, TextToSpeech.OnInitListener {
 
     private static final String TAG = "MapScreen";
     private GoogleMap mGoogleMap = null;
@@ -95,6 +101,20 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private static final String MAPQUEST_STATUS_CODE_OK = "0";
     private LatLng currentLocation = null;
     private static ProgressDialog progressDialog;
+    private TextToSpeech textToSpeech;
+    private ImageView imageViewInstruction;
+    private TextView textViewInstruction;
+    private InstructionManager instructionManager;
+    private boolean nowInstructionChecked = false;
+    private boolean nowInstructionUsed = false;
+    private double lastDistanceDecisionPoint1 = 0;
+    private double lastDistanceDecisionPoint2 = 0;
+    private int distanceCounter = 0;
+
+    private final int MIN_DISTANCE_FOR_NOW_INSTRUCTION = 100;
+    private final int MAX_DISTANCE_TO_DECISION_POINT = 32;
+    private final int DISTANCE_FOR_NOW_INSTRUCTION = 48;
+    private final int MAX_COUNTER_VALUE = 5;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,6 +136,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 .addApi(LocationServices.API)
                 .build();
         mGoogleApiClient.connect();
+
+        imageViewInstruction = (ImageView) getActivity().findViewById(R.id.imageViewInstruction);
+        textViewInstruction = (TextView) getActivity().findViewById(R.id.textViewInstruction);
+
+        textToSpeech = new TextToSpeech(getContext(), this);
 
         getMapAsync(this);
     }
@@ -244,6 +269,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
                 if(WIFI_ENABLED) {
                     if(currentLocation == null){
+                        currentLocation = CurrentLocation.coordinates;
                         requestNewRoute(CurrentLocation.coordinates, destination, "");
                         requestNewMapQuestRoute(CurrentLocation.coordinates, destination);
                         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(CurrentLocation.coordinates));
@@ -305,6 +331,12 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 + "&highwayEfficiency=21.0";
 
         new GetRouteTask(getActivity()).execute(request_url);
+    }
+
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) textToSpeech.setLanguage(Locale.getDefault());
+        else textToSpeech = null;
     }
 
     private class GetRouteTask extends AsyncTask<String, Void, JSONObject> {
@@ -377,8 +409,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             if(statuscode.equals(MAPQUEST_STATUS_CODE_OK)) {
                 MapQuestParserTask mapQuestParserTask = new MapQuestParserTask();
                 mapQuestParserTask.execute(String.valueOf(jsonResponse));
-
-                Route route = new Route(jsonResponse);
             }
         }
     }
@@ -431,11 +461,124 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
     @Override
     public void onLocationChanged(Location location) {
+
+        LatLng newPosition = new LatLng(0,0);
+
         if(location.getAccuracy() <= 100){
-            LatLng newPosition = new LatLng(location.getLatitude(), location.getLongitude());
+            newPosition = new LatLng(location.getLatitude(), location.getLongitude());
             locationMarker.setPosition(newPosition);
             currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         }
+
+        if(instructionManager != null) getInstruction(newPosition, location);
+    }
+
+    public void getInstruction(LatLng newPosition, Location location){
+
+        if(instructionManager != null){
+
+            double currentDecisionPointLatitude = instructionManager.getCurrentInstruction().getEndPoint().latitude;
+            double currentDecisionPointLongitude = instructionManager.getCurrentInstruction().getEndPoint().longitude;
+
+            double nextDecisionPointLatitude = instructionManager.getNextInstructionLocation().latitude;
+            double nextDecisionPointLongitude = instructionManager.getNextInstructionLocation().longitude;
+
+            float[] results = new float[1];
+            Location.distanceBetween(newPosition.latitude, newPosition.longitude, currentDecisionPointLatitude, currentDecisionPointLongitude, results);
+            double distanceCurrentDecisionPoint = results[0];
+
+            if (!nowInstructionChecked && distanceCurrentDecisionPoint >= MIN_DISTANCE_FOR_NOW_INSTRUCTION) nowInstructionUsed = true;
+
+            Location.distanceBetween(newPosition.latitude, newPosition.longitude, nextDecisionPointLatitude, nextDecisionPointLongitude, results);
+
+            double distanceDecisionPoint2 = results[0];
+            nowInstructionChecked = true;
+
+            if (distanceCurrentDecisionPoint < MAX_DISTANCE_TO_DECISION_POINT) updateInstruction();
+            else if (distanceCurrentDecisionPoint < DISTANCE_FOR_NOW_INSTRUCTION && nowInstructionUsed) {
+                updateNowInstruction();
+                nowInstructionUsed = false;
+            } else if (distanceCurrentDecisionPoint > lastDistanceDecisionPoint1 && distanceDecisionPoint2 < lastDistanceDecisionPoint2) {
+                lastDistanceDecisionPoint1 = distanceCurrentDecisionPoint;
+                lastDistanceDecisionPoint2 = distanceDecisionPoint2;
+                distanceCounter++;
+            } else if (distanceCurrentDecisionPoint > lastDistanceDecisionPoint1 && distanceDecisionPoint2 > lastDistanceDecisionPoint2) {
+                lastDistanceDecisionPoint1 = distanceCurrentDecisionPoint;
+                lastDistanceDecisionPoint2 = distanceDecisionPoint2;
+                distanceCounter--;
+            }
+            if (distanceCounter < (-1 * MAX_COUNTER_VALUE)) {
+                updateGuidance();
+            }
+            if (distanceCounter > MAX_COUNTER_VALUE) {
+                updateInstruction();
+            }
+        }
+    }
+
+    private void updateInstruction() {
+        lastDistanceDecisionPoint1 = 0;
+        lastDistanceDecisionPoint2= 0;
+        distanceCounter = 0;
+        nowInstructionChecked = false;
+        nowInstructionUsed = false;
+
+        Instruction nextInstruction = instructionManager.getNextInstruction();
+        displayInstruction(nextInstruction);
+    }
+
+    private void updateNowInstruction() {
+
+        String nowInstruction = null;
+        try {
+            nowInstruction = instructionManager.getManeuverText();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if(nowInstruction != null){
+            textViewInstruction.setText(nowInstruction);
+        }
+        speakInstruction();
+    }
+
+    private void updateGuidance() {
+        textToSpeech.setSpeechRate((float) 1);
+        textToSpeech.speak("Updating guidance", TextToSpeech.QUEUE_FLUSH, null);
+    }
+
+    private void displayInstruction(final app.miti.com.instruction.Instruction instruction) {
+        final String nextVerbalInstruction;
+        try {
+            nextVerbalInstruction = instructionManager.getManeuverText();
+
+            mHandler.post(new Runnable() {
+
+                @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                @Override
+                public void run() {
+
+                    assert nextVerbalInstruction != null;
+                    textViewInstruction.setText(nextVerbalInstruction);
+
+                    GradientDrawable gradientDrawable = new GradientDrawable();
+                    gradientDrawable.setShape(GradientDrawable.RECTANGLE);
+                    gradientDrawable.setColor(Color.rgb(0, 200, 255));
+                    gradientDrawable.setCornerRadius(15.0f);
+
+                    textViewInstruction.setBackground(gradientDrawable);
+                    imageViewInstruction.setImageDrawable(getResources().getDrawable(Maneuver.getFirstDrawableId(instruction.getManeuverType())));
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        speakInstruction();
+    }
+
+    private void speakInstruction() {
+        textToSpeech.setSpeechRate((float) 0.85);
+        textToSpeech.speak(textViewInstruction.getText().toString(), TextToSpeech.QUEUE_FLUSH, null);
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
@@ -780,6 +923,12 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     }
 
     private void createInstructions(JSONObject guidance){
-        InstructionManager instructionManager = new InstructionManager(guidance);
+        instructionManager = new InstructionManager(guidance);
+
+        if (instructionManager.isImportSuccessful()) {
+            instructionManager.createInstructions();
+            Location location  = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            getInstruction(currentLocation, location);
+        }
     }
 }
