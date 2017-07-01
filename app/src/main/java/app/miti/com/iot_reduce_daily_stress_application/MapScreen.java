@@ -110,6 +110,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private double lastDistanceDecisionPoint1 = 0;
     private double lastDistanceDecisionPoint2 = 0;
     private int distanceCounter = 0;
+    private LatLng previousLocation;
 
     private final int MIN_DISTANCE_FOR_NOW_INSTRUCTION = 100;
     private final int MAX_DISTANCE_TO_DECISION_POINT = 32;
@@ -329,7 +330,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 + "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude
                 + "&drivingStyle=2"
                 + "&highwayEfficiency=21.0";
-
+Log.d("teste", request_url);
         new GetRouteTask(getActivity()).execute(request_url);
     }
 
@@ -470,7 +471,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         }
 
-        if(instructionManager != null) getInstruction(newPosition, location);
+        if(currentLocation != null && instructionManager != null && !previousLocation.equals(currentLocation)) getInstruction(newPosition, location);
     }
 
     public void getInstruction(LatLng newPosition, Location location){
@@ -484,27 +485,28 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             double nextDecisionPointLongitude = instructionManager.getNextInstructionLocation().longitude;
 
             float[] results = new float[1];
-            Location.distanceBetween(newPosition.latitude, newPosition.longitude, currentDecisionPointLatitude, currentDecisionPointLongitude, results);
-            double distanceCurrentDecisionPoint = results[0];
 
-            if (!nowInstructionChecked && distanceCurrentDecisionPoint >= MIN_DISTANCE_FOR_NOW_INSTRUCTION) nowInstructionUsed = true;
+            Location.distanceBetween(newPosition.latitude, newPosition.longitude, currentDecisionPointLatitude, currentDecisionPointLongitude, results);
+            double currentComputedDistance = results[0];
+
+            if (!nowInstructionChecked && currentComputedDistance >= MIN_DISTANCE_FOR_NOW_INSTRUCTION) nowInstructionUsed = true;
 
             Location.distanceBetween(newPosition.latitude, newPosition.longitude, nextDecisionPointLatitude, nextDecisionPointLongitude, results);
 
-            double distanceDecisionPoint2 = results[0];
+            double nextComputedDistance = results[0];
             nowInstructionChecked = true;
 
-            if (distanceCurrentDecisionPoint < MAX_DISTANCE_TO_DECISION_POINT) updateInstruction();
-            else if (distanceCurrentDecisionPoint < DISTANCE_FOR_NOW_INSTRUCTION && nowInstructionUsed) {
+            if (currentComputedDistance < MAX_DISTANCE_TO_DECISION_POINT) updateInstruction();
+            else if (currentComputedDistance < DISTANCE_FOR_NOW_INSTRUCTION && nowInstructionUsed) {
                 updateNowInstruction();
                 nowInstructionUsed = false;
-            } else if (distanceCurrentDecisionPoint > lastDistanceDecisionPoint1 && distanceDecisionPoint2 < lastDistanceDecisionPoint2) {
-                lastDistanceDecisionPoint1 = distanceCurrentDecisionPoint;
-                lastDistanceDecisionPoint2 = distanceDecisionPoint2;
+            } else if (currentComputedDistance > lastDistanceDecisionPoint1 && nextComputedDistance < lastDistanceDecisionPoint2) {
+                lastDistanceDecisionPoint1 = currentComputedDistance;
+                lastDistanceDecisionPoint2 = nextComputedDistance;
                 distanceCounter++;
-            } else if (distanceCurrentDecisionPoint > lastDistanceDecisionPoint1 && distanceDecisionPoint2 > lastDistanceDecisionPoint2) {
-                lastDistanceDecisionPoint1 = distanceCurrentDecisionPoint;
-                lastDistanceDecisionPoint2 = distanceDecisionPoint2;
+            } else if (currentComputedDistance > lastDistanceDecisionPoint1 && nextComputedDistance > lastDistanceDecisionPoint2) {
+                lastDistanceDecisionPoint1 = currentComputedDistance;
+                lastDistanceDecisionPoint2 = nextComputedDistance;
                 distanceCounter--;
             }
             if (distanceCounter < (-1 * MAX_COUNTER_VALUE)) {
@@ -539,7 +541,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         if(nowInstruction != null){
             textViewInstruction.setText(nowInstruction);
         }
-        speakInstruction();
+        speakInstruction(nowInstruction);
     }
 
     private void updateGuidance() {
@@ -547,7 +549,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         textToSpeech.speak("Updating guidance", TextToSpeech.QUEUE_FLUSH, null);
     }
 
-    private void displayInstruction(final app.miti.com.instruction.Instruction instruction) {
+    private void displayInstruction(final Instruction instruction) {
         final String nextVerbalInstruction;
         try {
             nextVerbalInstruction = instructionManager.getManeuverText();
@@ -570,15 +572,16 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                     imageViewInstruction.setImageDrawable(getResources().getDrawable(Maneuver.getFirstDrawableId(instruction.getManeuverType())));
                 }
             });
+            speakInstruction(nextVerbalInstruction);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        speakInstruction();
+
     }
 
-    private void speakInstruction() {
+    private void speakInstruction(String instruction) {
         textToSpeech.setSpeechRate((float) 0.85);
-        textToSpeech.speak(textViewInstruction.getText().toString(), TextToSpeech.QUEUE_FLUSH, null);
+        textToSpeech.speak(instruction, TextToSpeech.QUEUE_FLUSH, null);
     }
 
     private class DownloadTask extends AsyncTask<String, String, String> {
@@ -928,7 +931,17 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         if (instructionManager.isImportSuccessful()) {
             instructionManager.createInstructions();
             Location location  = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            previousLocation = currentLocation;
             getInstruction(currentLocation, location);
         }
+    }
+
+    @Override
+    public void onDestroy(){
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onDestroy();
     }
 }

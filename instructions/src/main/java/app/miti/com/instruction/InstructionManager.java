@@ -64,6 +64,7 @@ public class InstructionManager {
             RouteSegment routeSegment = route.getNextSegment();
             Instruction instruction = new Instruction(routeSegment.getStartPoint(), routeSegment.getEndPoint(), routeSegment.getManeuverType(), routeSegment.getDistance());
             instructions.add(instruction);
+            if (instruction.toString() != null) this.instructions.add(instruction);
         }
     }
 
