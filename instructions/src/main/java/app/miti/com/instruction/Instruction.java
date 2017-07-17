@@ -13,7 +13,7 @@ public class Instruction {
     private int maneuverType;
     private int distance;
 
-    public Instruction(LatLng startPoint, LatLng endPoint, int maneuverType, int distance){
+    Instruction(LatLng startPoint, LatLng endPoint, int maneuverType, int distance){
         this.startPoint = startPoint;
         this.endPoint = endPoint;
         this.maneuverType = maneuverType;

@@ -56,6 +56,9 @@ public class InstructionManager {
         if(infoCollection.contains("ER ")){
             replacedString = infoCollection.replaceAll("ER ", "Estrada Regional ");
         }
+        if(infoCollection.contains("sem nome")) {
+            replacedString = String.valueOf(route.guidanceNodes.get(0).getInfoCollection().get(1));
+        }
         return replacedString;
     }
 

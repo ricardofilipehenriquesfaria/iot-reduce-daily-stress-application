@@ -85,7 +85,7 @@ class Route {
             firstDistance += distances[i];
         }
 
-        RouteSegment firstSegment = new RouteSegment(null, firstDecisionPoint, guidanceNodes.get(0).getManeuverType(), roundDistance(firstDistance));
+        RouteSegment firstSegment = new RouteSegment(decisionPoints[0], firstDecisionPoint, guidanceNodes.get(0).getManeuverType(), roundDistance(firstDistance));
 
         this.routeSegments.add(firstSegment);
 
