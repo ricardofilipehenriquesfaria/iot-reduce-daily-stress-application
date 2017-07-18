@@ -70,6 +70,12 @@ public class UpdateAlgorithm extends IntentService{
             if(jsonData.has("longitude_fim")){
                 rowData.put(Provider.Provider_Data.LONGITUDE_FIM, jsonData.getDouble("longitude_fim"));
             }
+            if(jsonData.has("linkid_inicio")){
+                rowData.put(Provider.Provider_Data.LINKID_INICIO, jsonData.getDouble("linkid_inicio"));
+            }
+            if(jsonData.has("linkid_fim")){
+                rowData.put(Provider.Provider_Data.LINKID_FIM, jsonData.getDouble("linkid_fim"));
+            }
             getContentResolver().update(Provider.Provider_Data.CONTENT_URI, rowData, Provider.Provider_Data._ID + "=" + jsonData.getInt("id"), null);
         } catch (JSONException e) {
             e.printStackTrace();

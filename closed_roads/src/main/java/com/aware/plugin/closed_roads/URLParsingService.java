@@ -60,7 +60,7 @@ public class URLParsingService extends IntentService {
         try {
 
             JSONArray jsonArray = new JSONArray(stringBuilder.toString());
-            Intent linkIdIntent = new Intent(this, LinkIdParsingService.class);
+            Intent insertAlgorithmIntent = new Intent(this, InsertAlgorithm.class);
 
             for (int i = 0; i < jsonArray.length(); i++) {
 
@@ -70,8 +70,8 @@ public class URLParsingService extends IntentService {
                 if(cursor != null)
                 {
                     if((cursor.moveToLast() && cursor.getInt(cursor.getColumnIndex(Provider.Provider_Data._ID)) < jsonData.getInt("id")) || (cursor.getCount() == 0)) {
-                        linkIdIntent.putExtra("JSONDATA", jsonData.toString());
-                        startService(linkIdIntent);
+                        insertAlgorithmIntent.putExtra("JSONDATA", jsonData.toString());
+                        startService(insertAlgorithmIntent);
                     }
                     cursor.close();
                 }

@@ -19,9 +19,6 @@
         <service android:name="com.aware.plugin.closed_roads.SocketParsingService"
             android:exported="false" />
 
-        <service android:name="com.aware.plugin.closed_roads.LinkIdParsingService"
-            android:exported="false" />
-
         <service android:name="com.aware.plugin.closed_roads.UpdateAlgorithm"
             android:exported="false" />
 

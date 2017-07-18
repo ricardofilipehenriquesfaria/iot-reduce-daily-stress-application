@@ -26,9 +26,9 @@ public class SocketParsingService extends IntentService {
 
             String jsonData = intent.getStringExtra("WRITE");
 
-            Intent linkIdIntent = new Intent(this, LinkIdParsingService.class);
-            linkIdIntent.putExtra("JSONDATA", jsonData);
-            startService(linkIdIntent);
+            Intent insertAlgorithmIntent = new Intent(this, InsertAlgorithm.class);
+            insertAlgorithmIntent.putExtra("JSONDATA", jsonData);
+            startService(insertAlgorithmIntent);
 
         } else if (intent.hasExtra("UPDATE")){
 
@@ -55,9 +55,9 @@ public class SocketParsingService extends IntentService {
                 Cursor cursor = getContentResolver().query(Provider.Provider_Data.CONTENT_URI, null,  Provider.Provider_Data._ID + "=" + jsonObject.getInt("id"), null, null);
 
                 if (cursor == null || cursor.getCount() < 1){
-                    Intent linkIdIntent = new Intent(this, LinkIdParsingService.class);
-                    linkIdIntent.putExtra("JSONDATA", jsonData);
-                    startService(linkIdIntent);
+                    Intent insertAlgorithmIntent = new Intent(this, InsertAlgorithm.class);
+                    insertAlgorithmIntent.putExtra("JSONDATA", jsonData);
+                    startService(insertAlgorithmIntent);
                 } else {
                     Intent updateAlgorithmIntent = new Intent(this, UpdateAlgorithm.class);
                     updateAlgorithmIntent.putExtra("JSONDATA", jsonData);
