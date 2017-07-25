@@ -8,7 +8,6 @@
       <module fileurl="file://$PROJECT_DIR$/instructions/instructions.iml" filepath="$PROJECT_DIR$/instructions/instructions.iml" />
       <module fileurl="file://$PROJECT_DIR$/iot-reduce-daily-stress-application.iml" filepath="$PROJECT_DIR$/iot-reduce-daily-stress-application.iml" />
       <module fileurl="file://$PROJECT_DIR$/location/location.iml" filepath="$PROJECT_DIR$/location/location.iml" />
-      <module fileurl="file://$PROJECT_DIR$/openCV/openCV.iml" filepath="$PROJECT_DIR$/openCV/openCV.iml" />
       <module fileurl="file://$PROJECT_DIR$/wifi/wifi.iml" filepath="$PROJECT_DIR$/wifi/wifi.iml" />
     </modules>
   </component>

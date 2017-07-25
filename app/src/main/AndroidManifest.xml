@@ -48,12 +48,6 @@
             tools:ignore="UnusedAttribute">
         </activity>
 
-        <activity android:name=".CameraActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:parentActivityName=".MainActivity"
-            tools:ignore="UnusedAttribute">
-        </activity>
-
         <provider
             android:name="app.miti.com.iot_reduce_daily_stress_application.PolylineProvider"
             android:authorities="${applicationId}.provider.polyline"

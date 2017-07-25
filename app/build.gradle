@@ -52,7 +52,6 @@ dependencies {
     compile project(':activity_recognition')
     compile project(':location')
     compile project(':closed_roads')
-    compile project(':openCV')
     compile project(':wifi')
     compile project(':instructions')
 }
