@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/closed_roads" />
             <option value="$PROJECT_DIR$/instructions" />
             <option value="$PROJECT_DIR$/location" />
+            <option value="$PROJECT_DIR$/roads_width" />
             <option value="$PROJECT_DIR$/wifi" />
           </set>
         </option>

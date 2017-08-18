@@ -54,4 +54,5 @@ dependencies {
     compile project(':closed_roads')
     compile project(':wifi')
     compile project(':instructions')
+    compile project(':roads_width')
 }
