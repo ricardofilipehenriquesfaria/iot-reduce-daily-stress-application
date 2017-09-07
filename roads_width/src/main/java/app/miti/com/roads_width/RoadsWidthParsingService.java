@@ -5,6 +5,10 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,6 +57,28 @@ public class RoadsWidthParsingService extends IntentService{
         } finally {
             assert httpURLConnection != null;
             httpURLConnection.disconnect();
+        }
+
+        try {
+
+            JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+
+                JSONObject jsonData = jsonArray.getJSONObject(i);
+
+                RoadsWidth roadsWidth = new RoadsWidth(jsonData.getInt("id"),
+                        jsonData.getString("toponimo"),
+                        jsonData.getString("categoria"),
+                        jsonData.getString("tipo_uso"),
+                        jsonData.getInt("extensao_via"),
+                        jsonData.getDouble("largura_via"),
+                        jsonData.getString("tipo_pavimento"),
+                        jsonData.getString("estado_conservacao")
+                );
+            }
+        } catch (JSONException e) {
+            Log.e("Error parsing data: ", e.toString());
         }
     }
 }
