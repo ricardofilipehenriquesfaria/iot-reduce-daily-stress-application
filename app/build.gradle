@@ -55,4 +55,5 @@ dependencies {
     compile project(':wifi')
     compile project(':instructions')
     compile project(':roads_width')
+    compile project(':elevations')
 }

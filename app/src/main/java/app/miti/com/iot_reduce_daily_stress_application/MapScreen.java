@@ -3,12 +3,14 @@ package app.miti.com.iot_reduce_daily_stress_application;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.net.Uri;
@@ -24,6 +26,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -57,7 +60,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -74,6 +76,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import app.miti.com.elevation.ElevationService;
 import app.miti.com.instruction.Instruction;
 import app.miti.com.instruction.InstructionManager;
 import app.miti.com.instruction.Maneuver;
@@ -95,6 +98,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private Polyline mapQuestPolyline = null;
     private Marker marker = null;
     private Marker locationMarker = null;
+    ArrayList<Marker> elevationMarker = new ArrayList<>();
     private LatLngBounds boundsMadeira = new LatLngBounds(new LatLng(32.621831, -17.283089), new LatLng(32.910233, -16.621391));
     private GoogleApiClient mGoogleApiClient = null;
     private String MAPQUEST_API_KEY;
@@ -180,6 +184,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             if(mGoogleMap != null && isResumed())
                 mGoogleMap.setMyLocationEnabled(true);
         }
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(ElevationBroadcastReceiver, new IntentFilter("SLOPE"));
     }
 
     @Override
@@ -190,6 +195,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             mGoogleMap.setMyLocationEnabled(false);
         }
         if(mGoogleApiClient.isConnected()) LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(ElevationBroadcastReceiver);
     }
 
     @Override
@@ -261,6 +267,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                     marker.remove();
                     if (polyline != null) polyline.remove();
                     if (mapQuestPolyline != null) mapQuestPolyline.remove();
+                    if(elevationMarker != null){
+                        for (Marker marker: elevationMarker) {
+                            marker.remove();
+                        }
+                    }
                 }
 
                 options.position(destination);
@@ -330,7 +341,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 + "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude
                 + "&drivingStyle=2"
                 + "&highwayEfficiency=21.0";
-Log.d("teste", request_url);
+
         new GetRouteTask(getActivity()).execute(request_url);
     }
 
@@ -689,8 +700,9 @@ Log.d("teste", request_url);
                 }
 
                 if(value){
-                    ElevationTask elevationTask = new ElevationTask();
-                    elevationTask.execute(arrayPoints);
+                    Intent intent = new Intent(getActivity(), ElevationService.class);
+                    intent.putExtra("ELEVATIONS", arrayListPoints);
+                    getActivity().startService(intent);
                 }
 
                 lineOptions.addAll(arrayListPoints);
@@ -759,8 +771,9 @@ Log.d("teste", request_url);
                 }
 
                 if(value){
-                    ElevationTask elevationTask = new ElevationTask();
-                    elevationTask.execute(arrayPoints);
+                    Intent intent = new Intent(getActivity(), ElevationService.class);
+                    intent.putExtra("ELEVATIONS", arrayListPoints);
+                    getActivity().startService(intent);
                 }
 
                 lineOptions.addAll(arrayListPoints);
@@ -813,118 +826,6 @@ Log.d("teste", request_url);
         polyline.setClickable(true);
     }
 
-    private class ElevationTask extends AsyncTask<LatLng, Void, JSONObject> {
-
-        LatLng mElevations[] = null;
-
-        @Override
-        protected JSONObject doInBackground(LatLng... elevations) {
-
-            mElevations = elevations;
-            JSONObject jsonObject = null;
-            int r;
-
-            try {
-                String stringUrl = "http://open.mapquestapi.com/elevation/v1/profile?key=hUuNdwLPB9fzsW1N1Zh5XeeWpqAYEqrU&latLngCollection=";
-                int value = 0;
-                for (LatLng elevation : elevations) {
-
-                    if(value == 0){
-                        stringUrl = stringUrl + String.valueOf(elevation.latitude) + "," + String.valueOf(elevation.longitude);
-                        value = 1;
-                    }
-                    else{
-                        stringUrl = stringUrl + "," + String.valueOf(elevation.latitude) + "," + String.valueOf(elevation.longitude);
-                    }
-                }
-                url = new URL(stringUrl);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.connect();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                assert urlConnection != null;
-                InputStream inputStream = urlConnection.getInputStream();
-
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ((r = inputStream.read()) != -1)
-                    stringBuilder.append((char) r);
-
-                jsonObject = new JSONObject(String.valueOf(stringBuilder));
-
-                inputStream.close();
-
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-            return jsonObject;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject jsonObject) {
-
-            try {
-
-                JSONArray elevationProfile = jsonObject.getJSONArray("elevationProfile");
-                double distance[] = new double[elevationProfile.length()];
-                double height[] = new double[elevationProfile.length()];
-                int statusCode = jsonObject.getJSONObject("info").getInt("statuscode");
-                double controlVariable = 0.1;
-                int previousIndex = 0;
-
-                for(int i = 0; i < elevationProfile.length(); i++) {
-
-                    height[i] = ((JSONObject) elevationProfile.get(i)).getDouble("height");
-                    distance[i] = ((JSONObject) elevationProfile.get(i)).getDouble("distance");
-
-                    if(i != 0 && statusCode == 0){
-
-                        if(distance[i] >= controlVariable || i == (elevationProfile.length()-1)){
-
-                            controlVariable = (Math.floor(distance[i] * 10) / 10) + 0.1;
-
-                            Double distanceCalc = (distance[i] - distance[previousIndex]) * 1000;
-                            Double heightCalc = height[i] - height[previousIndex];
-                            Double slope = getSlope(heightCalc, distanceCalc);
-                            Double slopeDegrees = getSlopeDegrees(heightCalc, distanceCalc);
-
-                            previousIndex = i;
-
-                            if(slope >= 10) {
-                                mGoogleMap.addMarker(new MarkerOptions()
-                                        .position(mElevations[i])
-                                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_slope))
-                                        .title(String.valueOf(slope) + "%, " + String.valueOf(slopeDegrees) + "º"));
-                            }
-                        }
-                    }
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        double getSlope(double height, double distance) {
-            if (distance == 0.0d) return Math.abs(0.0d);
-            else return Math.round(Math.abs(height / distance) * 100);
-        }
-
-        Bitmap resizeIcons(int drawable){
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat.getDrawable(getActivity(), drawable);
-            Bitmap bitmap = bitmapDrawable.getBitmap();
-            return Bitmap.createScaledBitmap(bitmap, 40, 40, false);
-        }
-
-        double getSlopeDegrees(double height, double distance){
-            double slope = getSlope(height, distance);
-            if (slope != 0.0) return Math.round(Math.toDegrees(Math.atan(slope/100)));
-            else return 0;
-        }
-    }
-
     private void createInstructions(JSONObject guidance){
         instructionManager = new InstructionManager(guidance);
 
@@ -944,4 +845,22 @@ Log.d("teste", request_url);
         }
         super.onDestroy();
     }
+
+    private BroadcastReceiver ElevationBroadcastReceiver = new BroadcastReceiver(){
+        int i = 0;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            LatLng elevation = intent.getExtras().getParcelable("elevation");
+            Double slope = intent.getDoubleExtra("slope", 0);
+            Double slopeDegrees = intent.getDoubleExtra("slopeDegrees", 0);
+
+            if(elevation != null) {
+                elevationMarker.add(mGoogleMap.addMarker(new MarkerOptions()
+                        .position(elevation)
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_slope))
+                        .title(String.valueOf(slope) + "%, " + String.valueOf(slopeDegrees) + "º")));
+            }
+        }
+    };
 }
