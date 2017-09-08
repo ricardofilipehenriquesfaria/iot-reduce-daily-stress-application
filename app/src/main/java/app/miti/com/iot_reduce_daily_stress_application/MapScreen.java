@@ -185,6 +185,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 mGoogleMap.setMyLocationEnabled(true);
         }
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(ElevationBroadcastReceiver, new IntentFilter("SLOPE"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(RoutesBroadcastReceiver, new IntentFilter("ROUTE"));
     }
 
     @Override
@@ -196,6 +197,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         }
         if(mGoogleApiClient.isConnected()) LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(ElevationBroadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(RoutesBroadcastReceiver);
     }
 
     @Override
@@ -342,87 +344,15 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 + "&drivingStyle=2"
                 + "&highwayEfficiency=21.0";
 
-        new GetRouteTask(getActivity()).execute(request_url);
+        Intent intent = new Intent(getActivity(), app.miti.com.routes.RoutesService.class);
+        intent.putExtra("ROUTES", request_url);
+        getActivity().startService(intent);
     }
 
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) textToSpeech.setLanguage(Locale.getDefault());
         else textToSpeech = null;
-    }
-
-    private class GetRouteTask extends AsyncTask<String, Void, JSONObject> {
-
-        private GetRouteTask(Activity activity) {
-            progressDialog = new ProgressDialog(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            progressDialog.setMessage(getResources().getString(R.string.waiting_route));
-            progressDialog.show();
-            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    GetRouteTask.this.cancel(true);
-                }
-            });
-        }
-
-        @Override
-        protected JSONObject doInBackground(String... strings) {
-
-            URLConnection urlConnection;
-            InputStream inputStream = null;
-            JSONObject jsonResponse = null;
-
-            try {
-                URL url = new URL(strings[0]);
-
-                urlConnection = url.openConnection();
-
-                inputStream = urlConnection.getInputStream();
-                String string = IOUtils.toString( urlConnection.getInputStream(), "utf-8");
-
-                jsonResponse = new JSONObject(string.replace("renderAdvancedNarrative(", "").replace(")", ""));
-
-            }catch (MalformedURLException e){
-                Log.e(TAG, Log.getStackTraceString(e));
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-            } finally {
-                try{
-                    assert inputStream != null;
-                    inputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, Log.getStackTraceString(e));
-                }
-            }
-            createInstructions(jsonResponse);
-            return jsonResponse;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject jsonResponse) {
-
-            if (progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-
-            String statuscode = "-1";
-            try{
-                JSONObject info = jsonResponse.getJSONObject("info");
-                statuscode = info.optString("statuscode");
-            } catch (JSONException e) {
-                Log.e(TAG, Log.getStackTraceString(e));
-            }
-
-            if(statuscode.equals(MAPQUEST_STATUS_CODE_OK)) {
-                MapQuestParserTask mapQuestParserTask = new MapQuestParserTask();
-                mapQuestParserTask.execute(String.valueOf(jsonResponse));
-            }
-        }
     }
 
     @Override
@@ -860,6 +790,35 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                         .position(elevation)
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_slope))
                         .title(String.valueOf(slope) + "%, " + String.valueOf(slopeDegrees) + "º")));
+            }
+        }
+    };
+
+    private BroadcastReceiver RoutesBroadcastReceiver = new BroadcastReceiver(){
+        int i = 0;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            JSONObject jsonResponse = null;
+            try {
+                jsonResponse = new JSONObject(intent.getStringExtra("JSONRESPONSE"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            createInstructions(jsonResponse);
+
+            String statuscode = "-1";
+            try{
+                JSONObject info = jsonResponse.getJSONObject("info");
+                statuscode = info.optString("statuscode");
+            } catch (JSONException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+
+            if(statuscode.equals(MAPQUEST_STATUS_CODE_OK)) {
+                MapQuestParserTask mapQuestParserTask = new MapQuestParserTask();
+                mapQuestParserTask.execute(String.valueOf(jsonResponse));
             }
         }
     };

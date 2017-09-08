@@ -56,4 +56,5 @@ dependencies {
     compile project(':instructions')
     compile project(':roads_width')
     compile project(':elevations')
+    compile project(':routes')
 }

@@ -1,1 +1,1 @@
-include ':app', ':activity_recognition', ':location', ':closed_roads', ':wifi', ':instructions', ':roads_width', ':elevations'
+include ':app', ':activity_recognition', ':location', ':closed_roads', ':wifi', ':instructions', ':roads_width', ':elevations', ':routes'
