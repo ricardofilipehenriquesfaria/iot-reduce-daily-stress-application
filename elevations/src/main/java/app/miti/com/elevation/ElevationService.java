@@ -123,7 +123,7 @@ public class ElevationService extends IntentService {
     }
 
     private void sendBroadcast (LatLng elevation, Double slope, Double slopeDegrees){
-        Intent intent = new Intent ("SLOPE");
+        Intent intent = new Intent ("ROADELEVATIONS");
         intent.putExtra("elevation", elevation);
         intent.putExtra("slope", slope);
         intent.putExtra("slopeDegrees", slopeDegrees);

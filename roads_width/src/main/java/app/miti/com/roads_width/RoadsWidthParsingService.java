@@ -67,7 +67,7 @@ public class RoadsWidthParsingService extends IntentService{
 
                 JSONObject jsonData = jsonArray.getJSONObject(i);
 
-                RoadsWidth roadsWidth = new RoadsWidth(jsonData.getInt("id"),
+                RoadsWidth.setRoadsWidthList(new RoadsWidth(jsonData.getInt("id"),
                         jsonData.getString("toponimo"),
                         jsonData.getString("categoria"),
                         jsonData.getString("tipo_uso"),
@@ -75,7 +75,7 @@ public class RoadsWidthParsingService extends IntentService{
                         jsonData.getDouble("largura_via"),
                         jsonData.getString("tipo_pavimento"),
                         jsonData.getString("estado_conservacao")
-                );
+                ));
             }
         } catch (JSONException e) {
             Log.e("Error parsing data: ", e.toString());

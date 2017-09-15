@@ -1,10 +1,15 @@
 package app.miti.com.roads_width;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Ricardo on 08-09-2017.
  */
 
 public class RoadsWidth{
+
+    public static List<RoadsWidth> roadsWidthList = new ArrayList<>();
 
     private int id;
     private String toponimo;
@@ -92,5 +97,13 @@ public class RoadsWidth{
 
     public void setEstadoConservacao(String estado_conservacao) {
         this.estado_conservacao = estado_conservacao;
+    }
+
+    public static void setRoadsWidthList(RoadsWidth roadsWidth){
+        roadsWidthList.add(roadsWidth);
+    }
+
+    public List<RoadsWidth> getRoadsWidthList(){
+        return roadsWidthList;
     }
 }

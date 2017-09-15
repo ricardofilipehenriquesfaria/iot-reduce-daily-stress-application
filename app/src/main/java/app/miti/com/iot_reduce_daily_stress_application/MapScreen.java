@@ -1,11 +1,8 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -14,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,7 +23,6 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,27 +54,18 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 
-import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 import app.miti.com.elevation.ElevationService;
 import app.miti.com.instruction.Instruction;
 import app.miti.com.instruction.InstructionManager;
 import app.miti.com.instruction.Maneuver;
+import app.miti.com.roads_width.RoadsWidthParsingService;
+import app.miti.com.routes.RoutesService;
 
 import static app.miti.com.iot_reduce_daily_stress_application.MainActivity.WIFI_ENABLED;
 
@@ -90,21 +76,14 @@ import static app.miti.com.iot_reduce_daily_stress_application.MainActivity.WIFI
 
 public class MapScreen extends SupportMapFragment implements OnMapReadyCallback, PlaceSelectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, TextToSpeech.OnInitListener {
 
-    private static final String TAG = "MapScreen";
     private GoogleMap mGoogleMap = null;
-    private HttpURLConnection urlConnection = null;
-    private URL url = null;
-    private Polyline polyline = null;
     private Polyline mapQuestPolyline = null;
     private Marker marker = null;
     private Marker locationMarker = null;
     ArrayList<Marker> elevationMarker = new ArrayList<>();
     private LatLngBounds boundsMadeira = new LatLngBounds(new LatLng(32.621831, -17.283089), new LatLng(32.910233, -16.621391));
     private GoogleApiClient mGoogleApiClient = null;
-    private String MAPQUEST_API_KEY;
-    private static final String MAPQUEST_STATUS_CODE_OK = "0";
     private LatLng currentLocation = null;
-    private static ProgressDialog progressDialog;
     private TextToSpeech textToSpeech;
     private ImageView imageViewInstruction;
     private TextView textViewInstruction;
@@ -124,8 +103,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        MAPQUEST_API_KEY = getResources().getString(R.string.access_token);
 
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getActivity().getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         autocompleteFragment.setOnPlaceSelectedListener(this);
@@ -158,7 +135,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             switch (message.what) {
                 case 3:
                     for(int i = 0; i < ClosedRoads.closedRoadsList.size(); i++) {
-                        requestNewRoute(
+                        requestClosedRoute(
                                 ClosedRoads.closedRoadsList.get(i).getInitialCoordinates(),
                                 ClosedRoads.closedRoadsList.get(i).getFinalCoordinates(),
                                 ClosedRoads.closedRoadsList.get(i).getEstrada());
@@ -184,7 +161,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             if(mGoogleMap != null && isResumed())
                 mGoogleMap.setMyLocationEnabled(true);
         }
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(ElevationBroadcastReceiver, new IntentFilter("SLOPE"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(ElevationsBroadcastReceiver, new IntentFilter("ROADELEVATIONS"));
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(RoutesBroadcastReceiver, new IntentFilter("ROUTE"));
     }
 
@@ -196,7 +173,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             mGoogleMap.setMyLocationEnabled(false);
         }
         if(mGoogleApiClient.isConnected()) LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(ElevationBroadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(ElevationsBroadcastReceiver);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(RoutesBroadcastReceiver);
     }
 
@@ -210,7 +187,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     public void onStop() {
         super.onStop();
         if(mGoogleApiClient.isConnected()) LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        if (mGoogleApiClient != null) mGoogleApiClient.disconnect();
+        if(mGoogleApiClient != null) mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -252,7 +229,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         });
 
         for(int i = 0; i < ClosedRoads.closedRoadsList.size(); i++) {
-            requestNewRoute(
+            requestClosedRoute(
                     ClosedRoads.closedRoadsList.get(i).getInitialCoordinates(),
                     ClosedRoads.closedRoadsList.get(i).getFinalCoordinates(),
                     ClosedRoads.closedRoadsList.get(i).getEstrada());
@@ -267,7 +244,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
                 if(marker != null) {
                     marker.remove();
-                    if (polyline != null) polyline.remove();
                     if (mapQuestPolyline != null) mapQuestPolyline.remove();
                     if(elevationMarker != null){
                         for (Marker marker: elevationMarker) {
@@ -284,12 +260,10 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 if(WIFI_ENABLED) {
                     if(currentLocation == null){
                         currentLocation = CurrentLocation.coordinates;
-                        requestNewRoute(CurrentLocation.coordinates, destination, "");
-                        requestNewMapQuestRoute(CurrentLocation.coordinates, destination);
+                        requestRoute(CurrentLocation.coordinates, destination);
                         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(CurrentLocation.coordinates));
                     }else{
-                        requestNewRoute(currentLocation, destination, "");
-                        requestNewMapQuestRoute(currentLocation, destination);
+                        requestRoute(currentLocation, destination);
                         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
                     }
                 }
@@ -299,18 +273,20 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         });
     }
 
-    public void requestNewRoute(LatLng origin, LatLng destination, String estrada){
+    private void requestClosedRoute(LatLng originPosition, LatLng destinationPosition, String estrada){
 
-        String stringOrigin = "origin=" + origin.latitude + "," + origin.longitude;
-        String stringDestination = "destination=" + destination.latitude + "," + destination.longitude;
+        Intent intent = new Intent(getActivity(), RoutesService.class);
+        intent.putExtra("ESTRADA", estrada);
 
-        String parameters = stringOrigin + "&" + stringDestination + "&sensor=false&mode=driving";
+        Bundle args = new Bundle();
+        args.putParcelable("ORIGINPOSITION", originPosition);
+        args.putParcelable("DESTINATIONPOSITION", destinationPosition);
 
-        DownloadTask downloadTask = new DownloadTask(estrada);
-        downloadTask.execute("https://maps.googleapis.com/maps/api/directions/json?" + parameters);
+        intent.putExtra("BUNDLE", args);
+        getActivity().startService(intent);
     }
 
-    private void requestNewMapQuestRoute (LatLng originPosition, LatLng destinationPosition){
+    private void requestRoute (LatLng originPosition, LatLng destinationPosition){
 
         String mustAvoidLinkIds = "";
 
@@ -324,28 +300,14 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             }
         }
 
-        String request_url = "http://open.mapquestapi.com/guidance/v1/route?key="
-                + MAPQUEST_API_KEY
-                + "&callback=renderAdvancedNarrative"
-                + "&outFormat=json"
-                + "&routeType=fastest"
-                + "&timeType=1"
-                + "&enhancedNarrative=false"
-                + "&shapeFormat=raw"
-                + "&generalize=0"
-                + "&narrativeType=text"
-                + "&fishbone=false"
-                + "&callback=renderBasicInformation"
-                + "&locale=" + Locale.getDefault()
-                + "&unit=m"
-                + "&mustAvoidLinkIds=" + mustAvoidLinkIds
-                + "&from=" + originPosition.latitude + "," + originPosition.longitude
-                + "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude
-                + "&drivingStyle=2"
-                + "&highwayEfficiency=21.0";
+        Intent intent = new Intent(getActivity(), RoutesService.class);
+        intent.putExtra("MUSTAVOIDLINKIDS", mustAvoidLinkIds);
 
-        Intent intent = new Intent(getActivity(), app.miti.com.routes.RoutesService.class);
-        intent.putExtra("ROUTES", request_url);
+        Bundle args = new Bundle();
+        args.putParcelable("ORIGINPOSITION", originPosition);
+        args.putParcelable("DESTINATIONPOSITION", destinationPosition);
+
+        intent.putExtra("BUNDLE", args);
         getActivity().startService(intent);
     }
 
@@ -358,12 +320,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     @Override
     public void onPlaceSelected(Place place) {
 
-        if (currentLocation == null) requestNewRoute(CurrentLocation.coordinates, place.getLatLng(), "");
-        else requestNewRoute(currentLocation, place.getLatLng(), "");
+        if (currentLocation == null) requestRoute(CurrentLocation.coordinates, place.getLatLng());
+        else requestRoute(currentLocation, place.getLatLng());
 
         if(marker != null){
             marker.remove();
-            if (polyline != null) polyline.remove();
             if (mapQuestPolyline != null) mapQuestPolyline.remove();
             marker.setPosition(place.getLatLng());
             marker.setTitle(String.valueOf(place.getAddress()));
@@ -412,10 +373,10 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         }
 
-        if(currentLocation != null && instructionManager != null && !previousLocation.equals(currentLocation)) getInstruction(newPosition, location);
+        if(previousLocation!= null && currentLocation != null && instructionManager != null && !previousLocation.equals(currentLocation)) getInstruction(newPosition);
     }
 
-    public void getInstruction(LatLng newPosition, Location location){
+    public void getInstruction(LatLng newPosition){
 
         if(instructionManager != null){
 
@@ -517,211 +478,11 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
     private void speakInstruction(String instruction) {
         textToSpeech.setSpeechRate((float) 0.85);
         textToSpeech.speak(instruction, TextToSpeech.QUEUE_FLUSH, null);
-    }
-
-    private class DownloadTask extends AsyncTask<String, String, String> {
-
-        private String mEstrada;
-
-        private DownloadTask(String estrada){
-            mEstrada = estrada;
-        }
-
-        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-        @Override
-        protected String doInBackground(String... string) {
-
-            String data = null;
-
-            try {
-                url = new URL(string[0]);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.connect();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            assert urlConnection != null;
-            try (InputStream inputStream = urlConnection.getInputStream()) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-                StringBuilder stringBuilder = new StringBuilder();
-
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    stringBuilder .append(line);
-                }
-
-                data = stringBuilder.toString();
-
-                bufferedReader.close();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                urlConnection.disconnect();
-            }
-            return data;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            ParserTask parserTask = new ParserTask(mEstrada);
-            parserTask.execute(result);
-        }
-    }
-
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
-        private String mEstrada;
-
-        private ParserTask(String estrada){
-            mEstrada = estrada;
-        }
-
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
-            JSONObject jObject;
-            List<List<HashMap<String, String>>> routes = null;
-
-            try {
-                jObject = new JSONObject(jsonData[0]);
-                DirectionsParsing parser = new DirectionsParsing(getContext());
-
-                routes = parser.parse(jObject);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return routes;
-        }
-
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            PolylineOptions lineOptions;
-
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
-            Boolean value = mSharedPreference.getBoolean("INCLINACAO", false);
-
-            for (int i = 0; i < result.size(); i++) {
-
-                ArrayList<LatLng> arrayListPoints = new ArrayList<>();
-                lineOptions = new PolylineOptions();
-                List<HashMap<String, String>> path = result.get(i);
-                LatLng arrayPoints[] = new LatLng[path.size()];
-
-                for (int j = 0; j < path.size(); j++) {
-
-                    HashMap<String, String>  point = path.get(j);
-
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-
-                    arrayListPoints.add(position);
-                    arrayPoints[j] = position;
-                }
-
-                if(value){
-                    Intent intent = new Intent(getActivity(), ElevationService.class);
-                    intent.putExtra("ELEVATIONS", arrayListPoints);
-                    getActivity().startService(intent);
-                }
-
-                lineOptions.addAll(arrayListPoints);
-                lineOptions.width(8);
-                lineOptions.geodesic(true);
-
-                polyline = mGoogleMap.addPolyline(lineOptions);
-                polyline.setJointType(JointType.ROUND);
-                polyline.setTag(mEstrada);
-                setPolylineStyle(polyline);
-            }
-
-            mGoogleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
-                public void onPolylineClick(Polyline polyline) {
-                    int strokeColor = ~polyline.getColor();
-                    polyline.setColor(strokeColor);
-                }
-            });
-        }
-    }
-
-    private class MapQuestParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
-            JSONObject jObject;
-            List<List<HashMap<String, String>>> routes = null;
-
-            try {
-
-                jObject = new JSONObject(jsonData[0]);
-                MapQuestDirectionsParsing parser = new MapQuestDirectionsParsing(getContext());
-                routes = parser.parse(jObject);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return routes;
-        }
-
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-
-            PolylineOptions lineOptions;
-
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
-            Boolean value = mSharedPreference.getBoolean("INCLINACAO", false);
-
-            for (int i = 0; i < result.size(); i++) {
-
-                ArrayList<LatLng> arrayListPoints = new ArrayList<>();
-                lineOptions = new PolylineOptions();
-                List<HashMap<String, String>> path = result.get(i);
-                LatLng arrayPoints[] = new LatLng[path.size()];
-
-                for (int j = 0; j < path.size(); j++) {
-
-                    HashMap<String, String>  point = path.get(j);
-
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-
-                    arrayListPoints.add(position);
-                    arrayPoints[j] = position;
-                }
-
-                if(value){
-                    Intent intent = new Intent(getActivity(), ElevationService.class);
-                    intent.putExtra("ELEVATIONS", arrayListPoints);
-                    getActivity().startService(intent);
-                }
-
-                lineOptions.addAll(arrayListPoints);
-                lineOptions.width(8);
-                lineOptions.geodesic(true);
-
-                mapQuestPolyline = mGoogleMap.addPolyline(lineOptions);
-                mapQuestPolyline.setJointType(JointType.ROUND);
-                setPolylineStyle(mapQuestPolyline);
-            }
-
-            mGoogleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
-                public void onPolylineClick(Polyline polyline) {
-                    int strokeColor = ~polyline.getColor();
-                    polyline.setColor(strokeColor);
-                }
-            });
-        }
     }
 
     private void setPolylineStyle(Polyline polyline){
@@ -761,9 +522,8 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
         if (instructionManager.isImportSuccessful()) {
             instructionManager.createInstructions();
-            Location location  = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             previousLocation = currentLocation;
-            getInstruction(currentLocation, location);
+            getInstruction(currentLocation);
         }
     }
 
@@ -776,7 +536,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         super.onDestroy();
     }
 
-    private BroadcastReceiver ElevationBroadcastReceiver = new BroadcastReceiver(){
+    private BroadcastReceiver ElevationsBroadcastReceiver = new BroadcastReceiver(){
         int i = 0;
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -795,30 +555,60 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     };
 
     private BroadcastReceiver RoutesBroadcastReceiver = new BroadcastReceiver(){
-        int i = 0;
+
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            JSONObject jsonResponse = null;
-            try {
-                jsonResponse = new JSONObject(intent.getStringExtra("JSONRESPONSE"));
-            } catch (JSONException e) {
-                e.printStackTrace();
+            ArrayList<LatLng> arrayListPoints = intent.getParcelableArrayListExtra("ARRAYLISTPOINTS");
+
+            if (intent.hasExtra("JSONRESPONSE")){
+                try {
+                    createInstructions(new JSONObject(intent.getStringExtra("JSONRESPONSE")));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
 
-            createInstructions(jsonResponse);
+            PolylineOptions lineOptions = null;
 
-            String statuscode = "-1";
-            try{
-                JSONObject info = jsonResponse.getJSONObject("info");
-                statuscode = info.optString("statuscode");
-            } catch (JSONException e) {
-                Log.e(TAG, Log.getStackTraceString(e));
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+            Boolean value = mSharedPreference.getBoolean("INCLINACAO", false);
+
+            for (int i = 0; i < arrayListPoints.size(); i++) {
+
+                lineOptions = new PolylineOptions();
+
+                if(!intent.hasExtra("ESTRADA")){
+                    Intent roadsWidthIntent = new Intent(getActivity(), RoadsWidthParsingService.class);
+                    roadsWidthIntent.putExtra("LATITUDE", arrayListPoints.get(i).latitude);
+                    roadsWidthIntent.putExtra("LONGITUDE", arrayListPoints.get(i).longitude);
+                    getActivity().startService(roadsWidthIntent);
+                }
+
+                lineOptions.addAll(arrayListPoints);
+                lineOptions.width(8);
+                lineOptions.geodesic(true);
             }
 
-            if(statuscode.equals(MAPQUEST_STATUS_CODE_OK)) {
-                MapQuestParserTask mapQuestParserTask = new MapQuestParserTask();
-                mapQuestParserTask.execute(String.valueOf(jsonResponse));
+            mapQuestPolyline = mGoogleMap.addPolyline(lineOptions);
+            mapQuestPolyline.setJointType(JointType.ROUND);
+
+            if(intent.hasExtra("ESTRADA")){
+                mapQuestPolyline.setTag(intent.getStringExtra("ESTRADA"));
+            }
+            setPolylineStyle(mapQuestPolyline);
+
+            mGoogleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+                public void onPolylineClick(Polyline polyline) {
+                    int strokeColor = ~polyline.getColor();
+                    polyline.setColor(strokeColor);
+                }
+            });
+
+            if(value && !intent.hasExtra("ESTRADA")){
+                Intent elevationsIntent = new Intent(getActivity(), ElevationService.class);
+                elevationsIntent.putExtra("ELEVATIONS", arrayListPoints);
+                getActivity().startService(elevationsIntent);
             }
         }
     };
