@@ -5,6 +5,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,8 +16,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.util.ArrayList;
 
 /**
  * Created by Ricardo on 03-08-2017.
@@ -31,19 +36,27 @@ public class RoadsWidthParsingService extends IntentService{
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        Double latitude = intent.getDoubleExtra("LATITUDE", 0);
-        Double longitude = intent.getDoubleExtra("LONGITUDE", 0);
+        assert intent != null;
+        ArrayList<LatLng> coordinatesList = intent.getParcelableArrayListExtra("COORDINATES");
 
         StringBuilder stringBuilder = new StringBuilder();
-        HttpURLConnection httpURLConnection = null;
+        URLConnection urlConnection;
 
         try {
-            URL url = new URL("http://172.104.130.173:8000/?latitude=" + String.valueOf(latitude) + "&longitude=" + String.valueOf(longitude));
+            String stringUrl = "http://172.104.130.173:8000/?latitude=";
 
-            httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestMethod("GET");
+            for (int i = 0; i < coordinatesList.size(); i++) {
+                if (i == 0) stringUrl = stringUrl + String.valueOf(coordinatesList.get(i).latitude);
+                else stringUrl = stringUrl + "&latitude=" + String.valueOf(coordinatesList.get(i).latitude);
+            }
+            for (int i = 0; i < coordinatesList.size(); i++) {
+                if (i == 0) stringUrl = stringUrl + "&longitude=" + String.valueOf(coordinatesList.get(i).longitude);
+                else stringUrl = stringUrl + "&longitude=" + String.valueOf(coordinatesList.get(i).longitude);
+            }
 
-            InputStream inputStream = new BufferedInputStream(httpURLConnection.getInputStream());
+            urlConnection = new URL(stringUrl).openConnection();
+
+            InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             String line;
@@ -51,34 +64,32 @@ public class RoadsWidthParsingService extends IntentService{
             while ((line = bufferedReader.readLine()) != null) {
                 stringBuilder.append(line);
             }
-
+            inputStream.close();
         } catch (IOException e) {
             Log.e("Error in HTTP connection: ", e.toString());
-        } finally {
-            assert httpURLConnection != null;
-            httpURLConnection.disconnect();
         }
 
         try {
-
-            JSONArray jsonArray = new JSONArray(stringBuilder.toString());
+            JSONArray jsonArray = new JSONArray(URLDecoder.decode(stringBuilder.toString(), "UTF-8"));
 
             for (int i = 0; i < jsonArray.length(); i++) {
 
-                JSONObject jsonData = jsonArray.getJSONObject(i);
-
-                RoadsWidth.setRoadsWidthList(new RoadsWidth(jsonData.getInt("id"),
-                        jsonData.getString("toponimo"),
-                        jsonData.getString("categoria"),
-                        jsonData.getString("tipo_uso"),
-                        jsonData.getInt("extensao_via"),
-                        jsonData.getDouble("largura_via"),
-                        jsonData.getString("tipo_pavimento"),
-                        jsonData.getString("estado_conservacao")
+                String jsonData = jsonArray.getString(i);
+                JSONObject jsonObject = new JSONObject(jsonData);
+                RoadsWidth.setRoadsWidthList(new RoadsWidth(jsonObject.getInt("id"),
+                        jsonObject.getString("toponimo"),
+                        jsonObject.getString("categoria"),
+                        jsonObject.getString("tipo_uso"),
+                        jsonObject.getInt("extensao_via"),
+                        jsonObject.getDouble("largura_via"),
+                        jsonObject.getString("tipo_pavimento"),
+                        jsonObject.getString("estado_conservacao")
                 ));
             }
         } catch (JSONException e) {
             Log.e("Error parsing data: ", e.toString());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
     }
 }

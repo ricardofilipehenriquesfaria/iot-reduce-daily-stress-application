@@ -111,11 +111,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             addMapFragment();
         }
-
-        Intent roadsWidthIntent = new Intent(this, app.miti.com.roads_width.RoadsWidthParsingService.class);
-        roadsWidthIntent.putExtra("LATITUDE", 32.6470059);
-        roadsWidthIntent.putExtra("LONGITUDE", -16.8984633);
-        startService(roadsWidthIntent);
     }
 
     private void initializeWifiPlugin(){

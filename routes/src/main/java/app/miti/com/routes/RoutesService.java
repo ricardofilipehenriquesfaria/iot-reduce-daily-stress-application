@@ -74,13 +74,15 @@ public class RoutesService extends IntentService {
                                 + "&fishbone=false"
                                 + "&callback=renderBasicInformation"
                                 + "&locale=" + Locale.getDefault()
-                                + "&unit=m"
+                                + "&unit=k"
                                 + "&from=" + originPosition.latitude + "," + originPosition.longitude
                                 + "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude
                                 + "&drivingStyle=2"
                                 + "&highwayEfficiency=21.0";
 
                     } else if (intent.hasExtra("MUSTAVOIDLINKIDS")){
+
+                        mustAvoidLinkIds = intent.getStringExtra("MUSTAVOIDLINKIDS");
 
                         requestUrl = "http://open.mapquestapi.com/directions/v2/route?key="
                                 + getResources().getString(R.string.access_token)
@@ -95,7 +97,7 @@ public class RoutesService extends IntentService {
                                 + "&fishbone=false"
                                 + "&callback=renderBasicInformation"
                                 + "&locale=" + Locale.getDefault()
-                                + "&unit=m"
+                                + "&unit=k"
                                 + "&mustAvoidLinkIds=" + mustAvoidLinkIds
                                 + "&from=" + originPosition.latitude + "," + originPosition.longitude
                                 + "&to=" + destinationPosition.latitude + "," + destinationPosition.longitude
@@ -166,10 +168,8 @@ public class RoutesService extends IntentService {
         Intent intent = new Intent ("ROUTE");
         intent.putParcelableArrayListExtra("ARRAYLISTPOINTS", arrayPoints);
 
-        if(!estrada.equals("")){
-            intent.putExtra("ESTRADA", estrada);
-            intent.putExtra("JSONRESPONSE", jsonResponse.toString());
-        }
+        if(!estrada.equals("")) intent.putExtra("ESTRADA", estrada);
+        else intent.putExtra("JSONRESPONSE", jsonResponse.toString());
 
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }

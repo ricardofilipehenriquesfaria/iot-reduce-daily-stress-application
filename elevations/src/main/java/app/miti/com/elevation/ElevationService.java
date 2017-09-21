@@ -36,23 +36,17 @@ public class ElevationService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
 
         assert intent != null;
-        ArrayList<LatLng> elevationsList = intent.getParcelableArrayListExtra("ELEVATIONS");
+        ArrayList<LatLng> coordinatesList = intent.getParcelableArrayListExtra("COORDINATES");
 
         JSONObject jsonObject = null;
         URLConnection urlConnection = null;
 
         try {
             String stringUrl = "http://open.mapquestapi.com/elevation/v1/profile?key=hUuNdwLPB9fzsW1N1Zh5XeeWpqAYEqrU&latLngCollection=";
-            int value = 0;
-            for (LatLng elevation : elevationsList) {
 
-                if(value == 0){
-                    stringUrl = stringUrl + String.valueOf(elevation.latitude) + "," + String.valueOf(elevation.longitude);
-                    value = 1;
-                }
-                else{
-                    stringUrl = stringUrl + "," + String.valueOf(elevation.latitude) + "," + String.valueOf(elevation.longitude);
-                }
+            for (int i = 0; i < coordinatesList.size(); i++) {
+                if (i == 0) stringUrl = stringUrl + String.valueOf(coordinatesList.get(i).latitude) + "," + String.valueOf(coordinatesList.get(i).longitude);
+                else stringUrl = stringUrl + "," + String.valueOf(coordinatesList.get(i).latitude) + "," + String.valueOf(coordinatesList.get(i).longitude);
             }
 
             urlConnection = new URL(stringUrl).openConnection();
@@ -107,7 +101,7 @@ public class ElevationService extends IntentService {
                         previousIndex = i;
 
                         if(slope >= 10) {
-                            sendBroadcast(elevationsList.get(i), slope, slopeDegrees);
+                            sendBroadcast(coordinatesList.get(i), slope, slopeDegrees);
                         }
                     }
                 }

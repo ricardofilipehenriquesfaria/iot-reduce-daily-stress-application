@@ -577,14 +577,6 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             for (int i = 0; i < arrayListPoints.size(); i++) {
 
                 lineOptions = new PolylineOptions();
-
-                if(!intent.hasExtra("ESTRADA")){
-                    Intent roadsWidthIntent = new Intent(getActivity(), RoadsWidthParsingService.class);
-                    roadsWidthIntent.putExtra("LATITUDE", arrayListPoints.get(i).latitude);
-                    roadsWidthIntent.putExtra("LONGITUDE", arrayListPoints.get(i).longitude);
-                    getActivity().startService(roadsWidthIntent);
-                }
-
                 lineOptions.addAll(arrayListPoints);
                 lineOptions.width(8);
                 lineOptions.geodesic(true);
@@ -605,10 +597,16 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 }
             });
 
-            if(value && !intent.hasExtra("ESTRADA")){
-                Intent elevationsIntent = new Intent(getActivity(), ElevationService.class);
-                elevationsIntent.putExtra("ELEVATIONS", arrayListPoints);
-                getActivity().startService(elevationsIntent);
+            if(!intent.hasExtra("ESTRADA")){
+                if(value){
+                    Intent elevationsIntent = new Intent(getActivity(), ElevationService.class);
+                    elevationsIntent.putExtra("COORDINATES", arrayListPoints);
+                    getActivity().startService(elevationsIntent);
+                }
+
+                Intent roadsWidthIntent = new Intent(getActivity(), RoadsWidthParsingService.class);
+                roadsWidthIntent.putExtra("COORDINATES", arrayListPoints);
+                getActivity().startService(roadsWidthIntent);
             }
         }
     };
