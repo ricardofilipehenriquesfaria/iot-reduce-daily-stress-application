@@ -44,7 +44,7 @@ public class InstructionManager {
 
     public String getManeuverText() throws JSONException {
 
-        String infoCollection = String.valueOf(route.guidanceNodes.get(0).getInfoCollection().get(0));
+        String infoCollection = String.valueOf(route.narrative[0]);
         String replacedString = "";
 
         if(infoCollection.contains("VR 1")) {
@@ -57,7 +57,7 @@ public class InstructionManager {
             replacedString = infoCollection.replaceAll("ER ", "Estrada Regional ");
         }
         if(infoCollection.contains("sem nome")) {
-            replacedString = String.valueOf(route.guidanceNodes.get(0).getInfoCollection().get(1));
+            replacedString = String.valueOf(route.narrative[0]);
         }
         return replacedString;
     }
