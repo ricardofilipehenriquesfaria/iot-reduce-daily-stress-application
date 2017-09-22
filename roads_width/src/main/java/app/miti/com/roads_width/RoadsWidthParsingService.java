@@ -3,6 +3,8 @@ package app.miti.com.roads_width;
 import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -76,7 +78,8 @@ public class RoadsWidthParsingService extends IntentService{
 
                 String jsonData = jsonArray.getString(i);
                 JSONObject jsonObject = new JSONObject(jsonData);
-                RoadsWidth.setRoadsWidthList(new RoadsWidth(jsonObject.getInt("id"),
+                RoadsWidth.setRoadsWidthList(new RoadsWidth(coordinatesList.get(i),
+                        jsonObject.getInt("id"),
                         jsonObject.getString("toponimo"),
                         jsonObject.getString("categoria"),
                         jsonObject.getString("tipo_uso"),
@@ -86,11 +89,20 @@ public class RoadsWidthParsingService extends IntentService{
                         jsonObject.getString("estado_conservacao")
                 ));
             }
+            sendBroadcast(RoadsWidth.getRoadsWidthList());
         } catch (JSONException e) {
             Log.e("Error parsing data: ", e.toString());
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+    }
+
+    private void sendBroadcast (ArrayList<RoadsWidth> roadsWidthList){
+        Intent intent = new Intent ("ROADSWIDTH");
+        Bundle args = new Bundle();
+        args.putSerializable("ROADSWIDTHS", roadsWidthList);
+        intent.putExtra("BUNDLE",args);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 }
 

@@ -1,7 +1,5 @@
 package app.miti.com.instruction;
 
-import android.util.Log;
-
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -35,7 +33,13 @@ class Route {
         try {
 
             JSONObject route = jsonResponse.getJSONObject("route");
-            JSONObject shape = route.getJSONObject("shape");
+            JSONObject shape = null;
+
+            if (route.has("shape")) {
+                shape = route.getJSONObject("shape");
+            }
+
+            assert shape != null;
             JSONArray maneuverIndexes = shape.getJSONArray("maneuverIndexes");
 
             maneuverIndexesArray = new int[maneuverIndexes.length()];
@@ -63,7 +67,6 @@ class Route {
 
             for (int i = 0; i < maneuvers.length(); i++) {
                 narrative[i] = maneuvers.getJSONObject(i).getString("narrative");
-                Log.d("teste1", String.valueOf(narrative[i]));
                 distance[i] = maneuvers.getJSONObject(i).getDouble("distance");
                 turnType[i] = maneuvers.getJSONObject(i).getInt("turnType");
 

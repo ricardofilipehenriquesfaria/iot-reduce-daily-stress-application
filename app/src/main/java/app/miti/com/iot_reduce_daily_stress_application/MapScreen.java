@@ -64,6 +64,7 @@ import app.miti.com.elevation.ElevationService;
 import app.miti.com.instruction.Instruction;
 import app.miti.com.instruction.InstructionManager;
 import app.miti.com.instruction.Maneuver;
+import app.miti.com.roads_width.RoadsWidth;
 import app.miti.com.roads_width.RoadsWidthParsingService;
 import app.miti.com.routes.RoutesService;
 
@@ -163,6 +164,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         }
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(ElevationsBroadcastReceiver, new IntentFilter("ROADELEVATIONS"));
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(RoutesBroadcastReceiver, new IntentFilter("ROUTE"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(RoutesWidthBroadcastReceiver, new IntentFilter("ROADSWIDTH"));
     }
 
     @Override
@@ -175,6 +177,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         if(mGoogleApiClient.isConnected()) LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(ElevationsBroadcastReceiver);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(RoutesBroadcastReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(RoutesWidthBroadcastReceiver);
     }
 
     @Override
@@ -608,6 +611,16 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 roadsWidthIntent.putExtra("COORDINATES", arrayListPoints);
                 getActivity().startService(roadsWidthIntent);
             }
+        }
+    };
+
+    private BroadcastReceiver RoutesWidthBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Bundle args = intent.getBundleExtra("BUNDLE");
+            ArrayList<RoadsWidth> roadsWidths = (ArrayList<RoadsWidth>) args.getSerializable("ROADSWIDTHS");
         }
     };
 }

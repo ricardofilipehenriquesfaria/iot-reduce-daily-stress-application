@@ -1,7 +1,8 @@
 package app.miti.com.roads_width;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Ricardo on 08-09-2017.
@@ -9,8 +10,9 @@ import java.util.List;
 
 public class RoadsWidth{
 
-    public static List<RoadsWidth> roadsWidthList = new ArrayList<>();
+    public static ArrayList<RoadsWidth> roadsWidthList = new ArrayList<>();
 
+    private LatLng coordinates;
     private int id;
     private String toponimo;
     private String categoria;
@@ -24,7 +26,8 @@ public class RoadsWidth{
         super();
     }
 
-    public RoadsWidth(int id, String toponimo, String categoria, String tipo_uso, int extensao_via, double largura_via, String tipo_pavimento, String estado_conservacao) {
+    public RoadsWidth(LatLng coordinates, int id, String toponimo, String categoria, String tipo_uso, int extensao_via, double largura_via, String tipo_pavimento, String estado_conservacao) {
+        this.coordinates = coordinates;
         this.id = id;
         this.toponimo = toponimo;
         this.categoria = categoria;
@@ -33,6 +36,10 @@ public class RoadsWidth{
         this.largura_via = largura_via;
         this.tipo_pavimento = tipo_pavimento;
         this.estado_conservacao = estado_conservacao;
+    }
+
+    public LatLng getCoordinates(){
+        return coordinates;
     }
 
     public int getId() {
@@ -65,6 +72,10 @@ public class RoadsWidth{
 
     public String getEstadoConservacao() {
         return estado_conservacao;
+    }
+
+    public void setCoordinates(LatLng coordinates){
+        this.coordinates = coordinates;
     }
 
     public void setId(int id) {
@@ -103,7 +114,7 @@ public class RoadsWidth{
         roadsWidthList.add(roadsWidth);
     }
 
-    public List<RoadsWidth> getRoadsWidthList(){
+    public static ArrayList<RoadsWidth> getRoadsWidthList(){
         return roadsWidthList;
     }
 }
