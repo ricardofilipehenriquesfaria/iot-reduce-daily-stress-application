@@ -4,7 +4,7 @@
     <application android:allowBackup="true" android:label="@string/app_name"
         android:supportsRtl="true">
 
-        <service android:name="app.miti.com.elevation.ElevationService"
+        <service android:name="app.miti.com.elevation.ElevationsService"
             android:exported="false" />
 
     </application>

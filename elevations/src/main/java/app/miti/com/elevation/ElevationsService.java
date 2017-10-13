@@ -2,6 +2,7 @@ package app.miti.com.elevation;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -20,13 +21,13 @@ import java.util.ArrayList;
 /*
     IntentService para obter a inclinação de cada segmento de estrada
 */
-public class ElevationService extends IntentService {
+public class ElevationsService extends IntentService {
 
     /*
         Construtor
     */
-    public ElevationService() {
-        super(ElevationService.class.getName());
+    public ElevationsService() {
+        super(ElevationsService.class.getName());
     }
 
     /*
@@ -82,6 +83,8 @@ public class ElevationService extends IntentService {
             double controlVariable = 0.1;
             int previousIndex = 0;
 
+            ArrayList<LatLng> segmentCoordinates = new ArrayList<>();
+
             for(int i = 0; i < elevationProfile.length(); i++) {
 
                 height[i] = ((JSONObject) elevationProfile.get(i)).getDouble("height");
@@ -89,23 +92,27 @@ public class ElevationService extends IntentService {
 
                 if(i != 0 && statusCode == 0){
 
+                    segmentCoordinates.add(coordinatesList.get(i));
+
                     if(distance[i] >= controlVariable || i == (elevationProfile.length()-1)){
 
                         controlVariable = (Math.floor(distance[i] * 10) / 10) + 0.1;
 
                         Double distanceCalc = (distance[i] - distance[previousIndex]) * 1000;
                         Double heightCalc = height[i] - height[previousIndex];
-                        Double slope = getSlope(heightCalc, distanceCalc);
-                        Double slopeDegrees = getSlopeDegrees(heightCalc, distanceCalc);
+                        Elevations.setElevationsList(new Elevations(segmentCoordinates,
+                                getSlope(heightCalc, distanceCalc),
+                                getSlopeDegrees(heightCalc, distanceCalc)
+                        ));
+
+                        segmentCoordinates.clear();
 
                         previousIndex = i;
 
-                        if(slope >= 10) {
-                            sendBroadcast(coordinatesList.get(i), slope, slopeDegrees);
-                        }
                     }
                 }
             }
+            sendBroadcast(Elevations.getElevationsList());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -116,11 +123,11 @@ public class ElevationService extends IntentService {
         else return Math.round(Math.abs(height / distance) * 100);
     }
 
-    private void sendBroadcast (LatLng elevation, Double slope, Double slopeDegrees){
+    private void sendBroadcast (ArrayList<Elevations> elevationsList){
         Intent intent = new Intent ("ROADELEVATIONS");
-        intent.putExtra("elevation", elevation);
-        intent.putExtra("slope", slope);
-        intent.putExtra("slopeDegrees", slopeDegrees);
+        Bundle args = new Bundle();
+        args.putSerializable("ELEVATIONS", elevationsList);
+        intent.putExtra("BUNDLE",args);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 

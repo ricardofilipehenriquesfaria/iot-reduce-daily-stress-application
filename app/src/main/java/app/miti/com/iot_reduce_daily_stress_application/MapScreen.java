@@ -23,6 +23,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,7 +61,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import app.miti.com.elevation.ElevationService;
+import app.miti.com.elevation.Elevations;
+import app.miti.com.elevation.ElevationsService;
 import app.miti.com.instruction.Instruction;
 import app.miti.com.instruction.InstructionManager;
 import app.miti.com.instruction.Maneuver;
@@ -96,6 +98,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     private int distanceCounter = 0;
     private LatLng previousLocation;
 
+    private ArrayList<Polyline> roadsWidthPolyline;
+    private ArrayList<Polyline> elevationsPolyline;
+
     private final int MIN_DISTANCE_FOR_NOW_INSTRUCTION = 100;
     private final int MAX_DISTANCE_TO_DECISION_POINT = 32;
     private final int DISTANCE_FOR_NOW_INSTRUCTION = 48;
@@ -122,6 +127,9 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
         imageViewInstruction = (ImageView) getActivity().findViewById(R.id.imageViewInstruction);
         textViewInstruction = (TextView) getActivity().findViewById(R.id.textViewInstruction);
+
+        roadsWidthPolyline = new ArrayList<>();
+        elevationsPolyline = new ArrayList<>();
 
         textToSpeech = new TextToSpeech(getContext(), this);
 
@@ -253,6 +261,18 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                             marker.remove();
                         }
                     }
+
+                    if(roadsWidthPolyline.size() != 0){
+                        for(Polyline polyline: roadsWidthPolyline){
+                            polyline.remove();
+                        }
+                    }
+
+                    if(elevationsPolyline.size() != 0){
+                        for(Polyline polyline: elevationsPolyline){
+                            polyline.remove();
+                        }
+                    }
                 }
 
                 options.position(destination);
@@ -329,6 +349,19 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         if(marker != null){
             marker.remove();
             if (mapQuestPolyline != null) mapQuestPolyline.remove();
+
+            if(roadsWidthPolyline.size() != 0){
+                for(Polyline polyline: roadsWidthPolyline){
+                    polyline.remove();
+                }
+            }
+
+            if(elevationsPolyline.size() != 0){
+                for(Polyline polyline: elevationsPolyline){
+                    polyline.remove();
+                }
+            }
+
             marker.setPosition(place.getLatLng());
             marker.setTitle(String.valueOf(place.getAddress()));
         } else {
@@ -544,15 +577,30 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            LatLng elevation = intent.getExtras().getParcelable("elevation");
-            Double slope = intent.getDoubleExtra("slope", 0);
-            Double slopeDegrees = intent.getDoubleExtra("slopeDegrees", 0);
+            Bundle args = intent.getBundleExtra("BUNDLE");
+            ArrayList<Elevations> elevations = (ArrayList<Elevations>) args.getSerializable("ELEVATIONS");
 
-            if(elevation != null) {
-                elevationMarker.add(mGoogleMap.addMarker(new MarkerOptions()
-                        .position(elevation)
-                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_slope))
-                        .title(String.valueOf(slope) + "%, " + String.valueOf(slopeDegrees) + "º")));
+            PolylineOptions polylineOptions = null;
+            Polyline polyline = null;
+
+            if(elevations != null){
+                for(int i = 0; i < elevations.size() - 1; i++){
+                    if(elevations.get(i).getSlope() > 10){
+                        polylineOptions = new PolylineOptions();
+                        Log.d("teste", String.valueOf(elevations.get(i).getCoordinates().size()));
+                        for(int j = 0; j < elevations.get(i).getCoordinates().size(); j++){
+                            polylineOptions.add(elevations.get(i).getCoordinates().get(j));
+                        }
+
+                        polylineOptions.width(12);
+                        polylineOptions.geodesic(true);
+                        polyline = mGoogleMap.addPolyline(polylineOptions);
+                        polyline.setStartCap(new RoundCap());
+                        polyline.setEndCap(new RoundCap());
+                        polyline.setColor(Color.argb(150, 255, 0, 255));
+                        elevationsPolyline.add(polyline);
+                    }
+                }
             }
         }
     };
@@ -562,55 +610,55 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            ArrayList<LatLng> arrayListPoints = intent.getParcelableArrayListExtra("ARRAYLISTPOINTS");
+        ArrayList<LatLng> arrayListPoints = intent.getParcelableArrayListExtra("ARRAYLISTPOINTS");
 
-            if (intent.hasExtra("JSONRESPONSE")){
-                try {
-                    createInstructions(new JSONObject(intent.getStringExtra("JSONRESPONSE")));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+        if (intent.hasExtra("JSONRESPONSE")){
+            try {
+                createInstructions(new JSONObject(intent.getStringExtra("JSONRESPONSE")));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        PolylineOptions lineOptions = null;
+
+        SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Boolean value = mSharedPreference.getBoolean("INCLINACAO", false);
+
+        for (int i = 0; i < arrayListPoints.size(); i++) {
+
+            lineOptions = new PolylineOptions();
+            lineOptions.addAll(arrayListPoints);
+            lineOptions.width(8);
+            lineOptions.geodesic(true);
+        }
+
+        mapQuestPolyline = mGoogleMap.addPolyline(lineOptions);
+        mapQuestPolyline.setJointType(JointType.ROUND);
+
+        if(intent.hasExtra("ESTRADA")){
+            mapQuestPolyline.setTag(intent.getStringExtra("ESTRADA"));
+        }
+        setPolylineStyle(mapQuestPolyline);
+
+        mGoogleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+            public void onPolylineClick(Polyline polyline) {
+                int strokeColor = ~polyline.getColor();
+                polyline.setColor(strokeColor);
+            }
+        });
+
+        if(!intent.hasExtra("ESTRADA")){
+            if(value){
+                Intent elevationsIntent = new Intent(getActivity(), ElevationsService.class);
+                elevationsIntent.putExtra("COORDINATES", arrayListPoints);
+                getActivity().startService(elevationsIntent);
             }
 
-            PolylineOptions lineOptions = null;
-
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
-            Boolean value = mSharedPreference.getBoolean("INCLINACAO", false);
-
-            for (int i = 0; i < arrayListPoints.size(); i++) {
-
-                lineOptions = new PolylineOptions();
-                lineOptions.addAll(arrayListPoints);
-                lineOptions.width(8);
-                lineOptions.geodesic(true);
-            }
-
-            mapQuestPolyline = mGoogleMap.addPolyline(lineOptions);
-            mapQuestPolyline.setJointType(JointType.ROUND);
-
-            if(intent.hasExtra("ESTRADA")){
-                mapQuestPolyline.setTag(intent.getStringExtra("ESTRADA"));
-            }
-            setPolylineStyle(mapQuestPolyline);
-
-            mGoogleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
-                public void onPolylineClick(Polyline polyline) {
-                    int strokeColor = ~polyline.getColor();
-                    polyline.setColor(strokeColor);
-                }
-            });
-
-            if(!intent.hasExtra("ESTRADA")){
-                if(value){
-                    Intent elevationsIntent = new Intent(getActivity(), ElevationService.class);
-                    elevationsIntent.putExtra("COORDINATES", arrayListPoints);
-                    getActivity().startService(elevationsIntent);
-                }
-
-                Intent roadsWidthIntent = new Intent(getActivity(), RoadsWidthParsingService.class);
-                roadsWidthIntent.putExtra("COORDINATES", arrayListPoints);
-                getActivity().startService(roadsWidthIntent);
-            }
+            Intent roadsWidthIntent = new Intent(getActivity(), RoadsWidthParsingService.class);
+            roadsWidthIntent.putExtra("COORDINATES", arrayListPoints);
+            getActivity().startService(roadsWidthIntent);
+        }
         }
     };
 
@@ -619,8 +667,28 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Bundle args = intent.getBundleExtra("BUNDLE");
-            ArrayList<RoadsWidth> roadsWidths = (ArrayList<RoadsWidth>) args.getSerializable("ROADSWIDTHS");
+        Bundle args = intent.getBundleExtra("BUNDLE");
+        ArrayList<RoadsWidth> roadsWidths = (ArrayList<RoadsWidth>) args.getSerializable("ROADSWIDTHS");
+
+        PolylineOptions polylineOptions = null;
+        Polyline polyline = null;
+
+        if(roadsWidths != null){
+            for(int i = 0; i< roadsWidths.size() - 1; i++){
+                if(roadsWidths.get(i).getLarguraVia() > 0){
+                    polylineOptions = new PolylineOptions();
+                    polylineOptions.add(roadsWidths.get(i).getCoordinates());
+                    polylineOptions.add(roadsWidths.get(i+1).getCoordinates());
+                    polylineOptions.width(12);
+                    polylineOptions.geodesic(true);
+                    polyline = mGoogleMap.addPolyline(polylineOptions);
+                    polyline.setStartCap(new RoundCap());
+                    polyline.setEndCap(new RoundCap());
+                    polyline.setColor(Color.argb(150, 255, 0, 0));
+                    roadsWidthPolyline.add(polyline);
+                }
+            }
+        }
         }
     };
 }
