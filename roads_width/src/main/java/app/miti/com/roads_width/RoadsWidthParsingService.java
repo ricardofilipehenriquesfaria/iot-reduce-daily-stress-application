@@ -45,7 +45,7 @@ public class RoadsWidthParsingService extends IntentService{
         URLConnection urlConnection;
 
         try {
-            String stringUrl = "http://172.104.130.173:8000/?latitude=";
+            String stringUrl = "http://151.236.37.145:8000/?latitude=";
 
             for (int i = 0; i < coordinatesList.size(); i++) {
                 if (i == 0) stringUrl = stringUrl + String.valueOf(coordinatesList.get(i).latitude);

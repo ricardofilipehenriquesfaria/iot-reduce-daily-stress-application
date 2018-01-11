@@ -22,7 +22,7 @@ import io.socket.SocketIOException;
 public class SocketService extends Service {
 
     private static final String TAG = "SocketService";
-    public static final String SERVER_IP = "http://84.23.192.131";
+    public static final String SERVER_IP = "http://151.236.37.145";
     public static final int SERVER_PORT = 3001;
 
     private boolean isRunning;
