@@ -22,7 +22,14 @@ public class FirebaseService extends FirebaseMessagingService {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 1410, intent, PendingIntent.FLAG_ONE_SHOT);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this).setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
+        int bitmap = 0;
+        if(remoteMessage.getNotification().getIcon().equals("ic_closed")){
+            bitmap = R.mipmap.ic_closed;
+        } else {
+            bitmap = R.mipmap.ic_launcher;
+        }
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this).setSmallIcon(bitmap)
                 .setContentTitle(remoteMessage.getNotification().getTitle())
                 .setContentText(remoteMessage.getNotification().getBody())
                 .setAutoCancel(true)

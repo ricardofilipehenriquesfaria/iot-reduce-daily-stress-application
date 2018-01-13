@@ -117,4 +117,8 @@ public class RoadsWidth{
     public static ArrayList<RoadsWidth> getRoadsWidthList(){
         return roadsWidthList;
     }
+
+    public static void deleteRoadsWidthList(){
+        roadsWidthList.clear();
+    }
 }

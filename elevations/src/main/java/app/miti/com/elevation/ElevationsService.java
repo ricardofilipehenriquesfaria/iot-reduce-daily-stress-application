@@ -74,6 +74,7 @@ public class ElevationsService extends IntentService {
         }
 
         try {
+            Elevations.deleteElevationsList();
 
             assert jsonObject != null;
             JSONArray elevationProfile = jsonObject.getJSONArray("elevationProfile");

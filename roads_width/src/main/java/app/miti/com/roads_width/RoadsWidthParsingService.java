@@ -74,6 +74,8 @@ public class RoadsWidthParsingService extends IntentService{
         try {
             JSONArray jsonArray = new JSONArray(URLDecoder.decode(stringBuilder.toString(), "UTF-8"));
 
+            RoadsWidth.deleteRoadsWidthList();
+
             for (int i = 0; i < jsonArray.length(); i++) {
 
                 String jsonData = jsonArray.getString(i);

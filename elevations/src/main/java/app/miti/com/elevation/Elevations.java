@@ -57,4 +57,8 @@ public class Elevations {
     public static ArrayList<Elevations> getElevationsList(){
         return elevationsList;
     }
+
+    public static void deleteElevationsList(){
+        elevationsList.clear();
+    }
 }
