@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ import java.util.ArrayList;
     IntentService para obter a inclinação de cada segmento de estrada
 */
 public class ElevationsService extends IntentService {
+
+    private ArrayList<JSONObject> elevationsArrayList = new ArrayList<>();
 
     /*
         Construtor
@@ -39,84 +42,101 @@ public class ElevationsService extends IntentService {
         assert intent != null;
         ArrayList<LatLng> coordinatesList = intent.getParcelableArrayListExtra("COORDINATES");
 
+        ArrayList<String> stringUrls = new ArrayList<>();
+
+        String stringUrl = "http://open.mapquestapi.com/elevation/v1/profile?key=hUuNdwLPB9fzsW1N1Zh5XeeWpqAYEqrU&latLngCollection=";
+
         JSONObject jsonObject = null;
-        URLConnection urlConnection = null;
+        URLConnection urlConnection;
 
-        try {
-            String stringUrl = "http://open.mapquestapi.com/elevation/v1/profile?key=hUuNdwLPB9fzsW1N1Zh5XeeWpqAYEqrU&latLngCollection=";
-
-            for (int i = 0; i < coordinatesList.size(); i++) {
+        for (int i = 0; i < coordinatesList.size(); i++){
+            if((stringUrl + String.valueOf(coordinatesList.get(i).latitude) + "," + String.valueOf(coordinatesList.get(i).longitude)).length() < 8300){
                 if (i == 0) stringUrl = stringUrl + String.valueOf(coordinatesList.get(i).latitude) + "," + String.valueOf(coordinatesList.get(i).longitude);
                 else stringUrl = stringUrl + "," + String.valueOf(coordinatesList.get(i).latitude) + "," + String.valueOf(coordinatesList.get(i).longitude);
+            } else {
+                stringUrls.add(stringUrl);
+                stringUrl = "http://open.mapquestapi.com/elevation/v1/profile?key=hUuNdwLPB9fzsW1N1Zh5XeeWpqAYEqrU&latLngCollection=";
+                stringUrl = stringUrl + String.valueOf(coordinatesList.get(i).latitude) + "," + String.valueOf(coordinatesList.get(i).longitude);
             }
-
-            urlConnection = new URL(stringUrl).openConnection();
-            urlConnection.connect();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
-        try {
-            assert urlConnection != null;
-            InputStream inputStream = urlConnection.getInputStream();
+        for(int i = 0; i < stringUrls.size(); i++){
+            try{
+                urlConnection = new URL(stringUrls.get(i)).openConnection();
+                urlConnection.connect();
 
-            StringBuilder stringBuilder = new StringBuilder();
-            int r;
-            while ((r = inputStream.read()) != -1)
-                stringBuilder.append((char) r);
+                InputStream inputStream = urlConnection.getInputStream();
 
-            jsonObject = new JSONObject(String.valueOf(stringBuilder));
+                StringBuilder stringBuilder = new StringBuilder();
 
-            inputStream.close();
+                int r;
+                while ((r = inputStream.read()) != -1) stringBuilder.append((char) r);
 
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
+                jsonObject = new JSONObject(String.valueOf(stringBuilder));
+
+                inputStream.close();
+
+                elevationsArrayList.add(jsonObject);
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        try {
-            Elevations.deleteElevationsList();
+        stringUrls.add(stringUrl);
+        Elevations.deleteElevationsList();
 
-            assert jsonObject != null;
-            JSONArray elevationProfile = jsonObject.getJSONArray("elevationProfile");
-            double distance[] = new double[elevationProfile.length()];
-            double height[] = new double[elevationProfile.length()];
-            int statusCode = jsonObject.getJSONObject("info").getInt("statuscode");
-            double controlVariable = 0.1;
-            int previousIndex = 0;
+        for (int i = 0; i < elevationsArrayList.size(); i++){
+            try {
+                LatLng[] shapePoints = new LatLng[elevationsArrayList.get(i).getJSONArray("shapePoints").length() / 2];
 
-            ArrayList<LatLng> segmentCoordinates = new ArrayList<>();
+                int m = 0;
+                for(int k = 0; k < elevationsArrayList.get(i).getJSONArray("shapePoints").length(); k+=2){
+                    shapePoints[m] = new LatLng(elevationsArrayList.get(i).getJSONArray("shapePoints").getDouble(k), elevationsArrayList.get(i).getJSONArray("shapePoints").getDouble(k + 1));
+                    m++;
+                }
 
-            for(int i = 0; i < elevationProfile.length(); i++) {
+                assert jsonObject != null;
+                JSONArray elevationProfile = elevationsArrayList.get(i).getJSONArray("elevationProfile");
+                double distance[] = new double[elevationProfile.length()];
+                double height[] = new double[elevationProfile.length()];
+                int statusCode = elevationsArrayList.get(i).getJSONObject("info").getInt("statuscode");
+                double controlVariable = 0.1;
+                int previousIndex = 0;
 
-                height[i] = ((JSONObject) elevationProfile.get(i)).getDouble("height");
-                distance[i] = ((JSONObject) elevationProfile.get(i)).getDouble("distance");
+                ArrayList<LatLng> segmentCoordinates = new ArrayList<>();
 
-                if(i != 0 && statusCode == 0){
+                for(int j = 0; j < elevationProfile.length(); j++) {
 
-                    segmentCoordinates.add(coordinatesList.get(i));
+                    height[j] = ((JSONObject) elevationProfile.get(j)).getDouble("height");
+                    distance[j] = ((JSONObject) elevationProfile.get(j)).getDouble("distance");
 
-                    if(distance[i] >= controlVariable || i == (elevationProfile.length()-1)){
+                    if(j != 0 && (statusCode == 0 || statusCode == 602)){
 
-                        controlVariable = (Math.floor(distance[i] * 10) / 10) + 0.1;
+                        segmentCoordinates.add(shapePoints[j]);
 
-                        Double distanceCalc = (distance[i] - distance[previousIndex]) * 1000;
-                        Double heightCalc = height[i] - height[previousIndex];
-                        Elevations.setElevationsList(new Elevations(segmentCoordinates,
-                                getSlope(heightCalc, distanceCalc),
-                                getSlopeDegrees(heightCalc, distanceCalc)
-                        ));
+                        if(distance[j] >= controlVariable || j == (elevationProfile.length()-1)){
 
-                        segmentCoordinates.clear();
+                            controlVariable = (Math.floor(distance[j] * 10) / 10) + 0.1;
 
-                        previousIndex = i;
+                            Double distanceCalc = (distance[j] - distance[previousIndex]) * 1000;
+                            Double heightCalc = height[j] - height[previousIndex];
+                            Elevations.setElevationsList(new Elevations(segmentCoordinates,
+                                    getSlope(heightCalc, distanceCalc),
+                                    getSlopeDegrees(heightCalc, distanceCalc)
+                            ));
 
+                            segmentCoordinates.clear();
+
+                            previousIndex = j;
+
+                        }
                     }
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-            sendBroadcast(Elevations.getElevationsList());
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
+        sendBroadcast(Elevations.getElevationsList());
     }
 
     double getSlope(double height, double distance) {
