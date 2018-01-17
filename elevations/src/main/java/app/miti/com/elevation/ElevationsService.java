@@ -60,6 +60,8 @@ public class ElevationsService extends IntentService {
             }
         }
 
+        stringUrls.add(stringUrl);
+
         for(int i = 0; i < stringUrls.size(); i++){
             try{
                 urlConnection = new URL(stringUrls.get(i)).openConnection();
@@ -82,7 +84,6 @@ public class ElevationsService extends IntentService {
             }
         }
 
-        stringUrls.add(stringUrl);
         Elevations.deleteElevationsList();
 
         for (int i = 0; i < elevationsArrayList.size(); i++){
