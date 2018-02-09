@@ -46,11 +46,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CustomCap;
+import com.google.android.gms.maps.model.Dot;
+import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
@@ -59,6 +62,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import app.miti.com.elevation.Elevations;
@@ -277,6 +282,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
                 options.position(destination);
                 options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                options.title("Destino");
 
                 marker = mGoogleMap.addMarker(options);
 
@@ -343,6 +349,8 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
     @Override
     public void onPlaceSelected(Place place) {
 
+        MarkerOptions options = new MarkerOptions();
+
         if (currentLocation == null) requestRoute(CurrentLocation.coordinates, place.getLatLng());
         else requestRoute(currentLocation, place.getLatLng());
 
@@ -362,11 +370,15 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 }
             }
 
-            marker.setPosition(place.getLatLng());
-            marker.setTitle(String.valueOf(place.getAddress()));
+            options.position(place.getLatLng());
+            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            options.title(String.valueOf(place.getAddress()));
+
+            marker = mGoogleMap.addMarker(options);
+
         } else {
             marker = mGoogleMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                     .position(place.getLatLng())
                     .title(String.valueOf(place.getAddress())));
         }
@@ -548,7 +560,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             default:
                 polyline.setStartCap(new RoundCap());
                 polyline.setEndCap(new RoundCap());
-                polyline.setColor(Color.argb(150, 0, 255, 0));
+                polyline.setColor(Color.argb(150, 0, 255, 255));
         }
         polyline.setClickable(true);
     }
@@ -592,12 +604,22 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                             polylineOptions.add(elevations.get(i).getCoordinates().get(j));
                         }
 
-                        polylineOptions.width(12);
+                        CustomCap customCap = new CustomCap(BitmapDescriptorFactory.fromResource(R.mipmap.ic_slope), 100);
+
+                        PatternItem dot = new Dot();
+                        PatternItem gap = new Gap(10);
+
+                        List<PatternItem> patternPolyline = Arrays.asList(gap, dot);
+                        polylineOptions.pattern(patternPolyline);
+
+                        polylineOptions.width(20);
                         polylineOptions.geodesic(true);
+                        polylineOptions.zIndex(1.0f);
+
                         polyline = mGoogleMap.addPolyline(polylineOptions);
-                        polyline.setStartCap(new RoundCap());
-                        polyline.setEndCap(new RoundCap());
-                        polyline.setColor(Color.argb(150, 255, 0, 255));
+                        polyline.setStartCap(customCap);
+                        polyline.setEndCap(customCap);
+                        polyline.setColor(Color.argb(255, 170, 70, 186));
                         elevationsPolyline.add(polyline);
                     }
                 }
@@ -629,7 +651,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
 
             lineOptions = new PolylineOptions();
             lineOptions.addAll(arrayListPoints);
-            lineOptions.width(8);
+            lineOptions.width(15);
             lineOptions.geodesic(true);
         }
 
@@ -676,15 +698,24 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
         if(roadsWidths != null){
             for(int i = 0; i< roadsWidths.size() - 1; i++){
                 if(roadsWidths.get(i).getLarguraVia() > 0){
+
+                    CustomCap customCap = new CustomCap(BitmapDescriptorFactory.fromResource(R.mipmap.ic_narrow), 100);
+                    PatternItem dot = new Dot();
+                    PatternItem gap = new Gap(10);
+                    List<PatternItem> patternPolyline = Arrays.asList(gap, dot);
+
                     polylineOptions = new PolylineOptions();
                     polylineOptions.add(roadsWidths.get(i).getCoordinates());
                     polylineOptions.add(roadsWidths.get(i+1).getCoordinates());
-                    polylineOptions.width(12);
+                    polylineOptions.width(20);
+                    polylineOptions.zIndex(1.0f);
                     polylineOptions.geodesic(true);
+                    polylineOptions.pattern(patternPolyline);
+
                     polyline = mGoogleMap.addPolyline(polylineOptions);
-                    polyline.setStartCap(new RoundCap());
-                    polyline.setEndCap(new RoundCap());
-                    polyline.setColor(Color.argb(150, 255, 0, 0));
+                    polyline.setStartCap(customCap);
+                    polyline.setEndCap(customCap);
+                    polyline.setColor(Color.argb(255, 135, 188, 72));
                     roadsWidthPolyline.add(polyline);
                 }
             }
