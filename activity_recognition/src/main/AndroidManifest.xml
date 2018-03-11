@@ -1,19 +1,27 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aware.plugin.google.activity_recognition">
 
+    <!-- Permissão para que a aplicação possa utilizar a Activity Recognition do utilizador. -->
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
     <application
         android:label="@string/app_name">
 
+        <!-- IntentService que processa a resposta/resultado da API Activity Recognition.
+            Ao configurar o atributo android:exported a "false" evita-se que outras aplicações possam iniciar este serviço. -->
         <service
             android:name="com.aware.plugin.google.activity_recognition.Algorithm"
             android:exported="false" />
 
+        <!-- Serviço que integra a framework Aware ao estender a classe Aware_Plugin (que é uma extensão da classe Android Service).
+            Ao configurar o atributo android:exported a "false" evita-se que outras aplicações possam iniciar este serviço. -->
         <service
             android:name="com.aware.plugin.google.activity_recognition.Plugin"
             android:exported="false" />
 
+        <!-- Content Provider que fornece acesso a uma das bases de dados da aplicação (nomeadamente à  base de dados plugin_google_activity_recognition).
+            O Content Provider encapsula os dados e fornece mecanismos para definir a segurança dos dados.
+            Os Content Providers são as interfaces padrão que conectam os dados num determinado processo com o código em execução num outro processo. -->
         <provider
             android:name="com.aware.plugin.google.activity_recognition.Google_AR_Provider"
             android:authorities="${applicationId}.provider.gar"

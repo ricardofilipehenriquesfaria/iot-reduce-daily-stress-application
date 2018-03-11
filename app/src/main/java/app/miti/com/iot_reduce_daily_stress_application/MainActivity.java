@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Aware.startPlugin(this, "com.aware.plugin.google.fused_location");
             Aware.startPlugin(this, "com.aware.plugin.closed_roads");
 
-            googleARObserver = new Google_AR_Observer(this, mHandler);
+            googleARObserver = new Google_AR_Observer(this);
             getContentResolver().registerContentObserver(Uri.parse("content://app.miti.com.iot_reduce_daily_stress_application.provider.gar/plugin_google_activity_recognition"), true, googleARObserver);
 
             locationObserver = new LocationObserver(this, mHandler);
@@ -165,10 +165,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public boolean handleMessage(Message message) {
 
         switch (message.what) {
-            case Google_AR_Observer.GOOGLE_AR_OBSERVER:
-                UserActivity.setUserActivity(getBaseContext());
-                menu.findItem(R.id.nav_activity).setTitle(UserActivity.getActivityName());
-                break;
             case 2:
                 String currentLocation = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
                 menu.findItem(R.id.nav_location).setTitle(currentLocation);

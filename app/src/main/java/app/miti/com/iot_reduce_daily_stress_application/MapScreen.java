@@ -234,7 +234,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 break;
         }
 
-        locationMarker = mGoogleMap.addMarker(new MarkerOptions().position(CurrentLocation.coordinates).title("Localização Atual"));
+        locationMarker = mGoogleMap.addMarker(new MarkerOptions().position(CurrentLocation.coordinates).title("Localização Atual").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CurrentLocation.coordinates, 17));
 
         mGoogleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -281,7 +281,7 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
                 }
 
                 options.position(destination);
-                options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 options.title("Destino");
 
                 marker = mGoogleMap.addMarker(options);
@@ -371,14 +371,14 @@ public class MapScreen extends SupportMapFragment implements OnMapReadyCallback,
             }
 
             options.position(place.getLatLng());
-            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
             options.title(String.valueOf(place.getAddress()));
 
             marker = mGoogleMap.addMarker(options);
 
         } else {
             marker = mGoogleMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                     .position(place.getLatLng())
                     .title(String.valueOf(place.getAddress())));
         }
