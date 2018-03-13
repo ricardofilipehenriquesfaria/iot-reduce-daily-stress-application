@@ -8,8 +8,13 @@ import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.Calendar;
 import java.util.TimeZone;
+
+import static java.lang.String.valueOf;
 
 /*
     O ContentObserver suporta um conjunto de callbacks que são disparadas quando os dados mudam.
@@ -60,7 +65,7 @@ public class Google_AR_Observer extends ContentObserver {
         /*
             O método setUserActivity() atualiza os atributos do objeto UserActivity.
         */
-        UserActivity.setUserActivity(mContext);
+        setUserActivity(mContext);
     }
 
     /*
@@ -110,5 +115,47 @@ public class Google_AR_Observer extends ContentObserver {
         */
         assert cursor != null;
         cursor.close();
+    }
+
+    /*
+        Método que permite atualizar os atributos da classe UserActivity,
+        ao aceder à base de dados e ao obter a última leitura realizada pela Activity Recognition API.
+    */
+    private static void setUserActivity(Context context) {
+
+        Cursor cursor = context.getContentResolver().query(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI, null, null, null, null);
+
+        /*
+            É verificado se já existe alguma entrada na base de dados.
+        */
+        if(cursor != null && cursor.moveToLast()) {
+
+            UserActivity.setActivityName(valueOf(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_NAME))));
+            UserActivity.setActivityType(cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITY_TYPE)));
+            UserActivity.setConfidence(cursor.getInt(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.CONFIDENCE)));
+
+            try {
+                UserActivity.setActivities(new JSONArray(cursor.getString(cursor.getColumnIndex(Google_AR_Provider.Google_Activity_Recognition_Data.ACTIVITIES))));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            cursor.close();
+
+        } else {
+
+            /*
+                Caso não exista nenhuma entrada na base de dados, os dados são atribuídos por default.
+            */
+            UserActivity.setActivityName("unknown");
+            UserActivity.setActivityType(4);
+            UserActivity.setConfidence(100);
+
+            try {
+                UserActivity.setActivities(new JSONArray("[{\"activity\":\"unknown\",\"confidence\":100}]"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
