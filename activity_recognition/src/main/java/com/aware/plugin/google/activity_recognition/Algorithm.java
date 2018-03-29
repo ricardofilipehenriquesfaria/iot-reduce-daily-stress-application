@@ -3,7 +3,6 @@ package com.aware.plugin.google.activity_recognition;
 import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.util.Log;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
@@ -17,6 +16,9 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+/*
+    IntentService que processa a resposta/resultado da API Activity Recognition.
+*/
 public class Algorithm extends IntentService {
 
     /*
@@ -36,7 +38,7 @@ public class Algorithm extends IntentService {
 
         /*
             Primeiro tem de ser verificado se alguma nova atividade foi identificada.
-            O método hasResult() irá retornar true se o Intent contém um ActivityRecognitionResult ou falso caso contrário ou caso o Intent fornecido seja null.
+            O método hasResult() irá retornar true se o Intent contém um ActivityRecognitionResult ou false caso contrário ou caso o Intent fornecido seja null.
             O ActivityRecognitionResult contém uma lista de atividades que o utilizador possa ter realizado num determinado momento.
             Um nível de confiança é associado a cada atividade indicando o nível de confiança relacionado com a(s) atividade(s) devolvida(s).
         */
@@ -49,7 +51,8 @@ public class Algorithm extends IntentService {
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 
             /*
-                Guarda a atividade mais provável detetada pelo dispositivo tal como o respetivo nível de confiança, no momento em que o Activity Recognition foi executado.
+                Guarda a atividade mais provável detetada pelo dispositivo tal como o respetivo nível de confiança,
+                no momento em que o Activity Recognition foi executado.
             */
             DetectedActivity mostProbable = result.getMostProbableActivity();
 
@@ -61,8 +64,10 @@ public class Algorithm extends IntentService {
             /*
                 Lista para guardar as atividades que foram detetadas, com o valor de confiança associado a cada atividade.
                 As atividades são ordenadas, começando pela mais provável primeiro.
-                A soma dos níveis de confiança de todas as atividades detetadas, não necessitam de ser <= 100, uma vez que algumas atividades não são mutuamente exclusivas.
-                Por exemplo, podemos estar a andar enquanto estamos num autocarro, enquanto que outras atividades são hierárquicas (ON_FOOT é uma generalização de andar e correr).
+                A soma dos níveis de confiança de todas as atividades detetadas, não necessitam de ser <= 100,
+                uma vez que algumas atividades não são mutuamente exclusivas.
+                Por exemplo, podemos estar a andar enquanto estamos num autocarro,
+                enquanto que outras atividades são hierárquicas (ON_FOOT é uma generalização de andar e correr).
             */
             List<DetectedActivity> otherActivities = result.getProbableActivities();
 
@@ -82,13 +87,13 @@ public class Algorithm extends IntentService {
 
             /*
                 O método getConfidence() retorna um valor entre 0 e 100 indicando a probabilidade de o utilizador estar a executar uma determinada atividade.
-                O valor retornado é guardado na variável global current_confidence.
+                O valor retornado é guardado na variável estática current_confidence.
             */
             Plugin.current_confidence = mostProbable.getConfidence();
 
             /*
                 O método getType() retorna um valor entre 0 e 8 indicando o tipo de atividade que o utilizador está a executar num determinado momento.
-                O valor retornado (int) é guardado na variável global current_activity.
+                O valor retornado (int) é guardado na variável estática current_activity.
             */
             Plugin.current_activity = mostProbable.getType();
 
@@ -99,15 +104,15 @@ public class Algorithm extends IntentService {
             String activity_name = getActivityName(Plugin.current_activity);
 
             /*
-                Define um objeto que irá conter os novos valores que irão ser inseridos na base de dados.
-                Utilizada para armazenar um conjunto de valores que o ContentResolver possa processar.
+                Define um objeto que irá conter os novos valores que serão inseridos na base de dados.
+                Utilizado para armazenar um conjunto de valores que o ContentResolver possa processar.
             */
             ContentValues data = new ContentValues();
 
             /*
                 São definidos e inseridos os valores para cada coluna.
                 Os argumentos para o método put() são "nome da coluna" e "valor".
-                A coluna _ID não é adicionada pois esta coluna é adicionada automaticamente.
+                A coluna _ID não é adicionada pois esta coluna é inserida automaticamente.
                 O Provider atribui um valor exclusivo de _ID para cada linha adicionada.
                 O Provider irá utilizar este valor de _ID como chave principal da tabela da base de dados.
             */
@@ -119,8 +124,9 @@ public class Algorithm extends IntentService {
             data.put(Google_Activity_Recognition_Data.ACTIVITIES, activities.toString());
 
             /*
-                Uma vez que o objeto data (ContentValues) tenha sido carregado, será chamado o método getContentResolver().insert() para inserir os dados na base de dados.
-                O valor de Google_Activity_Recognition_Data.CONTENT_URI será o URI (URL) que representa a tabela na qual iremos inserir os dados.
+                Uma vez que o objeto data (ContentValues) tenha sido carregado,
+                será chamado o método insert() para inserir os dados na base de dados.
+                O valor do CONTENT_URI corresponde a um URI (URL) que representa a tabela na qual iremos inserir os dados.
                 Este método irá retornar o URI (URL) da linha recém-criada na base de dados.
             */
             getContentResolver().insert(Google_Activity_Recognition_Data.CONTENT_URI, data);

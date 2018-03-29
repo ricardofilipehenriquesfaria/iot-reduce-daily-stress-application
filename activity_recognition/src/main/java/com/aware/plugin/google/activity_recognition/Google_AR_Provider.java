@@ -25,16 +25,16 @@ import java.util.HashMap;
     incluindo arquivos, mapas hash ou sistemas de preferências, neste caso será utilizada uma base de dados SQLite.
     O ContentProvider implementa um conjunto padrão de métodos para permitir o acesso à base de dados.
     O seu comportamento baseia-se nos métodos utilizados numa base de dados, onde podemos fazer insert(), update(), delete() e query().
- */
+*/
 public class Google_AR_Provider extends ContentProvider {
 
     /*
         A constante DATABASE_VERSION possuirá o número da versão da base de dados do ContentProvider.
         O número da versão deve ser incrementado por 1 sempre que a estrutura da base de dados seja modificada,
         de modo a que o Android tenha conhecimento da mudança.
-        A classe DatabaseHelper que extende a classe SQLiteOpenHelper irá ajudar a migrar a estrutura da base de dados para futuras versões da aplicação.
-        Sempre que a base de dados for acedida, mas a versão existente em disco não corresponda à versão atual
-        (ou seja, à versão passada pelo construtor), o método onUpgrade() da classe DatabaseHelper será chamado.
+        A classe DatabaseHelper que estende a classe SQLiteOpenHelper irá ajudar a migrar a estrutura da base de dados para futuras versões da aplicação.
+        Sempre que a base de dados seja acedida, mas a versão existente em disco não corresponda à versão atual
+        (ou seja, à versão passada pelo construtor), será chamado o método onUpgrade() da classe DatabaseHelper.
     */
     private static final int DATABASE_VERSION = 1;
 
@@ -177,8 +177,7 @@ public class Google_AR_Provider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
             case GOOGLE_AR:
-                count = database.delete(DATABASE_TABLES[0], selection,
-                        selectionArgs);
+                count = database.delete(DATABASE_TABLES[0], selection, selectionArgs);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);

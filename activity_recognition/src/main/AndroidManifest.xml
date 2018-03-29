@@ -19,9 +19,26 @@
             android:name="com.aware.plugin.google.activity_recognition.Plugin"
             android:exported="false" />
 
-        <!-- Content Provider que fornece acesso a uma das bases de dados da aplicação (nomeadamente à  base de dados plugin_google_activity_recognition).
-            O Content Provider encapsula os dados e fornece mecanismos para definir a segurança dos dados.
-            Os Content Providers são as interfaces padrão que conectam os dados num determinado processo com o código em execução num outro processo. -->
+        <!-- (API >= 21) JobService que permite utilizar a JobScheduler API, fornecendo uma interface para agendar tarefas em background.
+            Os JobServices devem ser protegidos com a permissão android.permission.BIND_JOB_SERVICE.
+            Se um JobService for declarado no Manifest, mas que não esteja protegido por esta permissão,
+            será simplesmente ignorado pelo Android OS.
+            Ao configurar o atributo android:exported a "false" evita-se que outras aplicações possam iniciar este serviço. -->
+        <service
+            android:name=".ScheduleDeleteService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" />
+
+        <!-- (API < 21) BroadcastReceiver que permite manipular (handle) os eventos agendados pelo AlarmManager.
+            Ao configurar o atributo android:exported a "false" declara-se que o BroadcastReceiver
+            não pode receber mensagens de fontes externas à aplicação.
+            Neste caso, as únicas mensagens que o BroadcastReceiver pode receber são aquelas enviadas por componentes
+            da mesma aplicação ou de aplicações com o mesmo ID de utilizador. -->
+        <receiver
+            android:name=".ScheduleDeleteReceiver"
+            android:exported="false" />
+
+        <!-- Content Provider que fornece acesso a uma das bases de dados da aplicação (nomeadamente à  base de dados plugin_google_activity_recognition). -->
         <provider
             android:name="com.aware.plugin.google.activity_recognition.Google_AR_Provider"
             android:authorities="${applicationId}.provider.gar"

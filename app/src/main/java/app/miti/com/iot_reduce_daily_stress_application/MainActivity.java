@@ -90,9 +90,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
             menu = navigationView.getMenu();
 
-            UserActivity.setUserActivity(this);
-            menu.findItem(R.id.nav_activity).setTitle(UserActivity.getActivityName());
-
             CurrentLocation currentLocation = new CurrentLocation();
             currentLocation.setCurrentLocation(MainActivity.this);
             location = currentLocation.getCoordinates();

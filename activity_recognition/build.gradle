@@ -5,11 +5,11 @@ version = version_readable
 group = "com.awareframework"
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 26
+    buildToolsVersion '25.0.3'
     defaultConfig {
-        minSdkVersion 10
-        targetSdkVersion 25
+        minSdkVersion 14
+        targetSdkVersion 26
         versionCode version_code
         versionName version_readable
     }
@@ -30,6 +30,10 @@ android {
     }
     lintOptions {
         abortOnError false
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
     }
 }
 
