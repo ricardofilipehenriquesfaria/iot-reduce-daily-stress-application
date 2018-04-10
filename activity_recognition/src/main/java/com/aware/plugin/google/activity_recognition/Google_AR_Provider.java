@@ -2,6 +2,7 @@ package com.aware.plugin.google.activity_recognition;
 
 import android.annotation.SuppressLint;
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -61,10 +62,21 @@ public class Google_AR_Provider extends ContentProvider {
     public static String AUTHORITY = "app.miti.com.iot_reduce_daily_stress_application.provider.gar";
 
     /*
-        Esta é uma Contract class que atua como um container para as constantes, definindo nomes para as URIs e para as colunas da base de dados.
-        Ao implementar a interface BaseColumns, é herdado um campo _ID (chave primária) que será utilizado como id de incremento automático na tabela da base de dados.
+        Esta é uma interface onde são declaradas as "constantes" base (Framework AWARE) para a criação das colunas das tabelas da base de dados.
     */
-    static final class Google_Activity_Recognition_Data implements BaseColumns {
+    public interface AWAREColumns extends BaseColumns {
+        String _ID = "_id";
+        String TIMESTAMP = "timestamp";
+        String DEVICE_ID = "device_id";
+    }
+
+    /*
+        Esta é uma Contract class que atua como um container para as constantes, definindo nomes para as URIs e para as colunas da base de dados.
+        Ao implementar a interface AWAREColumns, são herdados os campos base da Framework Aware, que serão utilizados na tabela da base de dados.
+        Como a interface AWAREColumns estende (extends) a interface BaseColumns,
+        é herdado um campo _ID (chave primária) que será utilizado como id de incremento automático na tabela da base de dados.
+    */
+    static final class Google_Activity_Recognition_Data implements AWAREColumns {
 
         /*
             Construtor Default
@@ -81,16 +93,13 @@ public class Google_AR_Provider extends ContentProvider {
         /*
             O tipo MIME dos resultados do CONTENT_URI quando um valor específico de _ID não é fornecido, sendo que podem ser retornados vários registos.
         */
-        static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.aware.plugin.google.activity_recognition";
+        static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.aware.plugin.google.activity_recognition";
 
         /*
             O tipo MIME dos resultados quando um _ID é anexado ao CONTENT_URI, retornando um único registo.
         */
-        static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.aware.plugin.google.activity_recognition";
+        static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.aware.plugin.google.activity_recognition";
 
-        static final String _ID = "_id";
-        static final String TIMESTAMP = "timestamp";
-        static final String DEVICE_ID = "device_id";
         static final String ACTIVITY_NAME = "activity_name";
         static final String ACTIVITY_TYPE = "activity_type";
         static final String CONFIDENCE = "confidence";
@@ -143,9 +152,9 @@ public class Google_AR_Provider extends ContentProvider {
     private static SQLiteDatabase database = null;
 
     /*
-        O método initializeDB() permite inicializar o ContentProvider.
+        O método initializeDatabase() permite inicializar o ContentProvider.
     */
-    private boolean initializeDB() {
+    private boolean initializeDatabase() {
 
         if(databaseHelper == null) databaseHelper = new DatabaseHelper(getContext(), DATABASE_NAME, null, DATABASE_VERSION, DATABASE_TABLES, TABLES_FIELDS);
 
@@ -170,7 +179,7 @@ public class Google_AR_Provider extends ContentProvider {
 
         int count;
 
-        if(!initializeDB()) {
+        if(!initializeDatabase()) {
             Log.w(AUTHORITY, "Database unavailable...");
             return 0;
         }
@@ -220,7 +229,7 @@ public class Google_AR_Provider extends ContentProvider {
 
         ContentValues values = (initialValues != null) ? new ContentValues(initialValues) : new ContentValues();
 
-        if(!initializeDB()) {
+        if(!initializeDatabase()) {
             Log.w(AUTHORITY, "Database unavailable...");
             return null;
         }
@@ -280,7 +289,7 @@ public class Google_AR_Provider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         
-    	if(!initializeDB()) {
+    	if(!initializeDatabase()) {
             Log.w(AUTHORITY, "Database unavailable...");
             return null;
         }
@@ -319,7 +328,7 @@ public class Google_AR_Provider extends ContentProvider {
 
         int count;
 
-    	if(!initializeDB()) {
+    	if(!initializeDatabase()) {
             Log.w(AUTHORITY, "Database unavailable...");
             return 0;
         }

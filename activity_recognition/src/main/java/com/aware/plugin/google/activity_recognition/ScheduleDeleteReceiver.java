@@ -8,7 +8,7 @@ import android.content.Intent;
     O AlarmManager necessita de um BroadcastReceiver para receber e executar a ação necessária.
     O BroadcastReceiver receberá uma notificação assim que o alarme seja acionado (triggered).
 */
-public class ScheduleDeleteReceiver extends BroadcastReceiver implements ScheduleDelete{
+public class ScheduleDeleteReceiver extends BroadcastReceiver {
 
     /*
         Este método é invocado assim que um Intent seja recebido (o alarme tenha sido acionado).
@@ -17,8 +17,8 @@ public class ScheduleDeleteReceiver extends BroadcastReceiver implements Schedul
     public void onReceive(Context context, Intent intent) {
 
         /*
-            Chamada ao método deleteOldEntries() da Interface ScheduleDelete.
+            Chamada ao método deleteOldEntries() da classe abstracta ScheduleDelete.
         */
-        ScheduleDelete.super.deleteOldEntries(context);
+        (new ScheduleDelete(){}).deleteOldEntries(context);
     }
 }

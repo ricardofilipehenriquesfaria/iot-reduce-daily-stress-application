@@ -4,7 +4,6 @@ import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 
 /*
     Esta é a classe base que manipula os requests assíncronos que foram agendados anteriormente.
@@ -13,7 +12,7 @@ import android.util.Log;
     É este serviço que irá permitir que o sistema execute uma tarefa, independentemente de a aplicação se encontrar ativa ou não.
 */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class ScheduleDeleteService extends JobService implements ScheduleDelete{
+public class ScheduleDeleteService extends JobService {
 
     /*
         Método chamado para indicar que o trabalho (job) começou a ser executado.
@@ -24,9 +23,9 @@ public class ScheduleDeleteService extends JobService implements ScheduleDelete{
     public boolean onStartJob(JobParameters params) {
 
         /*
-            Chamada ao método deleteOldEntries() da Interface ScheduleDelete.
+            Chamada ao método deleteOldEntries() da classe abstracta ScheduleDelete.
         */
-        ScheduleDelete.super.deleteOldEntries(getApplicationContext());
+        (new ScheduleDelete(){}).deleteOldEntries(getApplicationContext());
 
         /*
             Este método é chamado para informar o JobScheduler que o trabalho (job) terminou a sua tarefa.

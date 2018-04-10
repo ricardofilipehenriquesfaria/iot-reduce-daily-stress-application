@@ -6,12 +6,12 @@ import android.database.Cursor;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-interface ScheduleDelete {
+abstract class ScheduleDelete {
 
     /*
         Este método irá permitir eliminar entradas antigas na base de dados, de modo a que esta não ocupe demasiado espaço na memória do smartphone.
     */
-    default void deleteOldEntries(Context context) {
+    public void deleteOldEntries(Context context) {
 
         /*
             Constante para colocar a zeros o valor das horas, minutos, segundos e milissegundos do objeto Calendar.
@@ -41,7 +41,7 @@ interface ScheduleDelete {
         */
         Cursor cursor = context.getContentResolver().query(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI,
                 null,
-                "timestamp <" + calendar.getTimeInMillis(),
+                "timestamp < " + calendar.getTimeInMillis(),
                 null,
                 null);
 
