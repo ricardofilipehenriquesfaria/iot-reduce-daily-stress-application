@@ -5,12 +5,12 @@ version = version_readable
 group = "com.awareframework"
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 25
+        minSdkVersion 19
+        targetSdkVersion 27
         versionCode version_code
         versionName version_readable
     }
@@ -67,11 +67,15 @@ bintray {
     }
 }
 
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 dependencies {
     compile "com.google.android.gms:play-services-location:${google_libs}"
     compile "com.android.support:appcompat-v7:${support_libs}"
     compile "com.android.support:design:${support_libs}"
-    compile "com.awareframework:aware-core:${aware_libs}@aar"
+    api "com.github.denzilferreira:aware-client:${aware_libs}"
     compile "com.google.android.gms:play-services-maps:${google_libs}"
     compile "com.koushikdutta.ion:ion:2.1.6"
     compile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.0.2"

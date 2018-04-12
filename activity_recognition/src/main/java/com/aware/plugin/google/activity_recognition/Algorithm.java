@@ -25,7 +25,7 @@ public class Algorithm extends IntentService {
         Construtor Default
     */
     public Algorithm() {
-        super(Plugin.TAG);
+        super(Algorithm.class.getName());
     }
 
     /*

@@ -58,10 +58,6 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
 
         TAG = "AWARE::Google Fused Location";
 
-        DATABASE_TABLES = Locations_Provider.DATABASE_TABLES;
-        TABLES_FIELDS = Locations_Provider.TABLES_FIELDS;
-        CONTEXT_URIS = new Uri[]{Locations_Data.CONTENT_URI};
-
         CONTEXT_PRODUCER = new ContextProducer() {
 
             @Override
@@ -258,7 +254,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         Intent geofences = new Intent(this, com.aware.plugin.google.fused_location.Geofences.class);
         stopService(geofences);
 
-        Aware.stopAWARE();
+        Aware.stopAWARE(this);
     }
 
     private boolean is_google_services_available() {

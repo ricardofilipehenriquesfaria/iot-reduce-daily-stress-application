@@ -57,9 +57,6 @@ public class Plugin extends Aware_Plugin {
             }
         };
 
-        DATABASE_TABLES = Provider.DATABASE_TABLES;
-        TABLES_FIELDS = Provider.TABLES_FIELDS;
-        CONTEXT_URIS = new Uri[]{ Provider.Provider_Data.CONTENT_URI };
         Aware.startPlugin(this, PACKAGE_NAME);
     }
 
@@ -71,7 +68,7 @@ public class Plugin extends Aware_Plugin {
 
             Aware.setSetting(this, Plugin.STATUS_PLUGIN_WIFI, true);
 
-            Aware.startAWARE();
+            Aware.startAWARE(this);
 
         return START_STICKY;
     }
@@ -80,6 +77,6 @@ public class Plugin extends Aware_Plugin {
     public void onDestroy() {
         super.onDestroy();
         Aware.setSetting(this, Plugin.STATUS_PLUGIN_WIFI, false);
-        Aware.stopAWARE();
+        Aware.stopAWARE(this);
     }
 }

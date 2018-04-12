@@ -8,7 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -154,24 +153,6 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         getContentResolver().registerContentObserver(Google_Activity_Recognition_Data.CONTENT_URI, true, googleARObserver);
 
         /*
-            Copiamos as tabelas da base de dados para a variável DATABASE_TABLES da classe Aware_Plugin da Framework Aware.
-            Deste modo as tabelas da base de dados são sincronizadas e atualizadas remotamente.
-        */
-        DATABASE_TABLES = Google_AR_Provider.DATABASE_TABLES;
-
-        /*
-            Copiamos os campos da tabela da base de dados para a variável TABLE_FIELDS da classe Aware_Plugin da Framework Aware.
-            Deste modo os campos das tabelas da base de dados são sincronizados e atualizados remotamente.
-        */
-        TABLES_FIELDS = Google_AR_Provider.TABLES_FIELDS;
-
-        /*
-            Copiamos o CONTENT_URI do ContentProvider para a variável CONTEXT_URIS da classe Aware_Plugin da Framework Aware.
-            Deste modo o CONTENT_URI é sincronizado e atualizado remotamente.
-        */
-        CONTEXT_URIS = new Uri[]{Google_Activity_Recognition_Data.CONTENT_URI};
-
-        /*
             O ContextProducer é uma interface que permite compartilhar o contexto com outras aplicações/plugins.
             Neste caso o contexto é também partilhado com a Framework Aware.
         */
@@ -225,16 +206,6 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
             */
             Intent gARIntent = new Intent(getApplicationContext(), Algorithm.class);
             gARPending = PendingIntent.getService(getApplicationContext(), 0, gARIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            /*
-                A frequência com que será detetada a atividade do utilizador é colocada a 120 segundos.
-            */
-            Aware.setSetting(this, Plugin.FREQUENCY_PLUGIN_GOOGLE_ACTIVITY_RECOGNITION, 120);
-
-            /*
-                Inicia o Plugin. Caso este já se encontre em execução, são aplicadas as novas definições.
-            */
-            Aware.startPlugin(this, "com.aware.plugin.google.activity_recognition");
         }
     }
 
@@ -323,7 +294,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
         /*
             O Plugin é desligado (turned OFF).
         */
-        Aware.stopAWARE();
+        Aware.stopAWARE(this);
     }
 
     /*

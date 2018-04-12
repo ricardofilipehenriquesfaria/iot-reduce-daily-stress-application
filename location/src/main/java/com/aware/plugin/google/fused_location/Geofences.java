@@ -20,11 +20,5 @@ public class Geofences extends Aware_Plugin {
     public void onCreate() {
         super.onCreate();
 
-        DATABASE_TABLES = Provider.DATABASE_TABLES;
-        TABLES_FIELDS = Provider.TABLES_FIELDS;
-        CONTEXT_URIS = new Uri[]{
-                Provider.Geofences.CONTENT_URI,
-                Provider.Geofences_Data.CONTENT_URI
-        };
     }
 }

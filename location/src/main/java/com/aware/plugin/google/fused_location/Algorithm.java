@@ -16,7 +16,7 @@ import static com.google.android.gms.location.LocationResult.hasResult;
 public class Algorithm extends IntentService {
 
     public Algorithm() {
-        super(Plugin.TAG);
+        super(Algorithm.class.getName());
     }
 
     @Override
@@ -41,7 +41,7 @@ public class Algorithm extends IntentService {
 
             getContentResolver().insert(Locations_Data.CONTENT_URI, rowData);
 
-            if (DEBUG) Log.d(Plugin.TAG, "Fused location:" + rowData.toString());
+            if (DEBUG) Log.d(Algorithm.class.getName(), "Fused location:" + rowData.toString());
 
             if (Plugin.contextProducer != null)
                 Plugin.contextProducer.onContext();

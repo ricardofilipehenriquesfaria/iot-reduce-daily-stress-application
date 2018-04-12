@@ -56,12 +56,11 @@ abstract class ScheduleDelete {
             context.getContentResolver().delete(Google_AR_Provider.Google_Activity_Recognition_Data.CONTENT_URI,
                     "timestamp <" + calendar.getTimeInMillis(),
                     null);
-        }
 
-        /*
-            O Cursor é então fechado, libertando todos os seus recursos e tornando-o completamente inválido.
-        */
-        assert cursor != null;
-        cursor.close();
+            /*
+                O Cursor é então fechado, libertando todos os seus recursos e tornando-o completamente inválido.
+            */
+            cursor.close();
+        }
     }
 }
