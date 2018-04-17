@@ -58,6 +58,7 @@ dependencies {
     compile "com.android.support:preference-v14:${support_libs}"
     compile "com.android.support:design:${support_libs}"
     compile 'com.android.support:multidex:1.0.1'
+    compile 'pub.devrel:easypermissions:1.2.0'
     compile files('libs/mapquest-android-sdk-1.0.5.jar')
     compile 'commons-io:commons-io:2.5'
     compile project(':activity_recognition')

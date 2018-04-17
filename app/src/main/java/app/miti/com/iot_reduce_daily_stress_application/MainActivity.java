@@ -1,5 +1,6 @@
 package app.miti.com.iot_reduce_daily_stress_application;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -39,8 +41,11 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
+import pub.devrel.easypermissions.EasyPermissions;
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener, EasyPermissions.PermissionCallbacks, EasyPermissions.RationaleCallbacks {
 
     private Menu menu = null;
     private Google_AR_Observer googleARObserver = null;
@@ -52,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static boolean WIFI_STATE = false;
     public WifiManager wifiManager;
     public WifiInfo wifiInfo;
+    private static String[] PERMS = {android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.GET_ACCOUNTS};
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -59,6 +67,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (EasyPermissions.hasPermissions(this, PERMS)) {
+            create();
+        } else {
+            Log.d("debugteste", "teste");
+            ActivityCompat.requestPermissions(this, PERMS, 0);
+        }
+    }
+
+    public void create(){
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -287,5 +304,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onDestroy();
         getContentResolver().unregisterContentObserver(googleARObserver);
         getContentResolver().unregisterContentObserver(locationObserver);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+        Log.d("debugteste", "permissionsGranted");
+        if(EasyPermissions.hasPermissions(getApplication(), PERMS)) {
+            create();
+        }
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        finishAffinity();
+    }
+
+    @Override
+    public void onRationaleAccepted(int requestCode) {
+
+    }
+
+    @Override
+    public void onRationaleDenied(int requestCode) {
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 }

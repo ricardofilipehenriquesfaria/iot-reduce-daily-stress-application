@@ -7,18 +7,15 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.aware.Aware;
 import com.aware.Aware_Preferences;
 import com.aware.plugin.google.activity_recognition.Google_AR_Provider.Google_Activity_Recognition_Data;
-import com.aware.ui.PermissionsHandler;
 import com.aware.utils.Aware_Plugin;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -156,21 +153,17 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
             O ContextProducer é uma interface que permite compartilhar o contexto com outras aplicações/plugins.
             Neste caso o contexto é também partilhado com a Framework Aware.
         */
-        CONTEXT_PRODUCER = new ContextProducer() {
+        CONTEXT_PRODUCER = () -> {
 
-            @Override
-            public void onContext() {
-
-                /*
-                    Realizamos o broadcast quando temos uma nova atividade, com os seguintes extras:
-                    - atividade: (int) a atual atividade detetada;
-                    - confiança: (int) quão confiante é a previsão (0 - 100%).
-                */
-                Intent context = new Intent(ACTION_AWARE_GOOGLE_ACTIVITY_RECOGNITION);
-                context.putExtra(EXTRA_ACTIVITY, current_activity);
-                context.putExtra(EXTRA_CONFIDENCE, current_confidence);
-                sendBroadcast(context);
-            }
+            /*
+                Realizamos o broadcast quando temos uma nova atividade, com os seguintes extras:
+                - atividade: (int) a atual atividade detetada;
+                - confiança: (int) quão confiante é a previsão (0 - 100%).
+            */
+            Intent context = new Intent(ACTION_AWARE_GOOGLE_ACTIVITY_RECOGNITION);
+            context.putExtra(EXTRA_ACTIVITY, current_activity);
+            context.putExtra(EXTRA_CONFIDENCE, current_confidence);
+            sendBroadcast(context);
         };
 
         /*
@@ -216,19 +209,7 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        boolean permissions_ok = true;
-
-        /*
-            São determinadas se todas as permissões foram concedidas.
-        */
-        for (String p : REQUIRED_PERMISSIONS) {
-            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
-                permissions_ok = false;
-                break;
-            }
-        }
-
-        if (permissions_ok) {
+        if (PERMISSIONS_OK) {
 
             DEBUG = Aware.getSetting(this, Aware_Preferences.DEBUG_FLAG).equals("true");
 
@@ -247,17 +228,6 @@ public class Plugin extends Aware_Plugin implements GoogleApiClient.ConnectionCa
 
             if (gARClient != null && !gARClient.isConnected()) gARClient.connect();
 
-        } else {
-
-            /*
-                Caso alguma permissão não tenha sido concedida, criamos um novo Intent e passamos as permissões que necessitamos.
-                A Activity PermissionsHandler é uma atividade invisível, da Framework Aware,
-                utilizada para solicitar as permissões necessárias ao utilizador (a partir da API 23).
-            */
-            Intent permissions = new Intent(this, PermissionsHandler.class);
-            permissions.putExtra(PermissionsHandler.EXTRA_REQUIRED_PERMISSIONS, REQUIRED_PERMISSIONS);
-            permissions.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(permissions);
         }
 
         return super.onStartCommand(intent, flags, startId);
